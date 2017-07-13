@@ -1,0 +1,42 @@
+* CCI Data Process
+
+  This project is meant to be a library/WEB API for facilitating
+  common data processing tasks at the University of Maine.
+
+* Requirements
+
+  The project is built using Python 3, so the Python 3.5 system is
+  required.  Furthermore, the system requires the following python
+  libraries that may be installed either through pip or through the
+  Debian apt repositories.
+
+  |------------+--------------------+-----------------------------------------------------------|
+  | Library    | Apt                | Description                                               |
+  |------------+--------------------+-----------------------------------------------------------|
+  | Pandas     | python3-pandas     | Data structures for "relational" or "labeled" data        |
+  | matlabplot | python3-matlabplot | Python based plotting system in a style similar to Matlab |
+  |------------+--------------------+-----------------------------------------------------------|
+
+* Building and Testing
+
+  The source code for the project is located in the [[file:src]]
+  directory.  Test files are unsurprisingly found in the [[file:test]]
+  directory.
+
+  To run all of the unit tests for the project execute the following.
+
+#+BEGIN_SRC sh
+python -m unittest discover
+#+END_SRC
+
+* Contact
+
+  For more information, contact one of the following developers.
+
+  |------------------+----------------------------+---------------------------------|
+  | Developer        | Email                      | Role                            |
+  |------------------+----------------------------+---------------------------------|
+  | Andrei Kurbatov  | andrei.kurbotov@maine.edu  | Project lead                    |
+  | Heather Clifford | heather.clifford@maine.edu | Climate details and coding      |
+  | Mark Royer       | mark.royer@maine.edu       | Programming technical questions |
+  |------------------+----------------------------+---------------------------------|
