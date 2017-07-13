@@ -20,7 +20,7 @@ class Test(unittest.TestCase):
 
 
     def testReadCSVFile(self):
-        frame = get_data_frame_from_csv(os.path.join('..', 'KCC_210617', 'KCC_CFAmaster20170621_Part1.csv'))
+        frame = get_data_frame_from_csv(os.path.join('..', 'data', 'KCC_210617', 'KCC_CFAmaster20170621_Part1.csv'))
         print(frame.columns)
         
 
