@@ -20,9 +20,12 @@ class Test(unittest.TestCase):
 
 
     def testReadCSVFile(self):
-        frame = get_data_frame_from_csv(os.path.join('..', 'data', 'KCC_210617', 'KCC_CFAmaster20170621_Part1.csv'))
+        frame = get_data_frame_from_csv(os.path.join('csv_files', 'small.csv'))
         print(frame.columns)
         
+        self.assertEqual('Dat210617', frame.columns[0], 'First column should be Dat210617')
+        
+        self.assertEqual(2011.6986319241, frame.values[9][0], "Last value should be 2011.6986319241")
 
 
 if __name__ == "__main__":
