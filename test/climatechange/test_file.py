@@ -21,7 +21,7 @@ class Test(unittest.TestCase):
 
     def testReadCSVFile(self):
         frame = get_data_frame_from_csv(os.path.join('csv_files', 'small.csv'))
-        print(frame.columns)
+#         print(frame.columns)
         
         self.assertEqual('Dat210617', frame.columns[0], 'First column should be Dat210617')
         
