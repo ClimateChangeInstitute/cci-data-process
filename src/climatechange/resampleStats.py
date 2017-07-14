@@ -20,8 +20,8 @@ from typing import List
 def findMean(array:List[List[float]]) -> List[float]:
     '''
     find mean of each list within a list
-    @param array: list of lists, 2D array of floats
-    @return: list of means of each list
+    :param array: list of lists, 2D array of floats
+    :return: list of means of each list
     '''
 # find mean of data points within a single increment of the data set
     Mean = []

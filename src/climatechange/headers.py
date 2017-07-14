@@ -34,8 +34,8 @@ class HeaderDictionary(object):
         '''
         Create a new HeaderDictionary object.
         
-        @param headerDict:  Header dictionary to use instead of the default
-        @param unitDict: Unit dictionary to use instead of the default
+        :param headerDict:  Header dictionary to use instead of the default
+        :param unitDict: Unit dictionary to use instead of the default
         '''
         if headerDict:
             self.header_dictionary = headerDict
@@ -52,21 +52,21 @@ class HeaderDictionary(object):
 
     def get_header_dict(self) -> Mapping[str, str]:
         '''
-        @return: The known header mappings
+        :return: The known header mappings
         '''
         return self.header_dictionary
     
     def get_unit_dict(self) -> Mapping[str, str]:
         '''
-        @return: The known unit mappings
+        :return: The known unit mappings
         '''
         return self.unit_dictionary
     
     def parse_header(self, rawHeader:str) -> Tuple[str, str]:
         '''
         
-        @param rawHeader: A header possibly with unit specified between parentheses
-        @return: A 2-tuple containing the header and possibly the unit  
+        :param rawHeader: A header possibly with unit specified between parentheses
+        :return: A 2-tuple containing the header and possibly the unit
         '''
         
         # Match anything between 'header (unit)' and remove white space
@@ -80,8 +80,8 @@ class HeaderDictionary(object):
     def parse_headers(self, rawHeaders:List[str]) -> List[Tuple[str]]:
         '''
         
-        @param rawHeaders: A list of header names with unit information
-        @return: A list of parsed headers.  If the header is not known, then None is placed in its position
+        :param rawHeaders: A list of header names with unit information
+        :return: A list of parsed headers.  If the header is not known, then None is placed in its position
         '''
         return list(map(lambda e: e if e[0] in self.header_dictionary else None, map(self.parse_header, rawHeaders)))
         
