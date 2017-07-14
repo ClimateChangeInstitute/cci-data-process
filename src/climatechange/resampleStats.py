@@ -6,6 +6,7 @@ Created on Jul 13, 2017
 import csv
 
 import numpy as np
+from typing import List
 
 
 # year=[2011, 2010, 2009, 2008, 2007, 2006]
@@ -13,10 +14,10 @@ import numpy as np
 # chem2=[34, 28, 222, 2343, 23, 43]
 # array=[year,chem1, chem2]
 
-#dataframetolist
+# dataframetolist
 
 
-def findMean(array):
+def findMean(array:List[List[float]]) -> List[float]:
     '''
     find mean of each list within a list
     @param array: list of lists, 2D array of floats
@@ -32,7 +33,7 @@ def findMean(array):
             Mean.append(y)  
     return Mean
 
-def findMedian(array):
+def findMedian(array:List[List[float]]) -> List[float]:
 # find median of data points within a single increment of the data set
     Median = []
     for i in array:
@@ -44,7 +45,7 @@ def findMedian(array):
     return Median
        
 
-def findMax(array):
+def findMax(array:List[List[float]]) -> List[float]:
 # find max of data points within a single increment of the data set
     Max = []
     for i in array:
@@ -56,7 +57,7 @@ def findMax(array):
     return Max
       
 
-def findMin(array):
+def findMin(array:List[List[float]]) -> List[float]:
 # find min of data points within a single increment of the data set
     Min = []
     for i in array:
@@ -68,7 +69,7 @@ def findMin(array):
     return Min
       
 
-def findStd(array):
+def findStd(array:List[List[float]]) -> List[float]:
 # find std of data points within a single increment of the data set
     Std = []
     for i in array:
@@ -79,7 +80,7 @@ def findStd(array):
             Std.append(y)     
     return Std
 
-def findPtsYear(array):
+def findPtsYear(array:List[List[float]]) -> List[float]:
 # find # of data points within a single increment of the data set
     Pts = []
     for i in array:
@@ -90,7 +91,7 @@ def findPtsYear(array):
             Pts.append(y)     
     return Pts   
 
-def compileStats(array):
+def compileStats(array:List[List[float]]) -> List[List[float]]:
 # compiles all statistics for all yearly increments
     Mean = findMean(array)
     Median = findMedian(array)
