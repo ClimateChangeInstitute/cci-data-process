@@ -75,7 +75,7 @@ class Test(unittest.TestCase):
         noHeaders = []
         
         testDict = {"test": "test" }
-        testUnit = {"ppb", "ppb"}
+        testUnit = {"ppb" : "ppb"}
         
         testHeaderDict = HeaderDictionary(testDict, testUnit)
         
@@ -92,6 +92,10 @@ class Test(unittest.TestCase):
         oneHeaderWithUnitAndNotExisting = ['test (ppb)', 'test2 Not in (ppb)']
         
         self.assertEqual([('test','ppb'), None], testHeaderDict.parse_headers(oneHeaderWithUnitAndNotExisting))
+        
+        oneHeaderWithUnitAndNotExistingUnit = ['test (ppb)', 'test (not in unit)']
+        
+        self.assertEqual([('test','ppb'), ('test', None)], testHeaderDict.parse_headers(oneHeaderWithUnitAndNotExistingUnit))
         
 
 if __name__ == "__main__":

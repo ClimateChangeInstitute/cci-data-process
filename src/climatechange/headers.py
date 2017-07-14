@@ -83,7 +83,7 @@ class HeaderDictionary(object):
         :param rawHeaders: A list of header names with unit information
         :return: A list of parsed headers.  If the header is not known, then None is placed in its position
         '''
-        return list(map(lambda e: e if e[0] in self.header_dictionary else None, map(self.parse_header, rawHeaders)))
+        return list(map(lambda e: (e[0], self.unit_dictionary.get(e[1])) if e else None, map(lambda e: e if e[0] in self.header_dictionary else None, map(self.parse_header, rawHeaders))))
         
     
     
