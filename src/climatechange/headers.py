@@ -5,11 +5,11 @@ Created on Jul 12, 2017
 '''
 import json
 import pkg_resources
-from typing import IO, Mapping
+import re
+from typing import IO, Mapping, Tuple
 
 
 def load_dictionary(file:IO[str]) -> Mapping[str, str]:
-    print(type(file))
     
     try:
         result = json.load(file)
@@ -23,7 +23,7 @@ def load_dictionary(file:IO[str]) -> Mapping[str, str]:
 
 class HeaderDictionary(object):
     '''
-    Stores and retreives header values.  Also contains mappings from headers to default values.
+    Stores and retrieves header values.  Also contains mappings from headers to default values.
     '''
 
     header_dictionary = {}
@@ -50,16 +50,32 @@ class HeaderDictionary(object):
                 self.unit_dictionary = load_dictionary(f)
   
 
-    def get_header_dict(self) -> Mapping[str,str]:
+    def get_header_dict(self) -> Mapping[str, str]:
         '''
         @return: The known header mappings
         '''
         return self.header_dictionary
     
-    def get_unit_dict(self) -> Mapping[str,str]:
+    def get_unit_dict(self) -> Mapping[str, str]:
         '''
         @return: The known unit mappings
         '''
         return self.unit_dictionary
+    
+    def parse_header(self, rawHeader:str) -> Tuple[str, str]:
+        '''
+        
+        @param rawHeader: A header possibly with unit specified between parentheses
+        @return: A 2-tuple containing the header and possibly the unit  
+        '''
+        
+        # Match anything between 'header (unit)' and remove white space
+        match = re.match(r"\s*(.*?)\s*\(\s*(.*?)\s*\)", rawHeader)
+        
+        if match:
+            return match.group(1, 2)
+        else:
+            return (rawHeader, None)  
+        
     
     
