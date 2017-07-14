@@ -6,7 +6,7 @@ Created on Jul 12, 2017
 import json
 import pkg_resources
 import re
-from typing import IO, Mapping, Tuple
+from typing import IO, Mapping, Tuple, List
 
 
 def load_dictionary(file:IO[str]) -> Mapping[str, str]:
@@ -76,6 +76,14 @@ class HeaderDictionary(object):
             return match.group(1, 2)
         else:
             return (rawHeader, None)  
+        
+    def parse_headers(self, rawHeaders:List[str]) -> List[Tuple[str]]:
+        '''
+        
+        @param rawHeaders: A list of header names with unit information
+        @return: A list of parsed headers.  If the header is not known, then None is placed in its position
+        '''
+        return list(map(lambda e: e if e[0] in self.header_dictionary else None, map(self.parse_header, rawHeaders)))
         
     
     
