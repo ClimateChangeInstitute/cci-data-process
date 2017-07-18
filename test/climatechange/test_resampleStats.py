@@ -26,12 +26,6 @@ containingNaNArray = [[5.0, nan, nan, 2.0, 1.0],
                        [1.0, nan, nan, 5.0, 4.0]]
 
 
-# <<<<<<< HEAD
-# array = [[5, 3, 4, 5, 3]]
-# emptyArray=[[]]
-# array2=[[5, 3, 4, 5, 3],[1, 2, 3, 4],[4, 4]]
-# =======
-# >>>>>>> 4c142717fc0652688d62af2005ca61521146fe48
 
 class Test(unittest.TestCase):
 
