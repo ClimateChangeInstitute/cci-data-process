@@ -1,6 +1,8 @@
 # Ignore all contents of data directory
 /data
 
+/doc/_build
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
