@@ -5,6 +5,7 @@ Created on Jul 17, 2017
 '''
 import datetime
 from matplotlib.backends.backend_pdf import PdfPages
+from pandas.core.frame import DataFrame
 
 from climatechange.file import get_data_frame_from_csv
 import matplotlib.pyplot as plt
@@ -47,3 +48,15 @@ def examplePDFPlot(file_name:str):
         d['CreationDate'] = datetime.datetime.today()
         d['ModDate'] = datetime.datetime.utcnow()
         
+
+def create_pdf(df:DataFrame, file_name:str) -> str:
+    '''
+    Create a pdf file with multiple plots based on the data frame.
+    :param df: The data frame
+    :param file_name: The absolute path of the file
+    :return: The file path of the created PDF
+    '''
+    pass
+
+if __name__ == '__main__':
+    examplePDFPlot('test.pdf')

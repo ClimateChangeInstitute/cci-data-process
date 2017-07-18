@@ -18,12 +18,12 @@ singleRowArray = [[5, 3, 4, 5, 3]]
 multipleRowArray = [[5.0, 4.0, 3.0, 2.0, 1.0],
                    [2.0, 3.0, 4.0, 5.0, 6.0 ],
                    [1.0, 3.0, 2.0, 5.0, 4.0]]
-containingNoneArray = [[5.0, None, None, 2.0, 1.0],
-                       [2.0, None, None, 5.0, 6.0 ],
-                       [1.0, None, None, 5.0, 4.0]]
-containingNaNArray = [[5.0, nan, nan, 2.0, 1.0],
-                       [2.0, nan, nan, 5.0, 6.0 ],
-                       [1.0, nan, nan, 5.0, 4.0]]
+# containingNoneArray = [[5.0, None, None, 2.0, 1.0],
+#                        [2.0, None, None, 5.0, 6.0 ],
+#                        [1.0, None, None, 5.0, 4.0]]
+# containingNaNArray = [[5.0, nan, nan, 2.0, 1.0],
+#                        [2.0, nan, nan, 5.0, 6.0 ],
+#                        [1.0, nan, nan, 5.0, 4.0]]
 
 
 class Test(unittest.TestCase):

@@ -25,7 +25,7 @@ class Test(unittest.TestCase):
         
         self.assertEqual('Dat210617', frame.columns[0], 'First column should be Dat210617')
         
-        self.assertEqual(2011.6986319241, frame.values[9][0], "Last value should be 2011.6986319241")
+        self.assertEqual(2009.8, frame.values[9][0], "Last value should be 2011.6986319241")
 
 
 if __name__ == "__main__":
