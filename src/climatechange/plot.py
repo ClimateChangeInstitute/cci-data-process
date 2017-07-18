@@ -10,14 +10,14 @@ from climatechange.file import get_data_frame_from_csv
 import matplotlib.pyplot as plt
 
 
-def examplePDFPlot():
+def examplePDFPlot(file_name:str):
     '''
     Just a simple example of how to generated multiple page PDF from DataFrames
     '''
     
     df = get_data_frame_from_csv('../../test/csv_files/small.csv')
     
-    with PdfPages('pdf_output.pdf') as pdf:
+    with PdfPages(file_name) as pdf:
     
         ys = ['Cond (+ALU-S/cm)', 'Na (ppb)', 'Ca (ppb)', 'Dust (part/ml)', 'NH4 (ppb)', 'NO3 (ppb)']
         
@@ -46,5 +46,4 @@ def examplePDFPlot():
         d['Keywords'] = 'CCI UMaine'
         d['CreationDate'] = datetime.datetime.today()
         d['ModDate'] = datetime.datetime.utcnow()
-
-examplePDFPlot()
+        
