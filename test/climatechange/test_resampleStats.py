@@ -81,11 +81,11 @@ class Test(unittest.TestCase):
         self.assertAlmostEqual([0.894427190999915860], findStd(singleRowArray))
         self.assertAlmostEqual([1.4142135623730951, 1.4142135623730951, 1.4142135623730951], findStd(multipleRowArray))
 
-<<<<<<< HEAD
+# <<<<<<< HEAD
     def testfindLen(self):
-        self.assertAlmostEqual([], findStd(emptyArray))
-        self.assertAlmostEqual([5.0], findStd(singleRowArray))
-        self.assertAlmostEqual([5.0, 5.0, 5.0] findStd(multipleRowArray))
+        self.assertAlmostEqual([], findLen(emptyArray))
+        self.assertAlmostEqual([5.0], findLen(singleRowArray))
+        self.assertAlmostEqual([5.0, 5.0, 5.0], findLen(multipleRowArray))
  
 
 #         pass
