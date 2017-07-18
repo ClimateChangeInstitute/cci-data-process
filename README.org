@@ -15,6 +15,7 @@
   |------------+--------------------+-----------------------------------------------------------|
   | Pandas     | python3-pandas     | Data structures for "relational" or "labeled" data        |
   | matlabplot | python3-matlabplot | Python based plotting system in a style similar to Matlab |
+  | bottle     | python3-bottle     | Python library for creating web interfaces                |
   |------------+--------------------+-----------------------------------------------------------|
 
 * Building and Testing
