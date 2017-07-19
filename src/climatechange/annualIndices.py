@@ -3,10 +3,10 @@ Created on Jul 18, 2017
 
 @author: Heather
 '''
-import os
-from climatechange.file import get_data_frame_from_csv
-
-frame = get_data_frame_from_csv(os.path.join('csv_files', 'small.csv'))
+# import os
+# from climatechange.file import get_data_frame_from_csv
+# 
+# frame = get_data_frame_from_csv(os.path.join('csv_files', 'small.csv'))
 
 def increments_by_year(lst):
     #creates lists of years incrementally by 1 year,

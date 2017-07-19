@@ -4,15 +4,13 @@ Created on Jul 18, 2017
 @author: Heather
 '''
 import unittest
-import os
+# import os
 
 from climatechange.annualIndices import increments_by_year
 from climatechange.annualIndices import find_indices
 from climatechange.annualIndices import index_by_year
-from climatechange.file import get_data_frame_from_csv
-from astropy.units import one, year
-from sphinx.ext.imgmath import depth_re
-from _operator import index
+# from climatechange.file import get_data_frame_from_csv
+
 
 
 lst=[6, 9, 23, 3, 2, 8, 9, 3, 5]
