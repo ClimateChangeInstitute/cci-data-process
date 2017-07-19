@@ -1,3 +1,5 @@
+[[https://travis-ci.org/ClimateChangeInstitute/cci-data-process.svg?branch=master][file:https://travis-ci.org/ClimateChangeInstitute/cci-data-process]]
+
 * CCI Data Process
 
   This project is meant to be a library/WEB API for facilitating
