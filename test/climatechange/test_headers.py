@@ -40,7 +40,7 @@ class Test(unittest.TestCase):
                 
         with open(pkg_resources.resource_filename('climatechange', 'header_dict.json')) as file:  # @UndefinedVariable
             self.assertDictEqual(load_dictionary(file), self.hd.get_header_dict(), 'Header dictionaries do not match')
-            
+            print(file)
         with open(pkg_resources.resource_filename('climatechange', 'unit_dict.json')) as file:  # @UndefinedVariable
             self.assertDictEqual(load_dictionary(file), self.hd.get_unit_dict(), 'Unit dictionaries do not match')
         
