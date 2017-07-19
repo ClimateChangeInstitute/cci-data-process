@@ -1,4 +1,4 @@
-[[https://travis-ci.org/ClimateChangeInstitute/cci-data-process.svg?branch=master][file:https://travis-ci.org/ClimateChangeInstitute/cci-data-process]]
+[[https://travis-ci.org/ClimateChangeInstitute/cci-data-process][file:https://travis-ci.org/ClimateChangeInstitute/cci-data-process.svg?branch=master]]
 
 * CCI Data Process
 
