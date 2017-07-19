@@ -29,7 +29,7 @@
   To run all of the unit tests for the project execute the following.
 
 #+BEGIN_SRC sh
-python -m unittest discover
+(cd test; PYTHONPATH=../src python3 -m unittest discover climatechange)
 #+END_SRC
 
 * Generating Documentation
