@@ -3,23 +3,11 @@ Created on Jul 12, 2017
 
 @author: Mark Royer
 '''
-import json
-import pkg_resources
 import re
-from typing import IO, Mapping, Tuple, List
+from typing import Mapping, Tuple, List
 
+from climatechange.file import load_dict_by_package
 
-def load_dictionary(file:IO[str]) -> Mapping[str, str]:
-    
-    try:
-        result = json.load(file)
-    except ValueError:
-        contents = file.read()
-        if len(contents) > 0:  # File was not empty and still could not read
-            print("Warning unable to parse file %s" % file)
-        result = {}
-    
-    return result
 
 class HeaderDictionary(object):
     '''
@@ -40,14 +28,12 @@ class HeaderDictionary(object):
         if headerDict:
             self.header_dictionary = headerDict
         else:
-            with open(pkg_resources.resource_filename('climatechange', 'header_dict.json')) as f:  # @UndefinedVariable
-                self.header_dictionary = load_dictionary(f)
+            self.header_dictionary = load_dict_by_package('header_dict.json')
             
         if unitDict:
             self.unit_dictionary = unitDict
         else:
-            with open(pkg_resources.resource_filename('climatechange', 'unit_dict.json')) as f:  # @UndefinedVariable
-                self.unit_dictionary = load_dictionary(f)
+            self.unit_dictionary = load_dict_by_package('unit_dict.json')
   
 
     def get_header_dict(self) -> Mapping[str, str]:
@@ -62,15 +48,17 @@ class HeaderDictionary(object):
         '''
         return self.unit_dictionary
     
-    def parse_header(self, rawHeader:str) -> Tuple[str, str]:
+    def parse_header(self, rawHeader:str, regexp:str=r"\s*(.*?)\s*\(\s*(.*?)\s*\)") -> Tuple[str, str]:
         '''
         
-        :param rawHeader: A header possibly with unit specified between parentheses
+        :param rawHeader: A header possibly with unit specified between 
+            parentheses
+        :param regexp: If supplied, a regular expression for parsing the raw 
+            header.  The regular expression should contain two capture groups.
         :return: A 2-tuple containing the header and possibly the unit
         '''
-        
         # Match anything between 'header (unit)' and remove white space
-        match = re.match(r"\s*(.*?)\s*\(\s*(.*?)\s*\)", rawHeader)
+        match = re.match(regexp, rawHeader)
         
         if match:
             return match.group(1, 2)
@@ -81,9 +69,19 @@ class HeaderDictionary(object):
         '''
         
         :param rawHeaders: A list of header names with unit information
-        :return: A list of parsed headers.  If the header is not known, then None is placed in its position
+        :return: A list of parsed headers.  If the header is not known, then 
+            None is placed in its position
         '''
-        return list(map(lambda e: (e[0], self.unit_dictionary.get(e[1])) if e else None, map(lambda e: e if e[0] in self.header_dictionary else None, map(self.parse_header, rawHeaders))))
+        
+        # Parse headers into name and unit
+        result = map(self.parse_header, rawHeaders)
+        # Replace unmapped headers with None
+        result = map(lambda e: e if e[0] in self.header_dictionary else None, result)
+        # Replace unknown units with None
+        result = map(lambda e: (e[0], self.unit_dictionary.get(e[1])) if e else None, result)
+        
+        # Make sure the result is a list 
+        return list(result)
         
     
     
