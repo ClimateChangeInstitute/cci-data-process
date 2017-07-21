@@ -1,11 +1,12 @@
 {
 	"Dat210617": "Years",
 	"Dat011216V2": "Years",
-	"depth": "Depth",
-	"Cond": "Cond",
-	"Na": "Na",
-	"Ca": "Ca",
-	"Dust": "Dust",
-	"NH4": "NH4",
-	"NO3": "NO3"
+	"depth (m we)": "Depth",
+	"depth (m abs)": "Depth",
+	"Cond (+ALU-S/cm)": "Depth",
+	"Na (ppb)": "Sample",
+	"Ca (ppb)": "Sample",
+	"Dust (part/ml)": "Sample",
+	"NH4 (ppb)": "Sample",
+	"NO3 (ppb)": "Sample"
 }

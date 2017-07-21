@@ -5,8 +5,8 @@ Created on Jul 12, 2017
 '''
 import unittest
 
-from climatechange.headers import HeaderDictionary
 from climatechange.file import load_dict_by_package
+from climatechange.headers import HeaderDictionary, HeaderType, Header
 
 
 class Test(unittest.TestCase):
@@ -22,7 +22,12 @@ class Test(unittest.TestCase):
 
     def testHeaderDictionaryCreation(self):
                 
-        self.assertDictEqual(load_dict_by_package('header_dict.json'), self.hd.get_header_dict(), 'Header dictionaries do not match')
+        h_dict = load_dict_by_package('header_dict.json')
+        
+        for h, v in h_dict.items():
+            h_dict[h] = HeaderType(v)
+                
+        self.assertDictEqual(h_dict, self.hd.get_header_dict(), 'Header dictionaries do not match')
 
         self.assertDictEqual(load_dict_by_package('unit_dict.json'), self.hd.get_unit_dict(), 'Unit dictionaries do not match')
         
@@ -37,47 +42,57 @@ class Test(unittest.TestCase):
         
     def testParseHeader(self):
         
-        self.assertEqual(('Dat210617', None), self.hd.parse_header('Dat210617'))
-        self.assertEqual(('Dat011216V2', None), self.hd.parse_header('Dat011216V2'))
+        self.assertEqual(('Dat210617', None), Header.parse_header('Dat210617'))
+        self.assertEqual(('Dat011216V2', None), Header.parse_header('Dat011216V2'))
         
-        self.assertEqual(('depth', 'm abs'), self.hd.parse_header('depth (m abs)'))
-        self.assertEqual(('Cond', '+ALU-S/cm'), self.hd.parse_header('Cond (+ALU-S/cm)'))
-        self.assertEqual(('Na', 'ppb'), self.hd.parse_header('Na (ppb)'))
-        self.assertEqual(('Ca', 'ppb'), self.hd.parse_header('Ca (ppb)'))
-        self.assertEqual(('Dust', 'part/ml'), self.hd.parse_header('Dust (part/ml)'))
-        self.assertEqual(('NH4', 'ppb'), self.hd.parse_header('NH4 (ppb)'))
+        self.assertEqual(('depth', 'm abs'), Header.parse_header('depth (m abs)'))
+        self.assertEqual(('Cond', '+ALU-S/cm'), Header.parse_header('Cond (+ALU-S/cm)'))
+        self.assertEqual(('Na', 'ppb'), Header.parse_header('Na (ppb)'))
+        self.assertEqual(('Ca', 'ppb'), Header.parse_header('Ca (ppb)'))
+        self.assertEqual(('Dust', 'part/ml'), Header.parse_header('Dust (part/ml)'))
+        self.assertEqual(('NH4', 'ppb'), Header.parse_header('NH4 (ppb)'))
         
         # Test with some additional strange spacing
-        self.assertEqual(('NO3', 'ppb'), self.hd.parse_header('NO3 (ppb)'))
-        self.assertEqual(('NO3', 'ppb'), self.hd.parse_header('  NO3 (  ppb   )    '))
+        self.assertEqual(('NO3', 'ppb'), Header.parse_header('NO3 (ppb)'))
+        self.assertEqual(('NO3', 'ppb'), Header.parse_header('  NO3 (  ppb   )    '))
        
 
     def testParseHeaders(self):
         
-        noHeaders = []
+        noHeaders:Map[str, HeaderType] = []
         
-        testDict = {"test": "test" }
-        testUnit = {"ppb" : "ppb"}
+        testDict:Map[str, HeaderType] = {"test years (BP)": HeaderType.YEARS,
+                                         "test depth (m)": HeaderType.DEPTH,
+                                         "test_sample": HeaderType.SAMPLE,
+                                         "test_sample (ppb)" : HeaderType.SAMPLE}
+        testUnit:Map[str, str] = {"ppb" : "ppb"}
         
         testHeaderDict = HeaderDictionary(testDict, testUnit)
         
         self.assertEqual([], testHeaderDict.parse_headers(noHeaders))
         
-        oneHeaderNoUnit = ['test']
+        oneHeaderNoUnit = ['test_sample']
         
-        self.assertEqual([('test',None)], testHeaderDict.parse_headers(oneHeaderNoUnit))
+        self.assertEqual(str([Header('test_sample', HeaderType.SAMPLE, ('test_sample', None))]),
+                         str(testHeaderDict.parse_headers(oneHeaderNoUnit)))
         
-        oneHeaderWithUnit = ['test (ppb)']
+        oneHeaderWithUnit = ['test_sample (ppb)']
                 
-        self.assertEqual([('test','ppb')], testHeaderDict.parse_headers(oneHeaderWithUnit))
+        self.assertEqual(str([Header(oneHeaderWithUnit[0], HeaderType.SAMPLE, ('test_sample', 'ppb'))]),
+                         str(testHeaderDict.parse_headers(oneHeaderWithUnit)))
         
-        oneHeaderWithUnitAndNotExisting = ['test (ppb)', 'test2 Not in (ppb)']
+        oneHeaderWithUnitAndNotExisting = ['test_sample (ppb)', 'test2 Not in (ppb)']
         
-        self.assertEqual([('test','ppb'), None], testHeaderDict.parse_headers(oneHeaderWithUnitAndNotExisting))
+        self.maxDiff = None
+        self.assertEqual(str([Header(oneHeaderWithUnitAndNotExisting[0], HeaderType.SAMPLE, ('test_sample', 'ppb')),
+                              Header(oneHeaderWithUnitAndNotExisting[1], HeaderType.UNKNOWN, ('test2 Not in', 'ppb'))]),
+                         str(testHeaderDict.parse_headers(oneHeaderWithUnitAndNotExisting)))
         
-        oneHeaderWithUnitAndNotExistingUnit = ['test (ppb)', 'test (not in unit)']
+        oneHeaderWithUnitAndNotExistingUnit = ['test_sample (ppb)', 'test_sample (not in unit)']
         
-        self.assertEqual([('test','ppb'), ('test', None)], testHeaderDict.parse_headers(oneHeaderWithUnitAndNotExistingUnit))
+        self.assertEqual(str([Header(oneHeaderWithUnitAndNotExistingUnit[0], HeaderType.SAMPLE, ('test_sample', 'ppb')),
+                          Header(oneHeaderWithUnitAndNotExistingUnit[1], HeaderType.UNKNOWN, ('test_sample', 'not in unit'))]),
+                         str(testHeaderDict.parse_headers(oneHeaderWithUnitAndNotExistingUnit)))
         
 
 if __name__ == "__main__":
