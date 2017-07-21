@@ -6,7 +6,7 @@ Created on Jul 12, 2017
 import os
 import unittest
 
-from climatechange.file import get_data_frame_from_csv, load_dictionary
+from climatechange.file import load_dictionary, load_csv
 
 
 class Test(unittest.TestCase):
@@ -35,7 +35,7 @@ class Test(unittest.TestCase):
 
 
     def testReadCSVFile(self):
-        frame = get_data_frame_from_csv(os.path.join('csv_files', 'small.csv'))
+        frame = load_csv(os.path.join('csv_files', 'small.csv'))
         
         self.assertEqual('Dat210617', frame.columns[0], 'First column should be Dat210617')
         
