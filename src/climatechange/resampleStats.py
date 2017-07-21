@@ -1,7 +1,7 @@
 '''
 Created on Jul 13, 2017
 
-@author: Heather
+:author: Heather
 '''
 
 import numpy as np

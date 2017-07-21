@@ -1,7 +1,7 @@
 '''
-Created on Jul 12, 2017
+A collection of interfaces for working with files.
 
-@author: Mark Royer
+:author: Mark Royer
 '''
 import json
 from pandas.core.frame import DataFrame
@@ -17,7 +17,8 @@ def load_dictionary(file:IO[str]) -> Mapping[str, str]:
     and an empty dictionary is returned.  If loading the JSON file from a 
     package, you may want use :py:meth:`climatechange.load_dictionary_package` 
     instead of this method.
-    :param file: The JSON file that will be loaded
+    
+    :param: file: The JSON file that will be loaded
     :return: A Python dictionary object
     '''
     result = {}
@@ -35,17 +36,19 @@ def load_dict_by_package(file_name:str, package:str='climatechange') -> Mapping[
     Loads the specified file from the given package.  If the file is empty, 
     then a warning message is given and an empty dictionary is returned.
     
-    :param package: The package containing the file
-    :param file_name: The name of the dictionary file to load
+    :param: package: The package containing the file
+    :param: file_name: The name of the dictionary file to load
     :return: A Python dictionary object
     '''
     with open(pkg_resources.resource_filename(package, file_name)) as file:  # @UndefinedVariable
         return load_dictionary(file)
     
 
-def get_data_frame_from_csv(csvFileName: str) -> DataFrame:
+def load_csv(file_name: str) -> DataFrame:
     '''
+    Loads a CSV file into a :py:class:`pandas.core.frame.DataFrame` object. 
     
-    :param csvFileName:
+    :param: file_name: The name of the CSV file
+    :return: A DataFrame object
     '''
-    return pd.read_csv(csvFileName, sep=',')
+    return pd.read_csv(file_name, sep=',')

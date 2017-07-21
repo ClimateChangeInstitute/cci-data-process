@@ -1,13 +1,15 @@
 '''
 Created on Jul 18, 2017
 
+Use this module to start CCI data processing.
+
 :author: Mark Royer
 :author: Heather Clifford
 '''
 import os
 
 from climatechange import plot
-from climatechange.file import get_data_frame_from_csv
+from climatechange.file import load_csv
 
 
 def getFolder() -> str:
@@ -46,11 +48,11 @@ def write_resampled_data_to_csv_files(df):
 def create_pdf(f:str):
     '''
     
-    :param f: This is a CSV file
+    :param: f: This is a CSV file
     '''
     print("Creating pdf for %s" % f)
     
-    df = get_data_frame_from_csv(f)
+    df = load_csv(f)
     
     df = process_header_data(df)
 

@@ -7,7 +7,7 @@ import datetime
 from matplotlib.backends.backend_pdf import PdfPages
 from pandas.core.frame import DataFrame
 
-from climatechange.file import get_data_frame_from_csv
+from climatechange.file import load_csv
 import matplotlib.pyplot as plt
 
 
@@ -16,7 +16,7 @@ def examplePDFPlot(file_name:str):
     Just a simple example of how to generated multiple page PDF from DataFrames
     '''
     
-    df = get_data_frame_from_csv('../../test/csv_files/small.csv')
+    df = load_csv('../../test/csv_files/small.csv')
     
     with PdfPages(file_name) as pdf:
     

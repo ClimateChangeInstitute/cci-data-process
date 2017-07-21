@@ -28,12 +28,12 @@ def annualIndices(lst):
     ytop,ybot=incAnnual(lst)
     return [ytop,[find_indices(lst,lambda e: e>=ytop[i] and e<ybot[i]) for i in range(0,len(ytop))]]
 
-def get_data_frame_from_csv(csvFileName: str) -> DataFrame:
+def load_csv(file_name: str) -> DataFrame:
     '''
     
-    :param csvFileName:
+    :param file_name:
     '''
-    return pd.read_csv(csvFileName,sep=',')
+    return pd.read_csv(file_name,sep=',')
 
 def findMean(array:List[List[float]]) -> List[float]:
     '''
@@ -43,7 +43,7 @@ def findMean(array:List[List[float]]) -> List[float]:
     '''
     return [np.nanmean(i) for i in array]  
 
-small=get_data_frame_from_csv('small.csv')
+small=load_csv('small.csv')
 
 os.chdir('C:\\Users\\Heather\\Documents\\GitHub\\cci-data-process\\src\\climatechange')
 #data = json.load(open('header_dict.json', 'r'))

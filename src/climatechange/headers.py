@@ -1,7 +1,7 @@
 '''
 Created on Jul 12, 2017
 
-@author: Mark Royer
+:author: Mark Royer
 '''
 import re
 from typing import Mapping, Tuple, List
