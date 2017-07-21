@@ -7,18 +7,34 @@
 
 * Requirements
 
-  The project is built using Python 3, so the Python 3.5 system is
-  required.  Furthermore, the system requires the following python
-  libraries that may be installed either through pip or through the
-  Debian apt repositories.
+  The project is built using Python 3.6, so a version of Python >= 3.6
+  is required.  Furthermore, the system requires the following python
+  libraries that may be installed by pip.
 
-  |------------+--------------------+-----------------------------------------------------------|
-  | Library    | Apt                | Description                                               |
-  |------------+--------------------+-----------------------------------------------------------|
-  | Pandas     | python3-pandas     | Data structures for "relational" or "labeled" data        |
-  | matlabplot | python3-matlabplot | Python based plotting system in a style similar to Matlab |
-  | bottle     | python3-bottle     | Python library for creating web interfaces                |
-  |------------+--------------------+-----------------------------------------------------------|
+  |------------+--------------------+------------+-----------------------------------------------------------|
+  | Library    | Apt                | Pip        | Description                                               |
+  |------------+--------------------+------------+-----------------------------------------------------------|
+  | Bottle     | python3-bottle     | bottle     | Python library for creating web interfaces                |
+  | Matplotlib | python3-matplotlib | matplotlib | Python based plotting system in a style similar to Matlab |
+  | Pandas     | python3-pandas     | pandas     | Data structures for "relational" or "labeled" data        |
+  | Sphinx     | python3-sphinx     | sphinx     | Documentation generator for Python projects               |
+  |------------+--------------------+------------+-----------------------------------------------------------|
+
+  As of writing this, the default version of Python for [[https://www.continuum.io][Anaconda]] is
+  3.6.  However, on most Linux distribution the default version of
+  Python is 2.7, and package managed versions of Python 3 are likely
+  to be pre 3.6 (this may change soon).  If you do not want to use
+  Anaconda on a Debian system, you can install Python 3.6 by amending
+  the [[file:/etc/apt/sources.list][sources.list]] file.
+
+  The build instructions in this document assume that =python3.6=
+  points to a valid Python 3.6 installation.  Using =pip= to install
+  the required modules will work fine as follows and does not require
+  root access.
+
+#+BEGIN_SRC sh
+python3.6 -m pip install pandas matplotlib bottle sphinx
+#+END_SRC
 
 * Building and Testing
 
@@ -29,7 +45,7 @@
   To run all of the unit tests for the project execute the following.
 
 #+BEGIN_SRC sh
-(cd test; PYTHONPATH=../src python3 -m unittest discover climatechange)
+(cd test; PYTHONPATH=../src python3.6 -m unittest discover climatechange)
 #+END_SRC
 
 * Generating Documentation
