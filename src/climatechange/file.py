@@ -15,7 +15,7 @@ def load_dictionary(file:IO[str]) -> Mapping[str, str]:
     '''
     Load the specified JSON file. If empty, then a warning message is raised 
     and an empty dictionary is returned.  If loading the JSON file from a 
-    package, you may want use :py:meth:`climatechange.load_dictionary_package` 
+    package, you may want use :py:meth:`climatechange.file.load_dict_by_package` 
     instead of this method.
     
     :param: file: The JSON file that will be loaded

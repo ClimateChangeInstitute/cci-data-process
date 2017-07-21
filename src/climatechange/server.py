@@ -3,8 +3,7 @@ Created on Jul 18, 2017
 
 @author: Mark Royer
 '''
-from bottle import route, hook, static_file, run
-import os
+from bottle import route, static_file, run
 import tempfile
 
 from climatechange.plot import examplePDFPlot
