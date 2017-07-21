@@ -6,7 +6,7 @@ Created on Jul 12, 2017
 import os
 import unittest
 
-from climatechange.file import load_dictionary, load_csv
+from climatechange.file import load_dictionary, load_csv, data_dir, save_dictionary
 
 
 class Test(unittest.TestCase):
@@ -21,18 +21,32 @@ class Test(unittest.TestCase):
 
     def testLoadDictionary(self):
         
-        fileName = os.path.join('json_files', 'nothing.json')
-        with open(fileName, 'r') as f:
+        file_name = os.path.join('json_files', 'nothing.json')
+        with open(file_name, 'r') as f:
             self.assertDictEqual({}, load_dictionary(f), "Empty dictionary was expected")
          
-        fileName = os.path.join('json_files', 'empty.json')
-        with open(fileName, 'r') as f:
+        file_name = os.path.join('json_files', 'empty.json')
+        with open(file_name, 'r') as f:
             self.assertDictEqual({}, load_dictionary(f), "Empty dictionary was expected")
         
-        fileName = os.path.join('json_files', 'abcDict.json')
-        with open(fileName, 'r') as f:
+        file_name = os.path.join('json_files', 'abcDict.json')
+        with open(file_name, 'r') as f:
             self.assertDictEqual(self.abcDict, load_dictionary(f), "%s dictionary does not match" % f)
 
+    def testSaveDictionary(self):
+        
+        file_name = 'cci_test_file_delete_me.json'
+        file_path = os.path.join(data_dir(), file_name)
+        
+        save_dictionary({}, file_path)
+        with open(file_path, 'r') as f:
+            self.assertDictEqual({}, load_dictionary(f))
+        os.remove(file_path)
+        
+        save_dictionary(self.abcDict, file_path)
+        with open(file_path, 'r') as f:
+            self.assertDictEqual(self.abcDict, load_dictionary(f))
+        os.remove(file_path)
 
     def testReadCSVFile(self):
         frame = load_csv(os.path.join('csv_files', 'small.csv'))

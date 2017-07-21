@@ -9,7 +9,7 @@
 
   The project is built using Python 3.6, so a version of Python >= 3.6
   is required.  Furthermore, the system requires the following python
-  libraries that may be installed by pip.
+  libraries.
 
   |------------+--------------------+------------+-----------------------------------------------------------|
   | Library    | Apt                | Pip        | Description                                               |
@@ -20,12 +20,13 @@
   | Sphinx     | python3-sphinx     | sphinx     | Documentation generator for Python projects               |
   |------------+--------------------+------------+-----------------------------------------------------------|
 
-  As of writing this, the default version of Python for [[https://www.continuum.io][Anaconda]] is
-  3.6.  However, on most Linux distribution the default version of
-  Python is 2.7, and package managed versions of Python 3 are likely
-  to be pre 3.6 (this may change soon).  If you do not want to use
-  Anaconda on a Debian system, you can install Python 3.6 by amending
-  the [[file:/etc/apt/sources.list][sources.list]] file.
+  As of writing this document, the default version of Python for
+  [[https://www.continuum.io][Anaconda]] is 3.6.  However, on most Linux distribution the default
+  version of Python is 2.7, and package managed versions of Python 3
+  are likely to be pre 3.6 (this may change soon) on many Linux
+  distributions.  If you do not want to use Anaconda on a Debian
+  system, you can install Python 3.6 by amending the [[file:/etc/apt/sources.list][sources.list]]
+  file.
 
   The build instructions in this document assume that =python3.6=
   points to a valid Python 3.6 installation.  Using =pip= to install

@@ -8,7 +8,9 @@ from functools import singledispatch
 import re
 from typing import Mapping, Tuple, List
 
-from climatechange.file import load_dict_by_package
+from climatechange.file import load_dict_by_package, data_dir, load_dictionary,\
+    save_dictionary
+import os
 
 
 @singledispatch
@@ -97,18 +99,37 @@ class HeaderDictionary(object):
         if headerDict:
             self.header_dictionary = headerDict
         else:
-            self.header_dictionary = load_dict_by_package('header_dict.json')
-            for h, v in self.header_dictionary.items():
-                self.header_dictionary[h] = HeaderType(v)
-                
+            self.header_dictionary = self.load_latest_header_dict()
+            
+                        
         if unitDict:
             self.unit_dictionary = unitDict
         else:
             self.unit_dictionary = load_dict_by_package('unit_dict.json')
   
+    def load_latest_header_dict(self) -> Mapping[str, HeaderType]:
+        header_file_name = 'header_dict.json'
+        header_file_path = os.path.join(data_dir(), header_file_name)
+        
+        hdict = {}
+        if os.path.isfile(header_file_path):
+            with open(header_file_path, 'r') as f:
+                hdict = load_dictionary(f) 
+        else: # Load default header file from package
+            hdict = load_dict_by_package(header_file_name)
+            # Copy default header file to user data directory
+            save_dictionary(hdict, header_file_path)
+            
+        # Make sure mappings are to header types
+        for h, v in hdict.items():
+            hdict[h] = HeaderType(v)
+            
+        return hdict
+        
 
     def get_header_dict(self) -> Mapping[str, HeaderType]:
         '''
+        Returns the *already* loaded header dictionary.
         :return: The known header mappings
         '''
         return self.header_dictionary
@@ -116,6 +137,7 @@ class HeaderDictionary(object):
     
     def get_unit_dict(self) -> Mapping[str, str]:
         '''
+        Returns the *already* loaded unit dictionary.
         :return: The known unit mappings
         '''
         return self.unit_dictionary

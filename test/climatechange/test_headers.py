@@ -26,7 +26,7 @@ class Test(unittest.TestCase):
         
         for h, v in h_dict.items():
             h_dict[h] = HeaderType(v)
-                
+
         self.assertDictEqual(h_dict, self.hd.get_header_dict(), 'Header dictionaries do not match')
 
         self.assertDictEqual(load_dict_by_package('unit_dict.json'), self.hd.get_unit_dict(), 'Unit dictionaries do not match')
@@ -83,7 +83,6 @@ class Test(unittest.TestCase):
         
         oneHeaderWithUnitAndNotExisting = ['test_sample (ppb)', 'test2 Not in (ppb)']
         
-        self.maxDiff = None
         self.assertEqual(str([Header(oneHeaderWithUnitAndNotExisting[0], HeaderType.SAMPLE, ('test_sample', 'ppb')),
                               Header(oneHeaderWithUnitAndNotExisting[1], HeaderType.UNKNOWN, ('test2 Not in', 'ppb'))]),
                          str(testHeaderDict.parse_headers(oneHeaderWithUnitAndNotExisting)))

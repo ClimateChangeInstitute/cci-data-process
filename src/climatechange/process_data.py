@@ -10,6 +10,7 @@ import os
 
 from climatechange import plot
 from climatechange.file import load_csv
+from climatechange.headers import HeaderDictionary, HeaderType
 
 
 def getFolder() -> str:
@@ -25,6 +26,12 @@ def select_depth_column(df):
 
 
 def process_header_data(df):
+    
+    hd = HeaderDictionary()
+    
+    unknownHeaders = [ h for h in hd.parse_headers(list(df.columns)) if h.htype == HeaderType.UNKNOWN ]
+    
+    print("Unknown headers are: %s" % unknownHeaders)
     
     df = select_year_column(df)
     
