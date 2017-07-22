@@ -140,7 +140,7 @@ class HeaderDictionary(object):
         else:  # Load default header file from package
             hdict = load_dict_by_package(header_file_name, obj_hook=to_headers)
             # Copy default header file to user data directory
-            save_dictionary(hdict, header_file_path)
+            save_dictionary(hdict, header_file_path, enc_cls=HeaderEncoder)
             
         return hdict
         
