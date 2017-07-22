@@ -7,13 +7,13 @@ import os
 import unittest
 
 from climatechange.file import load_dictionary, load_csv, data_dir, save_dictionary
-from climatechange.headers import HeaderType, HeaderEncoder, to_headers
+from climatechange.headers import HeaderEncoder, to_headers
 
 
 class Test(unittest.TestCase):
 
     def setUp(self):
-        self.abcDict = to_headers({"a": "Years",
+        self.abc_dict = to_headers({"a": "Years",
                                   "b": "Years",
                                   "c": "Depth",
                                   "d": "Depth",
@@ -38,9 +38,9 @@ class Test(unittest.TestCase):
                                  load_dictionary(f, obj_hook=to_headers),
                                  "Empty dictionary was expected")
         
-        file_name = os.path.join('json_files', 'abcDict.json')
+        file_name = os.path.join('json_files', 'abc_dict.json')
         with open(file_name, 'r') as f:
-            self.assertDictEqual(self.abcDict,
+            self.assertDictEqual(self.abc_dict,
                                  load_dictionary(f, obj_hook=to_headers),
                                  "%s dictionary does not match" % f)
 
@@ -54,14 +54,14 @@ class Test(unittest.TestCase):
             self.assertDictEqual({}, load_dictionary(f))
         os.remove(file_path)
         
-        save_dictionary(self.abcDict, file_path, enc_cls=HeaderEncoder)
+        save_dictionary(self.abc_dict, file_path, enc_cls=HeaderEncoder)
         with open(file_path, 'r') as f:
-            self.assertDictEqual(self.abcDict, load_dictionary(f, obj_hook=to_headers))
+            self.assertDictEqual(self.abc_dict, load_dictionary(f, obj_hook=to_headers))
         os.remove(file_path)
         
-        save_dictionary(self.abcDict, file_path, enc_cls=HeaderEncoder)
+        save_dictionary(self.abc_dict, file_path, enc_cls=HeaderEncoder)
         with open(file_path, 'r') as f:
-            self.assertDictEqual(self.abcDict, load_dictionary(f, obj_hook=to_headers))
+            self.assertDictEqual(self.abc_dict, load_dictionary(f, obj_hook=to_headers))
         os.remove(file_path)
 
     def testReadCSVFile(self):
