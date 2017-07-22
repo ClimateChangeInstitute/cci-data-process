@@ -4,20 +4,15 @@ Created on Jul 12, 2017
 :author: Mark Royer
 '''
 from enum import Enum
-from functools import singledispatch
 import json
 import os
 import re
-from typing import Mapping, Tuple, List
+from typing import Mapping, Tuple, List, Any
 
 from climatechange.file import data_dir, load_dictionary, \
     save_dictionary, load_dict_by_package
+from pandas.core.dtypes.common import is_any_int_dtype
 
-
-@singledispatch
-def serialize(val):
-    """Default serialize"""
-    return str(val)
 
 class HeaderType(Enum):
     '''
@@ -32,16 +27,34 @@ class HeaderType(Enum):
     UNKNOWN = 'Unknown'
     
 class HeaderEncoder(json.JSONEncoder):
-    def default(self, obj):
+    '''
+    Used to dump Header information
+    '''
+    def default(self, obj:Any):
+        '''
+        Write out header types as simply the value  
+        :param obj: This is likely to be a dictionary object, but could be any 
+            object
+        '''
         if type(obj) == HeaderType:
             return str(obj.value)
         else:
             return json.JSONEncoder.default(self, obj)
 
-def to_headers(d):
+def to_headers(d:Mapping[str, str]) -> Mapping[str, HeaderType]:
+    '''
+    Use this function to specify how a header dictionary should be loaded.
+    :param d: A dictionary of header information
+    :return: A fully instantiated header dictionary
+    '''
     return {k: HeaderType(h) for (k, h) in d.items()}    
 
 class Header(object):
+    '''
+    A header parsed by the system.  This object contains the raw header, the 
+    type of header, and also a parsed version which is has the name of the 
+    header and unit separated. 
+    '''
     
     htype: HeaderType = HeaderType.UNKNOWN
     
@@ -147,7 +160,7 @@ class HeaderDictionary(object):
 
     def get_header_dict(self) -> Mapping[str, HeaderType]:
         '''
-        Returns the *already* loaded header dictionary.
+        Returns the **already** loaded header dictionary.
         :return: The known header mappings
         '''
         return self.header_dictionary
@@ -155,7 +168,7 @@ class HeaderDictionary(object):
     
     def get_unit_dict(self) -> Mapping[str, str]:
         '''
-        Returns the *already* loaded unit dictionary.
+        Returns the **already** loaded unit dictionary.
         :return: The known unit mappings
         '''
         return self.unit_dictionary
