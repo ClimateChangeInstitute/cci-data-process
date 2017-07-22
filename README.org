@@ -29,9 +29,11 @@
   file.
 
   The build instructions in this document assume that =python3.6=
-  points to a valid Python 3.6 installation.  Using =pip= to install
-  the required modules will work fine as follows and does not require
-  root access.
+  points to a valid Python 3.6 installation.
+
+  Using =pip= to install the required modules is an acceptable
+  installation method and does not require root access.  For example,
+  to install the required libraries using pip, type the following.
 
 #+BEGIN_SRC sh
 python3.6 -m pip install pandas matplotlib bottle sphinx
