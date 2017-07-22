@@ -6,7 +6,7 @@ Created on Jul 12, 2017
 import unittest
 
 from climatechange.file import load_dict_by_package
-from climatechange.headers import HeaderDictionary, HeaderType, Header
+from climatechange.headers import HeaderDictionary, HeaderType, Header, to_headers
 
 
 class Test(unittest.TestCase):
@@ -22,14 +22,15 @@ class Test(unittest.TestCase):
 
     def testHeaderDictionaryCreation(self):
                 
-        h_dict = load_dict_by_package('header_dict.json')
+        h_dict = load_dict_by_package('header_dict.json', obj_hook=to_headers)
         
-        for h, v in h_dict.items():
-            h_dict[h] = HeaderType(v)
+        self.assertDictEqual(h_dict,
+                             self.hd.get_header_dict(),
+                             'Header dictionaries do not match')
 
-        self.assertDictEqual(h_dict, self.hd.get_header_dict(), 'Header dictionaries do not match')
-
-        self.assertDictEqual(load_dict_by_package('unit_dict.json'), self.hd.get_unit_dict(), 'Unit dictionaries do not match')
+        self.assertDictEqual(load_dict_by_package('unit_dict.json'),
+                             self.hd.get_unit_dict(),
+                             'Unit dictionaries do not match')
         
         customHd = HeaderDictionary(self.abcDict, self.abcDict)
         
@@ -83,15 +84,15 @@ class Test(unittest.TestCase):
         
         oneHeaderWithUnitAndNotExisting = ['test_sample (ppb)', 'test2 Not in (ppb)']
         
-        self.assertEqual(str([Header(oneHeaderWithUnitAndNotExisting[0], HeaderType.SAMPLE, ('test_sample', 'ppb')),
-                              Header(oneHeaderWithUnitAndNotExisting[1], HeaderType.UNKNOWN, ('test2 Not in', 'ppb'))]),
-                         str(testHeaderDict.parse_headers(oneHeaderWithUnitAndNotExisting)))
+        self.assertListEqual([Header(oneHeaderWithUnitAndNotExisting[0], HeaderType.SAMPLE, ('test_sample', 'ppb')),
+                              Header(oneHeaderWithUnitAndNotExisting[1], HeaderType.UNKNOWN, ('test2 Not in', 'ppb'))],
+                             testHeaderDict.parse_headers(oneHeaderWithUnitAndNotExisting))
         
         oneHeaderWithUnitAndNotExistingUnit = ['test_sample (ppb)', 'test_sample (not in unit)']
         
-        self.assertEqual(str([Header(oneHeaderWithUnitAndNotExistingUnit[0], HeaderType.SAMPLE, ('test_sample', 'ppb')),
-                          Header(oneHeaderWithUnitAndNotExistingUnit[1], HeaderType.UNKNOWN, ('test_sample', 'not in unit'))]),
-                         str(testHeaderDict.parse_headers(oneHeaderWithUnitAndNotExistingUnit)))
+        self.assertListEqual([Header(oneHeaderWithUnitAndNotExistingUnit[0], HeaderType.SAMPLE, ('test_sample', 'ppb')),
+                              Header(oneHeaderWithUnitAndNotExistingUnit[1], HeaderType.UNKNOWN, ('test_sample', 'not in unit'))],
+                             testHeaderDict.parse_headers(oneHeaderWithUnitAndNotExistingUnit))
         
 
 if __name__ == "__main__":

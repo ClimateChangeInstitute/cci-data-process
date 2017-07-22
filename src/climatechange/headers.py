@@ -5,12 +5,13 @@ Created on Jul 12, 2017
 '''
 from enum import Enum
 from functools import singledispatch
+import json
+import os
 import re
 from typing import Mapping, Tuple, List
 
-from climatechange.file import load_dict_by_package, data_dir, load_dictionary,\
-    save_dictionary
-import os
+from climatechange.file import data_dir, load_dictionary, \
+    save_dictionary, load_dict_by_package
 
 
 @singledispatch
@@ -30,6 +31,16 @@ class HeaderType(Enum):
     SAMPLE = 'Sample'
     UNKNOWN = 'Unknown'
     
+class HeaderEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if type(obj) == HeaderType:
+            return str(obj.value)
+        else:
+            return json.JSONEncoder.default(self, obj)
+
+def to_headers(d):
+    return {k: HeaderType(h) for (k, h) in d.items()}    
+
 class Header(object):
     
     htype: HeaderType = HeaderType.UNKNOWN
@@ -70,14 +81,25 @@ class Header(object):
         
     def __repr__(self, *args, **kwargs):
         '''
-        :return: A json-like object.  For example, 
+        Return a JSON-like object. For example, 
         
         .. code-block:: python
         
             {"original_value": "test", "parsed_value": ["test", null], "htype": "Sample"}
+        :return: A JSON-like object
         '''
         return '{"original_value": "%s", "parsed_value": "%s", "htype": "%s"}' % (self.original_value, self.parsed_value, self.htype)
-       
+     
+    def __eq__(self, other):
+        '''
+        Overriding this method allows us to easily compare Header objects. 
+        :param other: Header object to compare to
+        :return: True IFF the two objects have equal values
+        '''
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        return NotImplemented
+          
 
 class HeaderDictionary(object):
     '''
@@ -114,15 +136,11 @@ class HeaderDictionary(object):
         hdict = {}
         if os.path.isfile(header_file_path):
             with open(header_file_path, 'r') as f:
-                hdict = load_dictionary(f) 
-        else: # Load default header file from package
-            hdict = load_dict_by_package(header_file_name)
+                hdict = load_dictionary(f, obj_hook=to_headers) 
+        else:  # Load default header file from package
+            hdict = load_dict_by_package(header_file_name, obj_hook=to_headers)
             # Copy default header file to user data directory
             save_dictionary(hdict, header_file_path)
-            
-        # Make sure mappings are to header types
-        for h, v in hdict.items():
-            hdict[h] = HeaderType(v)
             
         return hdict
         
