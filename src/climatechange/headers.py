@@ -11,7 +11,6 @@ from typing import Mapping, Tuple, List, Any
 
 from climatechange.file import data_dir, load_dictionary, \
     save_dictionary, load_dict_by_package
-from pandas.core.dtypes.common import is_any_int_dtype
 
 
 class HeaderType(Enum):
@@ -92,7 +91,7 @@ class Header(object):
         else:
             return (rawHeader, None)
         
-    def __repr__(self, *args, **kwargs):
+    def __repr__(self):
         '''
         Return a JSON-like object. For example, 
         

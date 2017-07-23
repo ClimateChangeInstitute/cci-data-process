@@ -11,7 +11,6 @@ from climatechange.resampleStats import findMin
 from climatechange.resampleStats import findStd
 from climatechange.resampleStats import findLen
 from climatechange.resampleStats import compileStats
-from math import nan
 
 emptyArray = []
 singleRowArray = [[5, 3, 4, 5, 3]]
