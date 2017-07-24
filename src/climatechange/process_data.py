@@ -1,87 +1,105 @@
+#!/usr/local/bin/python3.6
+# encoding: utf-8
 '''
-Created on Jul 18, 2017
+The Climate Change Institute Data Processor
 
-Use this module to start CCI data processing.
+The Climate Change Data Processor is a tool for cleaning, resampling, and
+packaging data gathered by CCI scientists.
+
+A number of statistical routines are applied to the loaded data.  The results 
+are written to CSV files along with PDFs containing plotted data.  
 
 :author: Mark Royer
 :author: Heather Clifford
+
+
+:contact: andrei.kurbotov@maine.edu
 '''
+import sys
 import os
 
-from climatechange import plot
-from climatechange.file import load_csv
-from climatechange.headers import HeaderDictionary, HeaderType
+from argparse import ArgumentParser
+from argparse import RawDescriptionHelpFormatter
+from climatechange import process_data_functions
 
+__all__ = []
+__version__ = 0.1
+__date__ = '2017-07-24'
+__updated__ = '2017-07-24'
 
-def getFolder() -> str:
-    return '../../data/KCC_210617'
+DEBUG = 1
+PROFILE = 1
 
+class CLIError(Exception):
+    '''Generic exception to raise and log different fatal errors.'''
+    def __init__(self, msg):
+        super(CLIError).__init__(type(self))
+        self.msg = "E: %s" % msg
+    def __str__(self):
+        return self.msg
+    def __unicode__(self):
+        return self.msg
 
-def select_year_column(df):
-    return df
+def main(argv=None): # IGNORE:C0111
+    '''Command line options.'''
 
+    if argv is None:
+        argv = sys.argv
+    else:
+        sys.argv.extend(argv)
 
-def select_depth_column(df):
-    return df
+    program_name = os.path.basename(sys.argv[0])
+    program_version = "v%s" % __version__
+    program_build_date = str(__updated__)
+    program_version_message = '%%(prog)s %s (%s)' % (program_version, program_build_date)
+    program_shortdesc = __import__('__main__').__doc__.split("\n")[1]
+    program_license = '''%s
 
+  Created by Mark Royer on %s.
+  Copyright 2017 Climate Change Institute. All rights reserved.
 
-def process_header_data(df):
+  Distributed on an "AS IS" basis without warranties
+  or conditions of any kind, either express or implied.
+
+USAGE
+''' % (program_shortdesc, str(__date__))
+
+    try:
+        # Setup argument parser
+        parser = ArgumentParser(description=program_license, formatter_class=RawDescriptionHelpFormatter)
+        parser.add_argument("-r", "--recursive", dest="recurse", action="store_true", help="recurse into subfolders [default: %(default)s]")
+        parser.add_argument("-v", "--verbose", dest="verbose", action="count", help="set verbosity level [default: %(default)s]")
+        parser.add_argument('-V', '--version', action='version', version=program_version_message)
+        parser.add_argument(dest="paths", default=".", help="paths to folder(s) with data file(s) [default: %(default)s]", metavar="path", nargs='+')
+
+        # Process arguments
+        args = parser.parse_args()
+
+        paths = args.paths
+        verbose = args.verbose
+        
+        if verbose > 0:
+            print("Verbose mode on")
+
+        for p in paths:
+            # process data paths
+            print(p)
+        return 0
+    except KeyboardInterrupt:
+        ### handle keyboard interrupt ###
+        return 0
+    except Exception as e:
+        if DEBUG:
+            raise(e)
+        indent = len(program_name) * " "
+        sys.stderr.write(program_name + ": " + repr(e) + "\n")
+        sys.stderr.write(indent + "  for help use --help")
+        return 2
+
+if __name__ == "__main__":
+    if DEBUG:
+#         sys.argv.append("-h")
+        pass
+
+    sys.exit(process_data_functions.main())
     
-    hd = HeaderDictionary()
-    
-    unknownHeaders = [ h for h in hd.parse_headers(list(df.columns)) if h.htype == HeaderType.UNKNOWN ]
-    
-    print("Unknown headers are: %s" % unknownHeaders)
-    
-    df = select_year_column(df)
-    
-    df = select_depth_column(df)
-    
-    return df
-
-
-def clean_data(df):
-    return df
-
-
-def create_statistics(df):
-    return df
-
-
-def write_resampled_data_to_csv_files(df):
-    pass
-
-
-def create_pdf(f:str):
-    '''
-    
-    :param: f: This is a CSV file
-    '''
-    print("Creating pdf for %s" % f)
-    
-    df = load_csv(f)
-    
-    df = process_header_data(df)
-
-    df = clean_data(df)
-
-    # Plot all of the raw data
-    # year vs each element
-    # depth vs each element
-    plot.create_pdf(df, f + '.out.pdf')
-
-    df_resampled_stats = create_statistics(df)
-    
-    write_resampled_data_to_csv_files(df_resampled_stats)
-    
-    
-    
-if __name__ == '__main__':
-    
-    print(os.path.abspath('.'))
-    
-    folder = getFolder()
-
-    for f in os.listdir(folder):
-        if f.endswith('.csv') :
-            create_pdf(os.path.join(folder, f))
