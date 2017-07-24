@@ -64,4 +64,5 @@ def compileStats(array:List[List[float]]) -> List[List[float]]:
     :param array: list of lists, 2D array floats
     :return: list of statistics for each list
     '''
-    return [findMean(array), findMedian(array), findMax(array), findMin(array), findStd(array), findLen(array)]
+#     result=[findMean(array), findMedian(array), findMax(array), findMin(array), findStd(array), findLen(array)]
+    return [ list(x) for x in zip(findMean(array), findMedian(array), findMax(array), findMin(array), findStd(array), findLen(array))]
