@@ -10,10 +10,6 @@ from climatechange.file import load_csv
 from climatechange.headers import HeaderDictionary, HeaderType
 
 
-def getFolder() -> str:
-    return '../../data/KCC_210617'
-
-
 def select_year_column(df):
     return df
 
@@ -26,8 +22,11 @@ def process_header_data(df):
     
     hd = HeaderDictionary()
     
-    unknownHeaders = [ h for h in hd.parse_headers(list(df.columns)) if h.htype == HeaderType.UNKNOWN ]
+    parsedHeaders = hd.parse_headers(list(df.columns))
     
+    unknownHeaders = [ h for h in parsedHeaders if h.htype == HeaderType.UNKNOWN ]
+    
+    print("All headers are: %s" % parsedHeaders)
     print("Unknown headers are: %s" % unknownHeaders)
     
     df = select_year_column(df)
@@ -71,11 +70,8 @@ def create_pdf(f:str):
     
     write_resampled_data_to_csv_files(df_resampled_stats)
     
-def main():
+def main(files):
     
-    folder = getFolder()
-
-    for f in os.listdir(folder):
-        if f.endswith('.csv') :
-            create_pdf(os.path.join(folder, f))
+    for f in files:
+        create_pdf(f)
     

@@ -78,13 +78,11 @@ USAGE
         paths = args.paths
         verbose = args.verbose
         
-        if verbose > 0:
+        if verbose and verbose > 0:
             print("Verbose mode on")
+        
+        return process_data_functions.main(paths)
 
-        for p in paths:
-            # process data paths
-            print(p)
-        return 0
     except KeyboardInterrupt:
         ### handle keyboard interrupt ###
         return 0
@@ -101,5 +99,5 @@ if __name__ == "__main__":
 #         sys.argv.append("-h")
         pass
 
-    sys.exit(process_data_functions.main())
+    sys.exit(main())
     
