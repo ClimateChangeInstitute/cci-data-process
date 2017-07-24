@@ -32,8 +32,7 @@ class HeaderEncoder(json.JSONEncoder):
     def default(self, obj:Any):
         '''
         Write out header types as simply the value  
-        :param obj: This is likely to be a dictionary object, but could be any 
-            object
+        :param obj: This is likely to be a dictionary object, but could be any object
         '''
         if type(obj) == HeaderType:
             return str(obj.value)
@@ -55,10 +54,13 @@ class Header(object):
     header and unit separated. 
     '''
     
+    # The type of the column data as determined from the header_dict.json file
     htype: HeaderType = HeaderType.UNKNOWN
     
+    # Read/Raw header value
     original_value: str
     
+    # The tuple is (Header name, unit)
     parsed_value: Tuple[str, str]
         
     def __init__(self,

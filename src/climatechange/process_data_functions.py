@@ -3,19 +3,14 @@ Created on Jul 24, 2017
 
 :author: Mark Royer
 '''
-import os
+
+from pandas.core.frame import DataFrame
+
+import numpy
 
 from climatechange import plot
 from climatechange.file import load_csv
 from climatechange.headers import HeaderDictionary, HeaderType
-
-
-def select_year_column(df):
-    return df
-
-
-def select_depth_column(df):
-    return df
 
 
 def process_header_data(df):
@@ -29,14 +24,34 @@ def process_header_data(df):
     print("All headers are: %s" % parsedHeaders)
     print("Unknown headers are: %s" % unknownHeaders)
     
-    df = select_year_column(df)
-    
-    df = select_depth_column(df)
-    
     return df
+
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
 
 
 def clean_data(df):
+    
+    # Remove zeroes.  Zeroes go to nan
+    values = df.values
+    
+    for r in values :
+        for i in range(len(r)):
+            if r[i] == 0:
+                r[i] = numpy.nan
+    
+    # Replace str values with nan
+    for r in values :
+        for i in range(len(r)):
+            if not is_number(r[i]):
+                r[i] = numpy.nan 
+    
+    df = DataFrame(data=values, index=df.index, columns=df.columns)
+    
     return df
 
 
