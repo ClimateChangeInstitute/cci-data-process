@@ -3,7 +3,7 @@
 	"Dat011216V2": "Years",
 	"depth (m we) ": "Depth",
 	"depth (m abs)": "Depth",
-	"Cond (+ALU-S/cm)": "Depth",
+	"Cond (+ALU-S/cm)": "Sample",
 	"Na (ppb)": "Sample",
 	"Ca (ppb)": "Sample",
 	"Dust (part/ml)": "Sample",
