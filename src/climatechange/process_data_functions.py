@@ -8,9 +8,10 @@ from pandas.core.frame import DataFrame
 
 import numpy
 
-from climatechange import plot
+from climatechange import plot, resampleStats
 from climatechange.file import load_csv
 from climatechange.headers import HeaderDictionary, HeaderType
+from climatechange.lstDataframe import lstToDataframe
 
 
 def process_header_data(df):
@@ -55,8 +56,16 @@ def clean_data(df):
     return df
 
 
-def create_statistics(df):
+def create_statistics(df: DataFrame) -> DataFrame:
+    
+    result = resampleStats.compileStats(df.values.tolist())
+    print("Rows is %d " % len(result))
+    print("Columns is %d " % len(result[0]))
+    
     return df
+#     return DataFrame(data=resampleStats.compileStats(df.values.tolist()),
+#                      index=df.index,
+#                      columns=df.columns)
 
 
 def write_resampled_data_to_csv_files(df):
@@ -76,13 +85,14 @@ def create_pdf(f:str):
 
     df = clean_data(df)
 
+    df_resampled_stats = create_statistics(df)
+    
+
     # Plot all of the raw data
     # year vs each element
     # depth vs each element
     plot.create_pdf(df, f + '.out.pdf')
 
-    df_resampled_stats = create_statistics(df)
-    
     write_resampled_data_to_csv_files(df_resampled_stats)
     
 def main(files):
