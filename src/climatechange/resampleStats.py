@@ -99,8 +99,7 @@ def compile_stats_by_year(df:DataFrame, headers: Header, yc:str, sc:str, inc_amt
     depth_columns = []
     for c in df.columns:
         if c in depth_column_header:
-            depth_columns.append(df.loc[:,c])
-      
+            depth_columns.append(df.loc[:,c])    
     
     print(pandas.concat([year_column, sample_column], axis=1).values)
     resampled_data=resample_by_inc(pandas.concat([year_column, sample_column], axis=1), inc_amt)

@@ -21,9 +21,17 @@ def find_index_by_increment(lst,inc):
     return [ytop,[find_indices(lst,lambda e: e>=ytop[i] and e<ybot[i]) for i in range(0,len(ytop))]]
 
         
-def resample_by_inc(df,inc):
-    years,ind=find_index_by_increment(df.iloc[:,0].values.tolist(),inc)
+def resample_by_inc(df,inc_amt):
+    '''
+    
+    :param df:
+    :param inc:
+    '''
+    years,ind=find_index_by_increment(df.iloc[:,0].values.tolist(),inc_amt)
     appended_data=[]
     for i in ind:
         appended_data.extend(compileStats(df.iloc[i,[1]].transpose().values.tolist()))
-    return pd.concat([DataFrame(years, columns=['Year']), DataFrame(appended_data,columns=['Mean','Median','Max','Min','Stdv','Count'])], axis=1) 
+    return pd.concat([DataFrame(years, columns=['Year']), DataFrame(appended_data,columns=['Mean','Median','Max','Min','Stdv','Count'])], axis=1)
+
+def resampled_data_to_csv(df):
+    pass 

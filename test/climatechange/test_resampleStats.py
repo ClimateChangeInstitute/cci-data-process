@@ -17,7 +17,7 @@ import os
 #list of values by column, first index is column index, for each you get element of row 
 
 emptyArray = []
-singleRowArray = [[5, 3, 4, 5, 3]]
+singleRowArray = [5, 3, 4, 5, 3]
 multipleRowArray = [[5.0, 4.0, 3.0, 2.0, 1.0],
                    [2.0, 3.0, 4.0, 5.0, 6.0 ],
                    [1.0, 3.0, 2.0, 5.0, 4.0]]
@@ -48,8 +48,8 @@ class Test(unittest.TestCase):
 # test for all functions with same name
     def testfindMean(self):
         self.assertAlmostEqual([], findMean(emptyArray))
-        self.assertAlmostEqual([4.0], findMean(singleRowArray))
-        self.assertAlmostEqual([3.0, 4.0, 3.0], findMean(multipleRowArray))
+        self.assertAlmostEqual(4.0, findMean(singleRowArray))
+#         self.assertAlmostEqual([3.0, 4.0, 3.0], findMean(multipleRowArray))
         
         # Maybe throw an error?
         # self.assertAlmostEqual([None, None, None], findMean(containingNoneArray))
