@@ -10,6 +10,7 @@ from typing import List
 from climatechange.headers import Header, HeaderType
 import numpy as np
 import pandas
+from climatechange.find_index_by_increments import resample_by_inc
 
 
 # dataframetolist
@@ -102,5 +103,7 @@ def compile_stats_by_year(df:DataFrame, headers: Header, yc:str, sc:str, inc_amt
       
     
     print(pandas.concat([year_column, sample_column], axis=1).values)
+    resampled_data=resample_by_inc(pandas.concat([year_column, sample_column], axis=1), inc_amt)
+    print (resampled_data)
     
     return df
