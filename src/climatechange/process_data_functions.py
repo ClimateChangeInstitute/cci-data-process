@@ -95,7 +95,7 @@ def create_pdf(f:str):
     # Plot all of the raw data
     # year vs each element
     # depth vs each element
-    plot.create_pdf(df, f + '.out.pdf')
+    plot.create_pdf(df, headers, f + '.out.pdf')
 
     write_resampled_data_to_csv_files(df_resampled_stats)
     
