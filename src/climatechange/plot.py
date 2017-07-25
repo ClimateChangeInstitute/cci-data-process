@@ -118,5 +118,50 @@ def create_pdf(df:DataFrame, headers: List[Header], file_name:str, bar_header:st
     
     
 
+
+def create_single_pdf(df:DataFrame,
+               year_name:str,
+               sample_name:str,
+               rdf:DataFrame,
+               file_name:str, 
+               bar_year_header:str='Year',
+               bar_header:str='Mean') -> str:
+    '''
+    Create a pdf file with multiple plots based on the data frame.
+    :param df: The data frame
+    :param file_name: The absolute path of the file
+    :return: The file path of the created PDF
+    '''
+    
+    with PdfPages(file_name) as pdf:
+    
+        plt.figure(figsize=(11, 8.5))
+        fig, tg = plt.subplots(1)
+        ax = rdf[[bar_year_header, bar_header]].plot(x=bar_year_header, kind='bar', ax=tg)
+        ax = df[[year_name, sample_name]].plot(x=year_name, kind='line',
+                                               linestyle='-',
+                                               marker='o',
+                                               ax=tg)
+        vals = ax.get_xticks()
+        ax.set_xticklabels(['{:.1f}'.format(x) for x in vals])
+        
+        plt.title('%s of %s' % (bar_header, sample_name))
+        plt.xlabel(year_name)
+        plt.ylabel(sample_name)
+        plt.legend()
+
+        pdf.savefig(fig)
+        plt.close()
+                
+        # Meta data for the PdfPages
+        d = pdf.infodict()
+        d['Title'] = 'CCI Plot'
+        d['Author'] = u'Some author'
+        d['Subject'] = 'CCI Data Parser output'
+        d['Keywords'] = 'CCI UMaine'
+        d['CreationDate'] = datetime.datetime.today()
+        d['ModDate'] = datetime.datetime.utcnow()
+
+
 if __name__ == '__main__':
     examplePDFPlot('test.pdf')
