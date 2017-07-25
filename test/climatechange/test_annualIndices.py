@@ -4,9 +4,10 @@ Created on Jul 18, 2017
 @author: Heather
 '''
 import unittest
-from climatechange.find_index_by_increments import find_indices
-from climatechange.find_index_by_increments import find_index_by_increment
-from climatechange.find_index_by_increments import create_range_by_inc
+
+from climatechange.resampleStats import create_range_by_inc, find_indices, \
+    find_index_by_increment
+
 
 lst=[6, 9, 23, 3, 2, 8, 9, 3, 5]
 years=[2011.6,2011.2,2011,2010.6,2010.2,2010,2009,2008.4,2008.1]
@@ -41,9 +42,6 @@ class Test(unittest.TestCase):
         ytop,ind=find_index_by_increment(years, inc)
         self.assertEqual([2008,2009,2010,2011], ytop)
         self.assertEqual([[7,8],[6],[3,4,5],[0,1,2]], ind) 
-        
-    def test_resample_by_inc(self):   
-          pass
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
