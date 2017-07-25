@@ -43,7 +43,7 @@ class Test(unittest.TestCase):
         self.assertEqual([[7,8],[6],[3,4,5],[0,1,2]], ind) 
         
     def test_resample_by_inc(self):   
-          
+          pass
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

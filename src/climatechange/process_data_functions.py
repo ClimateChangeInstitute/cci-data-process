@@ -58,22 +58,12 @@ def clean_data(df):
     return df
 
 
-def create_statistics(df: DataFrame, headers: List[Header]) -> DataFrame:
+def create_statistics(df: DataFrame, headers: List[Header], year:str, sample:str) -> DataFrame:
+    return compile_stats_by_year(df, headers, year, sample)
     
-#     result = resampleStats.compileStats(df.values.tolist())
-#     print("Rows is %d " % len(result))
-#     print("Columns is %d " % len(result[0]))
-    
-    compile_stats_by_year(df, headers, 'Dat210617', 'Na (ppb)')
-    
-    return df
-#     return DataFrame(data=resampleStats.compileStats(df.values.tolist()),
-#                      index=df.index,
-#                      columns=df.columns)
 
-
-def write_resampled_data_to_csv_files(df):
-    pass
+def write_resampled_data_to_csv_files(df:DataFrame, file_path:str):
+    df.to_csv(file_path)
 
 
 def create_pdf(f:str):
@@ -89,15 +79,20 @@ def create_pdf(f:str):
 
     df = clean_data(df)
 
-    df_resampled_stats = create_statistics(df, headers)
+    year_headers = [h.original_value for h in headers if h.htype == HeaderType.YEARS]
+
+    depth_headers = [h.original_value for h in headers if h.htype == HeaderType.DEPTH]
+
+    sample_headers = [h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
+
+    for y in year_headers:
+        for s in sample_headers:
+            df_resampled_stats = create_statistics(df, headers, y, s)
+
+#             plot.create_pdf(df, df_resampled_stats, headers, f + ('.out.%s.pdf' % s))
+            write_resampled_data_to_csv_files(df_resampled_stats, f + ('.out.%s.%s.csv' % (y, s.replace("/",""))))
     
-
-    # Plot all of the raw data
-    # year vs each element
-    # depth vs each element
-    plot.create_pdf(df, headers, f + '.out.pdf')
-
-    write_resampled_data_to_csv_files(df_resampled_stats)
+    
     
 def main(files):
     

@@ -29,9 +29,6 @@ def examplePDFPlot(file_name:str):
         
         df_indexed:DataFrame = df.set_index(xaxisLabel)
                 
-        
-        print(df_indexed.index.name)
-                
         for i in range(len(ys)):
             fig = plt.figure(figsize=(11, 8.5))
             
@@ -39,8 +36,6 @@ def examplePDFPlot(file_name:str):
 #             ax = df_indexed.plot(x=df_indexed.index.name, y=ys[i], kind='bar', ax=tg)
 #             
 #             vals = ax.get_xticks()
-#             print(vals)
-#             print(['{:.2f}'.format(x) for x in vals])
 #             ax.set_xticklabels(['{:.2f}'.format(x) for x in vals])
             
             ax = df[['depth (m we) ', ys[i]]].plot(x='depth (m we) ', kind='bar', ax=tg, color='C%d' % (i))
@@ -72,12 +67,12 @@ def examplePDFPlot(file_name:str):
         
 
 
-def add_plot_to_pdf(pdf, df, year_headers, sample_headers, count):
+def add_plot_to_pdf(pdf, df, bar_header, year_headers, sample_headers, count):
     for y in year_headers:
         for s in sample_headers:
             plt.figure(figsize=(11, 8.5))
             fig, tg = plt.subplots(1)
-            ax = df[[y, 'Na (ppb)']].plot(x=y, kind='bar', ax=tg, color='C%d' % (count%10))
+            ax = df[[y, bar_header]].plot(x=y, kind='bar', ax=tg, color='C%d' % (count%10))
             count += 1
             ax = df[[s]].plot(kind='line', linestyle='-', marker='o', ax=ax, color='C%d' % (count%10))
             count += 1
@@ -90,7 +85,7 @@ def add_plot_to_pdf(pdf, df, year_headers, sample_headers, count):
     
             pdf.savefig(fig)
 
-def create_pdf(df:DataFrame, headers: List[Header], file_name:str) -> str:
+def create_pdf(df:DataFrame, headers: List[Header], file_name:str, bar_header:str='Mean') -> str:
     '''
     Create a pdf file with multiple plots based on the data frame.
     :param df: The data frame
@@ -105,9 +100,9 @@ def create_pdf(df:DataFrame, headers: List[Header], file_name:str) -> str:
         
         sample_headers:List[str] = [h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
         
-        add_plot_to_pdf(pdf, df, year_headers, sample_headers, 1)
+        add_plot_to_pdf(pdf, df, bar_header, year_headers, sample_headers, 1)
         offset = len(year_headers)
-        add_plot_to_pdf(pdf, df, depth_headers, sample_headers, offset)
+        add_plot_to_pdf(pdf, df, bar_header, depth_headers, sample_headers, offset)
         
         plt.close()
             
