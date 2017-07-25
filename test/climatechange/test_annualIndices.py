@@ -4,17 +4,17 @@ Created on Jul 18, 2017
 @author: Heather
 '''
 import unittest
+from climatechange.find_index_by_increments import find_indices
+from climatechange.find_index_by_increments import find_index_by_increment
+from climatechange.find_index_by_increments import create_range_by_inc
 # import os
 
-from climatechange.annualIndices import increments_by_year
-from climatechange.annualIndices import find_indices
-from climatechange.annualIndices import index_by_year
 # from climatechange.file import get_data_frame_from_csv
-
 
 
 lst=[6, 9, 23, 3, 2, 8, 9, 3, 5]
 years=[2011.6,2011.2,2011,2010.6,2010.2,2010,2009,2008.4,2008.1]
+inc=1
 
 # for i in list(frame.column.values)
 #     for list of names in header_dict.json
@@ -41,8 +41,8 @@ class Test(unittest.TestCase):
     def testName(self):
         pass
 
-    def test_increments_by_year(self):
-        j,k=increments_by_year(years)
+    def test_create_range_by_inc(self):
+        j,k=create_range_by_inc(years)
         self.assertEqual([2008,2009, 2010, 2011],j)
         self.assertEqual([2009, 2010,2011,2012],k)
 
@@ -52,7 +52,7 @@ class Test(unittest.TestCase):
         self.assertEqual([2],t,'value should be 3')
 
     def test_index_by_year(self):
-        ytop,ind=index_by_year(years)
+        ytop,ind=find_index_by_increment(lst, inc)
         self.assertEqual([2008,2009,2010,2011], ytop, 'no')
         self.assertEqual([[7,8],[6],[3,4,5],[0,1,2]], ind, 'no')      
         
