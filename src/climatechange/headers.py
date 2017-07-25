@@ -175,7 +175,7 @@ class HeaderDictionary(object):
         return self.unit_dictionary
     
         
-    def parse_headers(self, rawHeaders:List[str]) -> List[Tuple[str]]:
+    def parse_headers(self, rawHeaders:List[str]) -> List[Header]:
         '''
         Convert a list of raw header names into a list containing header 
         objects.  For example, the headers

@@ -5,16 +5,18 @@ Created on Jul 24, 2017
 '''
 
 from pandas.core.frame import DataFrame
+from typing import List
 
 import numpy
 
 from climatechange import plot, resampleStats
 from climatechange.file import load_csv
-from climatechange.headers import HeaderDictionary, HeaderType
+from climatechange.headers import HeaderDictionary, HeaderType, Header
 from climatechange.lstDataframe import lstToDataframe
+from climatechange.resampleStats import compile_stats_by_year
 
 
-def process_header_data(df):
+def process_header_data(df) -> List[Header]:
     
     hd = HeaderDictionary()
     
@@ -22,10 +24,10 @@ def process_header_data(df):
     
     unknownHeaders = [ h for h in parsedHeaders if h.htype == HeaderType.UNKNOWN ]
     
-    print("All headers are: %s" % parsedHeaders)
-    print("Unknown headers are: %s" % unknownHeaders)
+#     print("All headers are: %s" % parsedHeaders)
+#     print("Unknown headers are: %s" % unknownHeaders)
     
-    return df
+    return parsedHeaders
 
 def is_number(s):
     try:
@@ -56,11 +58,13 @@ def clean_data(df):
     return df
 
 
-def create_statistics(df: DataFrame) -> DataFrame:
+def create_statistics(df: DataFrame, headers: List[Header]) -> DataFrame:
     
-    result = resampleStats.compileStats(df.values.tolist())
-    print("Rows is %d " % len(result))
-    print("Columns is %d " % len(result[0]))
+#     result = resampleStats.compileStats(df.values.tolist())
+#     print("Rows is %d " % len(result))
+#     print("Columns is %d " % len(result[0]))
+    
+    compile_stats_by_year(df, headers, 'Dat210617', 'Na (ppb)')
     
     return df
 #     return DataFrame(data=resampleStats.compileStats(df.values.tolist()),
@@ -81,11 +85,11 @@ def create_pdf(f:str):
     
     df = load_csv(f)
     
-    df = process_header_data(df)
+    headers = process_header_data(df)
 
     df = clean_data(df)
 
-    df_resampled_stats = create_statistics(df)
+    df_resampled_stats = create_statistics(df, headers)
     
 
     # Plot all of the raw data

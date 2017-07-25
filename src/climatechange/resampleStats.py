@@ -4,12 +4,16 @@ Created on Jul 13, 2017
 :author: Heather
 '''
 
-import numpy as np
+from pandas.core.frame import DataFrame
 from typing import List
+
+from climatechange.headers import Header, HeaderType
+import numpy as np
+import pandas
+
 
 # dataframetolist
 # matplotlib- graph age by depth
-
 def findMean(array:List[List[float]]) -> List[float]:
     '''
     find mean value of each list within a list
@@ -65,4 +69,38 @@ def compileStats(array:List[List[float]]) -> List[List[float]]:
     :return: list of statistics for each list
     '''
 #     result=[findMean(array), findMedian(array), findMax(array), findMin(array), findStd(array), findLen(array)]
-    return [ list(x) for x in zip(findMean(array), findMedian(array), findMax(array), findMin(array), findStd(array), findLen(array))]
+    return [ list(x) for x in zip(findMean(array),
+                                  findMedian(array),
+                                  findMax(array),
+                                  findMin(array),
+                                  findStd(array),
+                                  findLen(array))]
+
+
+def compile_stats_by_year(df:DataFrame, headers: Header, yc:str, sc:str, inc_amt:int=1) -> DataFrame:
+    '''
+    From the given data frame compile statistics (mean, median, min, max, etc) 
+    based on the parameters.
+    
+    :param df: The data to compile sats for
+    :param yc: The year column to use for indexing
+    :param sc: The sample compile to create statistics about
+    :param inc_amt: The amount to group the year column by.  For example, 
+        2012.6, 2012.4, 2012.2 would all be grouped into the year 2012.
+    :return: A new DataFrame containing the resampled statistics for the 
+    specified sample and year.
+    '''
+    
+    year_column = df.loc[:,yc]
+    sample_column = df.loc[:,sc]
+    
+    depth_column_header = [ h.original_value for h in headers if h.htype == HeaderType.DEPTH ]
+    depth_columns = []
+    for c in df.columns:
+        if c in depth_column_header:
+            depth_columns.append(df.loc[:,c])
+      
+    
+    print(pandas.concat([year_column, sample_column], axis=1).values)
+    
+    return df

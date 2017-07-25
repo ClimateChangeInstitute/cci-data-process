@@ -3,6 +3,8 @@ Created on Jul 18, 2017
 
 @author: Heather
 '''
+from typing import List, Tuple
+
 
 def create_range_by_inc(lst,inc):
     #creates lists of years incrementally by input of increment
@@ -13,9 +15,16 @@ def find_indices(lst,condition):
     #find indices of the specific condition called
     return [j for j, elem in enumerate(lst) if condition(elem)]
 
-def find_index_by_increment(lst,inc):
+def find_index_by_increment(lst:List[float],inc:int) -> Tuple[int, List[List[int]]]:
+    '''
+    
+    :param lst:
+    :param inc:
+    '''
     ytop,ybot=create_range_by_inc(lst,inc)
-    return [ytop,[find_indices(lst,lambda e: e>=ytop[i] and e<ybot[i]) for i in range(0,len(ytop))]]
+    return (ytop,
+            [find_indices(lst,
+                          lambda e: e>=ytop[i] and e<ybot[i]) for i in range(0,len(ytop))])
 
 
     
