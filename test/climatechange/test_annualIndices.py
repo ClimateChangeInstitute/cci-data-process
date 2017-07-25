@@ -42,7 +42,7 @@ class Test(unittest.TestCase):
         pass
 
     def test_create_range_by_inc(self):
-        j,k=create_range_by_inc(years)
+        j,k=create_range_by_inc(years,inc)
         self.assertEqual([2008,2009, 2010, 2011],j)
         self.assertEqual([2009, 2010,2011,2012],k)
 
@@ -52,9 +52,9 @@ class Test(unittest.TestCase):
         self.assertEqual([2],t,'value should be 3')
 
     def test_index_by_year(self):
-        ytop,ind=find_index_by_increment(lst, inc)
-        self.assertEqual([2008,2009,2010,2011], ytop, 'no')
-        self.assertEqual([[7,8],[6],[3,4,5],[0,1,2]], ind, 'no')      
+        ytop,ind=find_index_by_increment(years, inc)
+        self.assertEqual([2008,2009,2010,2011], ytop)
+        self.assertEqual([[7,8],[6],[3,4,5],[0,1,2]], ind)      
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
