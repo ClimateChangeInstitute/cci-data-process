@@ -12,18 +12,18 @@ import numpy as np
 import pandas
 
 
-def create_range_by_inc(lst,inc):
+def create_range_by_inc(list_to_inc:List[float],inc_amt: int=1) -> List[float]:
     #creates lists of years incrementally by input of increment
-    #lst must be Years
-    return [x for x in range(int(min(lst)),int(max(lst))+1,inc)], [x+1 for x in range(int(min(lst)),int(max(lst))+1,inc)]
+    #list_years must be Years
+    return [x for x in range(int(min(list_to_inc)),int(max(list_to_inc))+1,inc_amt)], [x+1 for x in range(int(min(list_to_inc)),int(max(list_to_inc))+1,inc_amt)]
 
-def find_indices(lst,condition):
+def find_indices(list_to_inc,condition):
     #find indices of the specific condition called
-    return [j for j, elem in enumerate(lst) if condition(elem)]
+    return [j for j, elem in enumerate(list_to_inc) if condition(elem)]
 
-def find_index_by_increment(lst,inc):
-    ytop,ybot=create_range_by_inc(lst,inc)
-    return [ytop,[find_indices(lst,lambda e: e>=ytop[i] and e<ybot[i]) for i in range(0,len(ytop))]]
+def find_index_by_increment(list_to_inc,inc):
+    ytop,ybot=create_range_by_inc(list_to_inc,inc)
+    return [ytop,[find_indices(list_to_inc,lambda e: e>=ytop[i] and e<ybot[i]) for i in range(0,len(ytop))]]
 
 def create_depth_headers(list_headers: List[str])-> List[str]:
     '''
@@ -68,7 +68,6 @@ def resample_by_inc(df_year_sample:DataFrame,
     df_depth=DataFrame(append_depth,columns=create_depth_headers(depth_column_headers))
     # find name of depths resampled by
     df_stats=DataFrame(appended_data,columns=['Mean','Median','Max','Min','Stdv','Count'])
-    print(pandas.concat([df_years,df_depth,df_stats], axis=1))
     return pandas.concat([df_years,df_depth,df_stats], axis=1)
 
 
