@@ -40,14 +40,17 @@ def create_depth_headers(list_headers: List[str])-> List[str]:
     
     return result
 
-def resample_by_inc(df,depth_columns,inc_amt):
+def resample_by_inc(df_year_sample:DataFrame,
+                    yc:str,
+                    depth_columns:DataFrame,
+                    depth_column_headers:List[str],
+                    inc_amt: int=1) -> DataFrame:
     '''
     
     :param df:
     :param inc:
     '''
-    print('function start')
-    years,ind=find_index_by_increment(df.iloc[:,0].values.tolist(),inc_amt)
+    years,ind=find_index_by_increment(df_year_sample.iloc[:,0].values.tolist(),inc_amt)
     appended_data=[]
     append_depth=[]
     for i in ind:
@@ -59,12 +62,13 @@ def resample_by_inc(df,depth_columns,inc_amt):
             combined.append(min_depth.iloc[j])
             combined.append(max_depth.iloc[j])
         append_depth.append(combined)
-        appended_data.extend(compileStats(df.iloc[i,[1]].transpose().values.tolist()))
-    df_years=DataFrame(years, columns=['Year'])
+        appended_data.extend(compileStats(df_year_sample.iloc[i,[1]].transpose().values.tolist()))
+    df_years=DataFrame(years, columns=[yc])
     # find name of year resampled by
-    df_depth=DataFrame(append_depth)
+    df_depth=DataFrame(append_depth,columns=create_depth_headers(depth_column_headers))
     # find name of depths resampled by
     df_stats=DataFrame(appended_data,columns=['Mean','Median','Max','Min','Stdv','Count'])
+    print(pandas.concat([df_years,df_depth,df_stats], axis=1))
     return pandas.concat([df_years,df_depth,df_stats], axis=1)
 
 
@@ -148,10 +152,9 @@ def compile_stats_by_year(df:DataFrame, headers: Header, yc:str, sc:str, inc_amt
     year_column = df.loc[:,yc]
     sample_column = df.loc[:,sc]
     
-    depth_column_header = [ h.original_value for h in headers if h.htype == HeaderType.DEPTH ]
-    depth_columns=DataFrame([df.loc[:,c].values.tolist() for c in df.columns if c in depth_column_header]).transpose()
-    df=pandas.concat([year_column, sample_column], axis=1)
-    resampled_data=resample_by_inc(df,depth_columns,inc_amt)
-#     print (resampled_data)
+    depth_column_headers = [ h.original_value for h in headers if h.htype == HeaderType.DEPTH ]
+    depth_columns=DataFrame([df.loc[:,c].values.tolist() for c in df.columns if c in depth_column_headers]).transpose()
+    df_year_sample=pandas.concat([year_column, sample_column], axis=1)
+    resampled_data=resample_by_inc(df_year_sample,yc,depth_columns,depth_column_headers,inc_amt)
     
     return resampled_data
