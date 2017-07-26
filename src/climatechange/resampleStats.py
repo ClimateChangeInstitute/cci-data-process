@@ -25,7 +25,21 @@ def find_index_by_increment(lst,inc):
     ytop,ybot=create_range_by_inc(lst,inc)
     return [ytop,[find_indices(lst,lambda e: e>=ytop[i] and e<ybot[i]) for i in range(0,len(ytop))]]
 
-        
+def create_depth_headers(list_headers: List[str])-> List[str]:
+    '''
+    Expected output should look like
+    
+    ['top depth (m we)','bottom depth (m we)','top depth (m abs)','bottom depth (m abs)']
+
+    :param list_headers: list of headers, example: ['depth (m we)','depth (m abs)']
+    '''
+    result = []
+    for i in list_headers:
+        result.append('top ' + i)
+        result.append('bottom ' + i)
+    
+    return result
+
 def resample_by_inc(df,depth_columns,inc_amt):
     '''
     
@@ -51,7 +65,6 @@ def resample_by_inc(df,depth_columns,inc_amt):
     df_depth=DataFrame(append_depth)
     # find name of depths resampled by
     df_stats=DataFrame(appended_data,columns=['Mean','Median','Max','Min','Stdv','Count'])
-    print(pandas.concat([df_years,df_depth,df_stats], axis=1))
     return pandas.concat([df_years,df_depth,df_stats], axis=1)
 
 

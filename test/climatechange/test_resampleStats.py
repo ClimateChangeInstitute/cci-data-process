@@ -3,19 +3,20 @@ Created on Jul 13, 2017
 
 @author: Heather
 '''
+import os
 import unittest
-from climatechange.resampleStats import findMean
-from climatechange.resampleStats import findMedian
+
+from climatechange.file import load_csv
+from climatechange.resampleStats import compileStats
+from climatechange.resampleStats import findLen
 from climatechange.resampleStats import findMax
+from climatechange.resampleStats import findMean, create_depth_headers
+from climatechange.resampleStats import findMedian
 from climatechange.resampleStats import findMin
 from climatechange.resampleStats import findStd
-from climatechange.resampleStats import findLen
-from climatechange.resampleStats import compileStats
-from climatechange.file import load_csv
-import os
+
 
 # list of values by column, first index is column index, for each you get element of row 
-
 emptyArray = []
 singleRowArray = [[5, 3, 4, 5, 3]]
 multipleRowArray = [[5.0, 4.0, 3.0, 2.0, 1.0],
@@ -110,7 +111,18 @@ class Test(unittest.TestCase):
         self.assertAlmostEqual(small_output,
                                compileStats(frame.transpose().values.tolist()))
         
-
+    def test_create_depth_headers(self):
+        input=['depth (m we)','depth (m abs)']
+        input_empty=[]
+        expected_output=['top depth (m we)','bottom depth (m we)','top depth (m abs)','bottom depth (m abs)']
+        result=create_depth_headers(input)
+        result_empty=create_depth_headers(input_empty)
+        self.assertListEqual(expected_output, result)
+        self.assertListEqual([],result_empty)
+        
+        
+        
+        
         
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
