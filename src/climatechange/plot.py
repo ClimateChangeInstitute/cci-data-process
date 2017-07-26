@@ -137,7 +137,7 @@ def create_single_pdf(df:DataFrame,
     
         plt.figure(figsize=(11, 8.5))
         fig, tg = plt.subplots(1)
-        ax = rdf[[bar_year_header, bar_header]].plot(x=bar_year_header, kind='bar', ax=tg)
+        ax = rdf[[bar_year_header, bar_header]].plot(x=bar_year_header, kind='line', ax=tg)
         ax = df[[year_name, sample_name]].plot(x=year_name, kind='line',
                                                linestyle='-',
                                                marker='o',

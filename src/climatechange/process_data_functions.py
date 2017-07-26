@@ -89,7 +89,7 @@ def create_pdf(f:str):
         for s in sample_headers:
             df_resampled_stats = create_statistics(df, headers, y, s)
 
-            plot.create_single_pdf(df, y, s, df_resampled_stats, f + ('.out.%s.%s.pdf' % (y, s.replace("/",""))))
+            plot.create_single_pdf(df, y, s, df_resampled_stats, f + ('.out.%s.%s.pdf' % (y, s.replace("/",""))),bar_year_header=y)
             write_resampled_data_to_csv_files(df_resampled_stats, f + ('.out.%s.%s.csv' % (y, s.replace("/",""))))
     
     
