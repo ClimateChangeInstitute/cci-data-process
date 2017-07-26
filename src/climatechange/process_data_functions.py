@@ -66,7 +66,7 @@ def write_resampled_data_to_csv_files(df:DataFrame, file_path:str):
     df.to_csv(file_path)
 
 
-def create_pdf(f:str):
+def resample_by_years(f:str):
     '''
     
     :param: f: This is a CSV file
@@ -97,5 +97,5 @@ def create_pdf(f:str):
 def main(files):
     
     for f in files:
-        create_pdf(f)
+        resample_by_years(f)
     

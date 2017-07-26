@@ -85,7 +85,7 @@ def add_plot_to_pdf(pdf, df, bar_header, year_headers, sample_headers, count):
     
             pdf.savefig(fig)
 
-def create_pdf(df:DataFrame, headers: List[Header], file_name:str, bar_header:str='Mean') -> str:
+def resample_by_years(df:DataFrame, headers: List[Header], file_name:str, bar_header:str='Mean') -> str:
     '''
     Create a pdf file with multiple plots based on the data frame.
     :param df: The data frame
