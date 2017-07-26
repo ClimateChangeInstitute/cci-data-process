@@ -1,14 +1,6 @@
 climatechange package
 =====================
 
-climatechange\.annualIndices module
------------------------------------
-
-.. automodule:: climatechange.annualIndices
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 climatechange\.file module
 --------------------------
 
@@ -21,14 +13,6 @@ climatechange\.headers module
 -----------------------------
 
 .. automodule:: climatechange.headers
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-climatechange\.lstDataframe module
------------------------------------
-
-.. automodule:: climatechange.lstDataframe
     :members:
     :undoc-members:
     :show-inheritance:
