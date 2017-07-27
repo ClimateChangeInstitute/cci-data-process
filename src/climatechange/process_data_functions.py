@@ -65,9 +65,19 @@ def create_statistics(df: DataFrame, headers: List[Header], year:str, sample:str
 def write_resampled_data_to_csv_files(df:DataFrame, file_path:str):
     df.to_csv(file_path)
 
-
 def resample_by_years(f:str):
     '''
+    Resampler by Years
+    a. Input: dataset with years, depths, samples
+    
+    $ PYTHONPATH=. python climatechange/process_data.py -y ../test/csv_files/small.csv
+
+    a. Output: csv file with statistics for each sample by years
+
+    i. Pdf of statistics by years with raw data
+
+    1. Mean w/ raw, median w/ raw (by years) on same plot for each year column
+    have 1 pdf with mean and median for each sample
     
     :param: f: This is a CSV file
     '''
@@ -92,6 +102,57 @@ def resample_by_years(f:str):
             plot.create_single_pdf(df, y, s, df_resampled_stats, f + ('.out.%s.%s.pdf' % (y, s.replace("/",""))),bar_year_header=y)
             write_resampled_data_to_csv_files(df_resampled_stats, f + ('.out.%s.%s.csv' % (y, s.replace("/",""))))
     
+    
+def resample_by_depths(f:str):
+    '''
+    Resampler by Depths
+    
+    a. Input: dataset with years, depths, samples
+    b. $ PYTHONPATH=. python climatechange/process_data.py -d ../test/csv_files/small.csv
+    c. Output: csv file with statistics for each sample by depths
+
+    i. Pdf of statistics by depths with raw data
+    
+    1. Mean w/ raw, median w/ raw (by depths) on same plot for each year column
+    have 1 pdf with mean and median for each sample
+    
+    :param f:
+    '''
+    pass
+    
+def double_resample_by_depths(f1:str, f2:str):
+    '''
+    Double Resampler by Depths
+
+    a. Input: two datasets with corresponding years, depths, samples
+    b. $ PYTHONPATH=. python climatechange/process_data.py -dd ../test/csv_files/small.csv
+    ../test/csv_files/small2.csv
+    c. Output: correlation between raw data and statistics of the same samples in both datasets
+    i. Pdf of correlation between same samples
+    
+    :param f1:
+    :param f2:
+    '''
+    
+def double_resample_by_depth_intervals(f1:str, f2:str):
+    '''
+    
+    Double Resampler by Depth Intervals
+
+    a. Input: two datasets with corresponding years, depths, samples
+    b. $ PYTHONPATH=. python climatechange/process_data.py -di ../test/csv_files/small.csv
+        ../test/csv_files/small2.csv
+
+    i. Take depth intervals of one dataset and resample second dataset by first dataset
+    depth intervals
+    b. Output: correlation between raw data and statistics of the same samples in both datasets
+
+    i. Pdf of correlation between same samples
+    
+    :param f1:
+    :param f2:
+    '''
+    pass
     
     
 def main(files):

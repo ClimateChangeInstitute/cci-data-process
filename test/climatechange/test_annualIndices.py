@@ -3,22 +3,24 @@ Created on Jul 18, 2017
 
 @author: Heather
 '''
+import os
 import unittest
 
-from climatechange.resampleStats import create_range_by_inc
-from climatechange.resampleStats import find_indices
-from climatechange.resampleStats import find_index_by_increment
-from climatechange.resampleStats import resampled_years
-from climatechange.resampleStats import resampled_depths_by_years
-from climatechange.resampleStats import resampled_statistics_by_years
 from pandas import DataFrame
 from pandas.util.testing import assert_frame_equal
+
 from climatechange.file import load_csv
+from climatechange.resampleStats import create_range_by_inc
+from climatechange.resampleStats import find_index_by_increment
+from climatechange.resampleStats import find_indices
+from climatechange.resampleStats import resampled_depths_by_years
+from climatechange.resampleStats import resampled_statistics_by_years
+from climatechange.resampleStats import resampled_years
 import pandas as pd
-from anaconda_project.internal.conda_api import result
- 
-frame = load_csv('/Users/Heather/Documents/GitHub/cci-data-process/test/csv_files/small.csv')
-out_frame= load_csv('/Users/Heather/Documents/GitHub/cci-data-process/test/csv_files/output_test_small.Dat210617.Na(ppb).csv')
+
+
+frame = load_csv(os.path.join('csv_files','small.csv'))
+out_frame= load_csv(os.path.join('csv_files','output_test_small.Dat210617.Na(ppb).csv'))
 lst=frame.transpose().values.tolist()
 years=frame.loc[:,'Dat210617']
 data=frame.loc[:,'Na (ppb)']
