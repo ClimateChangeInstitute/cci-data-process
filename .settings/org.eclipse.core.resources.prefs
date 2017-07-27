@@ -1,2 +1,3 @@
 eclipse.preferences.version=1
 encoding//src/climatechange/process_data.py=utf-8
+encoding//test/climatechange/test_find_index_by_inc.py=utf-8
