@@ -6,17 +6,29 @@ Created on Jul 13, 2017
 import os
 import unittest
 
+from pandas.core.frame import DataFrame
+from pandas.util.testing import assert_frame_equal
+import numpy as np
+import pandas as pd
 from climatechange.file import load_csv
-from climatechange.resampleStats import compileStats
+from climatechange.plot import resample_by_years
+from climatechange.process_data_functions import create_statistics, \
+    process_header_data, write_resampled_data_to_csv_files, clean_data
+from climatechange.resampleStats import compileStats, compile_stats_by_year,\
+    resampled_by_inc_years, find_index_by_increment, resampled_depths_by_years,\
+    create_range_by_inc
 from climatechange.resampleStats import findLen
 from climatechange.resampleStats import findMax
 from climatechange.resampleStats import findMean, create_depth_headers
 from climatechange.resampleStats import findMedian
 from climatechange.resampleStats import findMin
 from climatechange.resampleStats import findStd
+from climatechange.headers import HeaderDictionary,HeaderType, Header
+
 
 
 # list of values by column, first index is column index, for each you get element of row 
+inc_amt=1
 emptyArray = []
 singleRowArray = [[5, 3, 4, 5, 3]]
 multipleRowArray = [[5.0, 4.0, 3.0, 2.0, 1.0],
@@ -51,6 +63,10 @@ class Test(unittest.TestCase):
         self.assertAlmostEqual([], findMean(emptyArray))
         self.assertAlmostEqual([4.0], findMean(singleRowArray))
 #         self.assertAlmostEqual([3.0, 4.0, 3.0], findMean(multipleRowArray))
+        
+        str_input=[['f','r','6']]
+        self.assertRaises(TypeError, findMean, str_input)
+
         
         # Maybe throw an error?
         # self.assertAlmostEqual([None, None, None], findMean(containingNoneArray))
@@ -120,6 +136,81 @@ class Test(unittest.TestCase):
         self.assertListEqual(expected_output, result)
         self.assertListEqual([],result_empty)
         
+    def test_clean_data(self):
+        input_test=DataFrame([['str', 0, 1],[4, 5, 6],[7, 'str', 0]])
+        expected_output=DataFrame([[np.nan, np.nan, 1],[4, 5, 6],[7, np.nan, np.nan]])
+        result=clean_data(input_test)
+        
+        try:
+            assert_frame_equal(expected_output, result)
+            return True
+        except AssertionError:
+            return False
+    
+    def test_create_range_by_inc(self):
+        expected_output=[2011]
+        input_test = load_csv(os.path.join('csv_files','input_test_zeros_and_numbers.csv'))
+        input_test = clean_data(input_test)
+        result=create_range_by_inc(input_test.loc[:,'Dat210617'].values.tolist(),inc_amt)
+        self.assertEqual(expected_output,result)  
+          
+    def test_index_by_increment(self):
+        expected_output=[list(range(0,871,inc_amt))]
+        input_test = load_csv(os.path.join('csv_files','input_test_zeros_and_numbers.csv'))
+        index=find_index_by_increment(input_test.loc[:,'Dat210617'].values.tolist(), inc_amt)
+        self.assertEqual(expected_output, index)
+    
+    def test_resampled_depths_by_years(self):
+#         expected_result = load_csv(os.path.join('csv_files','output_test_zeros_and_numbers.csv')) 
+         
+        input_test = load_csv(os.path.join('csv_files','input_test_zeros_and_numbers.csv'))
+        input_test = clean_data(input_test)
+        
+        headers = process_header_data(input_test)
+        depth_column_headers = [ h.original_value for h in headers if h.htype == HeaderType.DEPTH ]
+        depth_columns=DataFrame([input_test.loc[:,c].values.tolist() for c in input_test.columns if c in depth_column_headers]).transpose()
+
+        expected_result=DataFrame([[0.593488372],[0.916582279],[1.61],[2.48]]).transpose()
+        expected_result.columns=['top depth (m we) ','bottom depth (m we) ','top depth (m abs)','bottom depth (m abs)']
+        df_year_sample=pd.concat([input_test.loc[:,'Dat210617'], input_test.loc[:,'Cond (+ALU-S/cm)']], axis=1)
+        index=find_index_by_increment(df_year_sample.iloc[:,0].values.tolist(),inc_amt)       
+        result=resampled_depths_by_years(df_year_sample, index, depth_columns, depth_column_headers)
+        assert_frame_equal(expected_result,result)
+        
+    def test_resampled_by_inc_years(self): 
+        expected_result = load_csv(os.path.join('csv_files','output_test_zeros_and_numbers.csv')) 
+        input_test = load_csv(os.path.join('csv_files','input_test_zeros_and_numbers.csv'))
+        input_test=clean_data(input_test)
+        headers = process_header_data(input_test)
+        depth_column_headers = [ h.original_value for h in headers if h.htype == HeaderType.DEPTH ]
+        depth_columns=DataFrame([input_test.loc[:,c].values.tolist() for c in input_test.columns if c in depth_column_headers]).transpose()
+        df_year_sample=pd.concat([input_test.loc[:,'Dat210617'], input_test.loc[:,'Cond (+ALU-S/cm)']], axis=1)
+        result=resampled_by_inc_years(df_year_sample,'Dat210617',depth_columns,depth_column_headers,inc_amt)
+        assert_frame_equal(expected_result, result)
+        
+    def test_compile_stats_by_year(self):
+        input_test = load_csv(os.path.join('csv_files','input_test_zeros_and_numbers.csv'))
+        input_test=clean_data(input_test)
+        expected_result = load_csv(os.path.join('csv_files','output_test_zeros_and_numbers.csv')) 
+        headers = process_header_data(input_test)
+        result=compile_stats_by_year(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)', inc_amt)
+        assert_frame_equal(expected_result, result)
+        
+    def test_empty_rows(self):
+        expected_result = load_csv(os.path.join('csv_files','output_test_zeros.csv')) 
+        input_test = load_csv(os.path.join('csv_files','input_test_zeros.csv'))
+        input_test = clean_data(input_test)
+        headers = process_header_data(input_test)
+        result = create_statistics(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)')
+        assert_frame_equal(expected_result, result)
+         
+    def test_partial_empty_rows(self):
+        input_test = load_csv(os.path.join('csv_files','input_test_zeros_and_numbers.csv'))
+        input_test = clean_data(input_test)
+        expected_result = load_csv(os.path.join('csv_files','output_test_zeros_and_numbers.csv'))   
+        headers = process_header_data(input_test)
+        result = create_statistics(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)')
+        assert_frame_equal(expected_result, result)
         
         
         

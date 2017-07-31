@@ -40,6 +40,7 @@ inc_amt=1
 yc='Year'
 
 
+
 class Test(unittest.TestCase):
 
 
@@ -54,21 +55,22 @@ class Test(unittest.TestCase):
     def testName(self):
         pass
 
-    def test_create_range_by_inc(self):
-        j=create_range_by_inc(years,inc_amt)
-        self.assertEqual(resamp_years,j)
+#     def test_create_range_by_inc(self):
+#         j=create_range_by_inc(years,inc_amt)
+#         self.assertEqual(resamp_years,j)
 
-    def test_find_indices(self):
-        lst=[0,3,5,6,7,20]
-        #find indices of the specific condition called
-        t=find_indices(lst,lambda e: e>10)
-        self.assertEqual([5],t)
-
-    def test_index_by_increment(self):
-        expected_output=[[14, 15, 16, 17, 18], [9, 10, 11, 12, 13], [4, 5, 6, 7, 8], [0, 1, 2, 3]]
-        index=find_index_by_increment(years, inc_amt)
-        self.assertEqual(expected_output, index)
+#     def test_find_indices(self):
+#         lst=[0,3,5,6,7,20]
+#         #find indices of the specific condition called
+#         t=find_indices(lst,lambda e: e>10)
+#         self.assertEqual([5],t)
+# 
+#     def test_index_by_increment(self):
+#         expected_output=[[14, 15, 16, 17, 18], [9, 10, 11, 12, 13], [4, 5, 6, 7, 8], [0, 1, 2, 3]]
+#         index=find_index_by_increment(years, inc_amt)
+#         self.assertEqual(expected_output, index)
         
+
 #     def test_resampled_years(self):
 #         expected_output=DataFrame(years,columns=[yc])
 #         print(expected_output)
@@ -76,12 +78,7 @@ class Test(unittest.TestCase):
 #         print(result)
 #         assert_frame_equal(expected_output, result)
     
-#     def test_resampled_depths_by_years(self):
-#         depth_columns=pd.concat([frame.loc[:,'depth (m we)'],frame.loc[:,'depth (m abs)']],axis=1)
-#         output_depth_columns=pd.concat([out_frame.loc[:,'top depth (m we)'],out_frame.loc[:,'bottom depth (m we)'],
-#                                 out_frame.loc[:,'top depth (m abs)'],out_frame.loc[:,'bottom depth (m abs)']],axis=1)
-#         result=resampled_depths_by_years(df_year_sample, index, depth_columns, depth_column_headers)
-#         assert_frame_equal(output_depth_columns,result)
+
     
 #     def test_resampled_statistics_by_years(self):
 #         result=resampled_statistics_by_years(df_year_sample, yc, index)

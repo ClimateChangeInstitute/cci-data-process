@@ -14,6 +14,7 @@ from climatechange.file import load_csv
 from climatechange.headers import HeaderDictionary, HeaderType, Header
 from climatechange.lstDataframe import lstToDataframe
 from climatechange.resampleStats import compile_stats_by_year
+from builtins import float
 
 
 def process_header_data(df) -> List[Header]:
@@ -50,8 +51,11 @@ def clean_data(df):
     # Replace str values with nan
     for r in values :
         for i in range(len(r)):
-            if not is_number(r[i]):
+            if is_number(r[i]):
+                r[i]=float(r[i])
+            else:
                 r[i] = numpy.nan 
+                
     
     df = DataFrame(data=values, index=df.index, columns=df.columns)
     
@@ -159,4 +163,5 @@ def main(files):
     
     for f in files:
         resample_by_years(f)
+    print('done')
     

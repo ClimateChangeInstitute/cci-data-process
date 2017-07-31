@@ -4,15 +4,14 @@ Created on Jul 13, 2017
 :author: Heather
 '''
 
-from pandas.core.frame import DataFrame
+from pandas.core.frame import DataFrame, _to_arrays
 from typing import List
-from typing import Tuple
 from climatechange.headers import Header, HeaderType
 import numpy as np
 import pandas
 
 
-def create_range_by_inc(list_to_inc:List[float],inc_amt: int=1) -> List[List[float]]:
+def create_range_by_inc(list_to_inc:List[float],inc_amt: int=1) -> List[float]:
     '''
     
     :param list_to_inc:
@@ -20,7 +19,9 @@ def create_range_by_inc(list_to_inc:List[float],inc_amt: int=1) -> List[List[flo
     '''
     #creates lists of years incrementally by input of increment
     #list_years must be Years
-    return [i for i in range(int(min(list_to_inc)),int(max(list_to_inc))+1,inc_amt)]
+    x=min(list_to_inc)
+    y=max(list_to_inc)
+    return [i for i in range(round(x),round(y),inc_amt)]
 
 def find_indices(list_to_inc,condition)-> List[float]:
     '''
@@ -76,6 +77,7 @@ def resampled_depths_by_years(df_year_sample:DataFrame,index,depth_columns:DataF
             combined.append(min_depth.iloc[j])
             combined.append(max_depth.iloc[j])
         append_depth.append(combined)
+
     return DataFrame(append_depth,columns=create_depth_headers(depth_column_headers))
 
 def resampled_by_inc_years(df_year_sample:DataFrame,
@@ -116,7 +118,7 @@ def findMax(array:List[List[float]]) -> List[float]:
     :param array: list of lists, 2D array floats
     :return: list of maximum values for each list
     '''
-    return [max(i) for i in array]
+    return [np.nanmax(i) for i in array]
       
 def findMin(array:List[List[float]]) -> List[float]:
     '''
@@ -124,7 +126,7 @@ def findMin(array:List[List[float]]) -> List[float]:
     :param array: list of lists, 2D array floats
     :return: list of minimum values for each list
     '''     
-    return [min(i) for i in array]
+    return [np.nanmin(i) for i in array]
 
 def findStd(array:List[List[float]]) -> List[float]:
     '''
@@ -132,7 +134,7 @@ def findStd(array:List[List[float]]) -> List[float]:
     :param array: list of lists, 2D array floats
     :return: list of standard deviation values for each list
     '''
-    return [np.std(i) for i in array]
+    return [np.nanstd(i) for i in array]
 
 def findLen(array:List[List[float]]) -> List[float]:
     '''
