@@ -104,7 +104,7 @@ class Test(unittest.TestCase):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)   
             result = compile_stats_by_depth(input_test,'depth (m we)', 'Cond (+ALU-S/cm)',0.01)
-        assert_frame_equal(expected_result, result)
+        assert_frame_equal(expected_result, result.df)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

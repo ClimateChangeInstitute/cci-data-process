@@ -15,6 +15,8 @@ from climatechange.headers import HeaderDictionary, HeaderType, Header
 from builtins import float
 import time
 from climatechange.resampleStats import compile_stats_by_year
+from climatechange.resample_data_by_depths import compile_stats_by_depth
+from climatechange.plot import write_resampled_data_to_csv_files
 
 
 
@@ -136,15 +138,27 @@ def resample_by_depths(f:str,inc_amt:float):
     df = clean_data(df)
 
     depth_headers = [h.original_value for h in headers if h.htype == HeaderType.DEPTH]
+    sample_headers=[h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
+    compiled_stats = []
+   
+    for depth_name in depth_headers:
+        for sample_name in sample_headers:
+            compiled_stats.append(compile_stats_by_depth(df, depth_name, sample_name, inc_amt))
     
+    for i in compiled_stats:
+        write_resampled_data_to_csv_files(i, f + ('_resampled_%s_%s.csv' % (i.x_value_name, i.sample_value_name.replace("/",""))))
+            
     for depth_name in depth_headers:
         plot.create_csv_pdf_resampled(f, df, depth_name, headers,inc_amt)
     
-def double_resample_by_depths(f1:str, f2:str):
+def double_resample_by_depths(f1:str, f2:str,inc_amt:float):
     '''
     Double Resampler by Depths
 
     a. Input: two datasets with corresponding years, depths, samples
+    Input: two files, one increment amount
+    -call resample_by _depths for each file
+    -create new function to correlate, run statistical analysis of both
     b. $ PYTHONPATH=. python climatechange/process_data.py -dd ../test/csv_files/small.csv
     ../test/csv_files/small2.csv
     c. Output: correlation between raw data and statistics of the same samples in both datasets
@@ -153,6 +167,8 @@ def double_resample_by_depths(f1:str, f2:str):
     :param f1:
     :param f2:
     '''
+    resample_by_depths(f1,inc_amt)
+    resample_by_depths(f2,inc_amt)
     
 def double_resample_by_depth_intervals(f1:str, f2:str):
     '''

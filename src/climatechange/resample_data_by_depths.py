@@ -9,6 +9,7 @@ from climatechange.resampleStats import compileStats,find_indices,create_depth_h
 import pandas
 from typing import List
 import numpy as np
+from climatechange.compiled_stat import CompiledStat
 
 
 def create_range_for_depths(list_to_inc:List[float],inc_amt: int=0.01) -> List[float]:
@@ -60,13 +61,13 @@ def resampled_by_inc_depths(df_x_sample:DataFrame,
     df_stats=resampled_statistics_by_x(df_x_sample,x_name,index)
     return pandas.concat([df_depths,df_stats], axis=1)
 
-def compile_stats_by_depth(df:DataFrame, depth_name:str, sample_name:str, inc_amt:int=0.01) -> DataFrame:
+def compile_stats_by_depth(df:DataFrame, depth_name:str, sample_name:str, inc_amt:int=0.01) -> CompiledStat:
     '''
     From the given data frame compile statistics (mean, median, min, max, etc) 
     based on the parameters.
     
     :param df: The data to compile stats for
-    :param resample_name: The depth column to use for indexing
+    :param depth_name: The depth column to use for indexing
     :param sample_name: The sample compile to create statistics about
     :param inc_amt: The amount to group the year column by.  For example, 
         2012.6, 2012.4, 2012.2 would all be grouped into the year 2012.
@@ -77,7 +78,7 @@ def compile_stats_by_depth(df:DataFrame, depth_name:str, sample_name:str, inc_am
     df_x_sample=pandas.concat([df.loc[:,depth_name], df.loc[:,sample_name]], axis=1)
     resampled_data=resampled_by_inc_depths(df_x_sample, depth_name, inc_amt)
     
-    return resampled_data
+    return CompiledStat(resampled_data,depth_name,sample_name)
 
 # def compile_stats_to_csv_pdf(f:str,
 #                              df:DataFrame,

@@ -160,6 +160,38 @@ from climatechange.resample_data_by_depths import compile_stats_by_depth
 def write_resampled_data_to_csv_files(df:DataFrame, file_path:str):
     df.to_csv(file_path,index=False)
 
+# def compile_stats_to_csv_pdf(f:str,
+#                              df:DataFrame,
+#                              pdf,
+#                              x_name:str,
+#                              headers:Header,
+#                              inc_amt:float,
+#                              bar_header:str) -> str:
+#     '''
+#     
+#     :param f: input file path
+#     :param df: dataframe of input file
+#     :param pdf: pdf file
+#     :param x_name: name of year column
+#     :param headers: headers of input dataframe
+#     :param bar_header: header of statistic to plot
+#     
+#     :return: csv files with statistics resampled of bar_header, 
+#         pdf files of statistics with raw data
+#     '''
+#     
+#     sample_headers = [h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
+#     for sample_name in sample_headers:
+#         if HeaderDictionary().parse_headers([x_name])[0].htype == HeaderType.YEARS:
+#             df_resampled_stats = compile_stats_by_year(df, headers, x_name, sample_name)
+#             label_name='Year'
+#         else:
+#             df_resampled_stats = compile_stats_by_depth(df,x_name, sample_name)
+#             label_name='Depth'
+#             
+#         df_name=df_resampled_stats.columns[0]
+#         write_resampled_data_to_csv_files(df_resampled_stats, f + ('_resampled_%s_%s.csv' % (x_name, sample_name.replace("/",""))))
+
 def compile_stats_to_csv_pdf(f:str,
                              df:DataFrame,
                              pdf,
@@ -188,6 +220,7 @@ def compile_stats_to_csv_pdf(f:str,
         else:
             df_resampled_stats = compile_stats_by_depth(df,x_name, sample_name)
             label_name='Depth'
+            
         df_name=df_resampled_stats.columns[0]
         write_resampled_data_to_csv_files(df_resampled_stats, f + ('_resampled_%s_%s.csv' % (x_name, sample_name.replace("/",""))))
         plt.figure(figsize=(11, 8.5))
