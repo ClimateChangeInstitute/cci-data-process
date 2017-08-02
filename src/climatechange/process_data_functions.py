@@ -109,6 +109,19 @@ def resample_by_years(f:str, inc_amt:float=1):
 #             write_resampled_data_to_csv_files(df_resampled_stats, f + ('.out.%s.%s.csv' % (year_name, sample_name.replace("/",""))))
 #     
     
+
+def get_compiled_stats_by_depth(inc_amt, df, depth_headers, sample_headers):
+    compiled_stats = []
+    for depth_name in depth_headers:
+        cur_depth = []
+        for sample_name in sample_headers:
+            cur_depth.append(compile_stats_by_depth(df, depth_name, sample_name, inc_amt))
+        
+#             print("compile stats for %s: %s seconds"%(sample_name,time.time()-start_time_d))
+        compiled_stats.append(cur_depth)
+    
+    return compiled_stats
+
 def resample_by_depths(f:str, inc_amt:float):
     '''
     Resampler by Depths
@@ -125,7 +138,7 @@ def resample_by_depths(f:str, inc_amt:float):
     
     :param f:This is a CSV file
     '''
-    
+    start_time_d = time.time()
     print("Creating pdf for %s" % f)
     
     df = load_csv(f)
@@ -133,23 +146,18 @@ def resample_by_depths(f:str, inc_amt:float):
     headers = process_header_data(df)
 
     df = clean_data(df)
-
+#     print("load and clean data: %s seconds"%(time.time()-start_time_d))
 
     depth_headers = [h.original_value for h in headers if h.htype == HeaderType.DEPTH]
     sample_headers = [h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
-    compiled_stats = []
-   
-    for depth_name in depth_headers:
-        cur_depth = []
-        for sample_name in sample_headers:
-            cur_depth.append(compile_stats_by_depth(df, depth_name, sample_name, inc_amt))
-        compiled_stats.append(cur_depth)
-    
+
+    compiled_stats = get_compiled_stats_by_depth(inc_amt, df, depth_headers, sample_headers)
+#     print("compile stats: %s seconds"%(time.time()-start_time_d)) 
     for cur_depth in compiled_stats:
         for c in cur_depth:
             write_resampled_data_to_csv_files(c.df,
                                               f + ('_resampled_%s_%s.csv' % (c.x_value_name, c.sample_value_name.replace("/", ""))))
-
+#     print("create csvs: %s seconds"%(time.time()-start_time_d))       
     for i in range(len(depth_headers)):
         file_name = f + ('_resampled_%s.pdf' % depth_headers[i])
         with PdfPages(file_name) as pdf:
@@ -164,7 +172,7 @@ def resample_by_depths(f:str, inc_amt:float):
                                          inc_amt,
                                          'Depth')    
                 pyplot.close()
-
+#     print("create_pdfs: %s seconds"%(time.time()-start_time_d))            
             
 #     for depth_name in depth_headers:
 #         plot.create_csv_pdf_resampled(f, df, depth_name, headers,inc_amt)
@@ -185,6 +193,7 @@ def double_resample_by_depths(f1:str, f2:str, inc_amt:float):
     :param f1:
     :param f2:
     '''
+    
     resample_by_depths(f1, inc_amt)
     resample_by_depths(f2, inc_amt)
     
@@ -213,7 +222,7 @@ def main(files):
     start_time = time.time()
     for f in files:
 #         resample_by_years(f)
-        resample_by_depths(f, 0.01)
+        resample_by_depths(f, 0.1)
     print('done')
-    print("--- %s seconds ---" % (time.time() - start_time))
+    print(" %s seconds to run" % (time.time() - start_time))
     

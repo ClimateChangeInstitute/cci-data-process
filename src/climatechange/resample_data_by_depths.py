@@ -51,7 +51,7 @@ def resampled_statistics_by_x(df_x_sample, index):
 
 def resampled_by_inc_depths(df_x_sample:DataFrame,
                     x_name:str,
-                    inc_amt: int=0.01) -> DataFrame:
+                    inc_amt:float) -> DataFrame:
     '''
     :param df:
     :param inc:
@@ -61,7 +61,7 @@ def resampled_by_inc_depths(df_x_sample:DataFrame,
     df_stats = resampled_statistics_by_x(df_x_sample, index)
     return pandas.concat([df_depths, df_stats], axis=1)
 
-def compile_stats_by_depth(df:DataFrame, depth_name:str, sample_name:str, inc_amt:int=0.01) -> CompiledStat:
+def compile_stats_by_depth(df:DataFrame, depth_name:str, sample_name:str, inc_amt:float) -> CompiledStat:
     '''
     From the given data frame compile statistics (mean, median, min, max, etc) 
     based on the parameters.
@@ -79,66 +79,3 @@ def compile_stats_by_depth(df:DataFrame, depth_name:str, sample_name:str, inc_am
     resampled_data = resampled_by_inc_depths(df_x_sample, depth_name, inc_amt)
     
     return CompiledStat(resampled_data, depth_name, sample_name)
-
-# def compile_stats_to_csv_pdf(f:str,
-#                              df:DataFrame,
-#                              pdf,
-#                              x_name:str,
-#                              headers:Header,
-#                              bar_header:str) -> str:
-#     '''
-#     
-#     :param f: input file path
-#     :param df: dataframe of input file
-#     :param pdf: pdf file
-#     :param x_name: name of year column
-#     :param headers: headers of input dataframe
-#     :param bar_header: header of statistic to plot
-#     
-#     :return: csv files with statistics resampled of bar_header, 
-#         pdf files of statistics with raw data
-#     '''
-#     
-#     sample_headers:List[str] = [h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
-#     for sample_name in sample_headers:
-#         df_resampled_stats = compile_stats_by_depth(df, headers, x_name, sample_name)
-#         write_resampled_data_to_csv_files(df_resampled_stats, f + ('_resampled_%s_%s.csv' % (x_name, sample_name.replace("/",""))))
-#     
-#     
-#         plt.figure(figsize=(11, 8.5))
-#         fig, tg = plt.subplots(1)
-#         ax = df_resampled_stats[[x_name, bar_header]].plot(x=x_name, kind='line',color='r', ax=tg)
-#         ax = df[[x_name, sample_name]].plot(x=x_name, kind='line',
-#                                            linestyle='-',
-#                                            color='0.75',
-#                                            ax=tg,zorder=-1)
-#         vals = ax.get_xticks()
-#         ax.set_xticklabels(['{:.0f}'.format(x) for x in vals])
-#         plt.title('Resampled %s of %s' % (bar_header, sample_name))
-#         plt.xlabel(x_name)
-#         plt.ylabel(sample_name)
-#         plt.legend()    
-#         pdf.savefig(fig)
-#         plt.close()
-# 
-# def create_csv_pdf_of_resampled_stats(f:str,
-#                                      df:DataFrame,
-#                                      x_name:str,
-#                                      headers:Header,
-#                                      bar_header:str='Mean')->str:
-#     '''
-#     Create a pdf file with multiple plots based on the data frame.
-#     :param f: input file path
-#     :param df: dataframe of input file
-#     :param x_name: name of year column
-#     :param headers: headers of input dataframe
-#     :param bar_header: header of statistic to plot
-#     
-#     :return: pdf of compiled figures by year,
-#         csv file of statistics by sample and year
-#     '''
-#     file_name=f + ('_resampled_%s.pdf' % x_name)
-#     with PdfPages(file_name) as pdf:
-#         compile_stats_to_csv_pdf(f, df, pdf, x_name, headers, bar_header)    
-#         plt.close()
-#         

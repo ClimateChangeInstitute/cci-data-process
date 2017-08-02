@@ -228,7 +228,7 @@ def add_compile_stats_to_pdf(f:str,
     x_str='{:.%sf}' %str(inc_amt)[::-1].find('.')
     ax.set_xticklabels([x_str.format(x) for x in vals])
     
-    plt.title('Resampled to %s %s resolution of %s' % (inc_amt,label_name,sample_name))
+    plt.title('%s %s Resolution of %s' % (inc_amt,x_name,sample_name))
     plt.xlabel(x_name)
     plt.ylabel(sample_name)
     plt.legend()    
