@@ -160,7 +160,7 @@ from climatechange.resample_data_by_depths import compile_stats_by_depth
 def write_resampled_data_to_csv_files(df:DataFrame, file_path:str):
     df.to_csv(file_path,index=False)
 
-# def compile_stats_to_csv_pdf(f:str,
+# def add_compile_stats_to_pdf(f:str,
 #                              df:DataFrame,
 #                              pdf,
 #                              x_name:str,
@@ -192,13 +192,16 @@ def write_resampled_data_to_csv_files(df:DataFrame, file_path:str):
 #         df_name=df_resampled_stats.columns[0]
 #         write_resampled_data_to_csv_files(df_resampled_stats, f + ('_resampled_%s_%s.csv' % (x_name, sample_name.replace("/",""))))
 
-def compile_stats_to_csv_pdf(f:str,
+def add_compile_stats_to_pdf(f:str,
                              df:DataFrame,
+                             df_resampled_stats:DataFrame,
                              pdf,
                              x_name:str,
+                             sample_name:str,
                              headers:Header,
                              inc_amt:float,
-                             bar_header:str) -> str:
+                             label_name:str,
+                             bar_header:str='Mean') -> str:
     '''
     
     :param f: input file path
@@ -211,35 +214,26 @@ def compile_stats_to_csv_pdf(f:str,
     :return: csv files with statistics resampled of bar_header, 
         pdf files of statistics with raw data
     '''
-    
-    sample_headers = [h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
-    for sample_name in sample_headers:
-        if HeaderDictionary().parse_headers([x_name])[0].htype == HeaderType.YEARS:
-            df_resampled_stats = compile_stats_by_year(df, headers, x_name, sample_name)
-            label_name='Year'
-        else:
-            df_resampled_stats = compile_stats_by_depth(df,x_name, sample_name)
-            label_name='Depth'
+
             
-        df_name=df_resampled_stats.columns[0]
-        write_resampled_data_to_csv_files(df_resampled_stats, f + ('_resampled_%s_%s.csv' % (x_name, sample_name.replace("/",""))))
-        plt.figure(figsize=(11, 8.5))
-        fig, tg = plt.subplots(1)
-        ax = df_resampled_stats[[df_name, bar_header]].plot(x=df_name, kind='line',color='r', ax=tg)
-        ax = df[[x_name, sample_name]].plot(x=x_name, kind='line',
+    df_name=df_resampled_stats.columns[0]
+    plt.figure(figsize=(11, 8.5))
+    fig, tg = plt.subplots(1)
+    ax = df_resampled_stats[[df_name, bar_header]].plot(x=df_name, kind='line',color='r', ax=tg)
+    ax = df[[x_name, sample_name]].plot(x=x_name, kind='line',
                                            linestyle='-',
                                            color='0.75',
                                            ax=tg,zorder=-1)
-        vals = ax.get_xticks()
-        x_str='{:.%sf}' %str(inc_amt)[::-1].find('.')
-        ax.set_xticklabels([x_str.format(x) for x in vals])
-        
-        plt.title('Resampled to %s %s resolution of %s' % (inc_amt,label_name,sample_name))
-        plt.xlabel(x_name)
-        plt.ylabel(sample_name)
-        plt.legend()    
-        pdf.savefig(fig)
-        plt.close()
+    vals = ax.get_xticks()
+    x_str='{:.%sf}' %str(inc_amt)[::-1].find('.')
+    ax.set_xticklabels([x_str.format(x) for x in vals])
+    
+    plt.title('Resampled to %s %s resolution of %s' % (inc_amt,label_name,sample_name))
+    plt.xlabel(x_name)
+    plt.ylabel(sample_name)
+    plt.legend()    
+    pdf.savefig(fig)
+    plt.close()
 
 def create_csv_pdf_resampled(f:str,
                              df:DataFrame,
@@ -260,7 +254,7 @@ def create_csv_pdf_resampled(f:str,
     '''
     file_name=f + ('_resampled_%s.pdf' % x_name)
     with PdfPages(file_name) as pdf:
-        compile_stats_to_csv_pdf(f, df, pdf, x_name, headers,inc_amt, bar_header)    
+        add_compile_stats_to_pdf(f, df, pdf, x_name, headers,inc_amt, bar_header)    
         plt.close()
                     # Meta data for the PdfPages
 #         d = pdf.infodict()

@@ -114,7 +114,7 @@ class Test(unittest.TestCase):
 #         sample_headers=[h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
 #         compiled_stats = []
 #         inc_amt=0.01
-#    
+#     
 #         for depth_name in depth_headers:
 #             for sample_name in sample_headers:
 #                 compiled_stats.append(compile_stats_by_depth(df, depth_name, sample_name, inc_amt))

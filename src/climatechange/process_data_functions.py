@@ -15,7 +15,10 @@ from climatechange.headers import HeaderDictionary, HeaderType, Header
 from builtins import float
 import time
 from climatechange.resample_data_by_depths import compile_stats_by_depth
-from climatechange.plot import write_resampled_data_to_csv_files
+from climatechange.plot import write_resampled_data_to_csv_files,\
+    add_compile_stats_to_pdf
+from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib import pyplot
 
 
 
@@ -49,7 +52,7 @@ def clean_data(df):
     for r in values :
         for i in range(len(r)):
             if is_number(r[i]):
-                r[i]=float(r[i])
+                r[i] = float(r[i])
             else:
                 r[i] = numpy.nan 
                 
@@ -68,7 +71,7 @@ def clean_data(df):
 # def write_resampled_data_to_csv_files(df:DataFrame, file_path:str):
 #     df.to_csv(file_path,index=False)
 
-def resample_by_years(f:str,inc_amt:float=1):
+def resample_by_years(f:str, inc_amt:float=1):
     '''
     Resampler by Years
     a. Input: dataset with years, depths, samples
@@ -99,14 +102,14 @@ def resample_by_years(f:str,inc_amt:float=1):
 #     sample_headers = [h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
     
     for year_name in year_headers:
-        plot.create_csv_pdf_resampled(f, df, year_name, headers,inc_amt)
+        plot.create_csv_pdf_resampled(f, df, year_name, headers, inc_amt)
 #         for sample_name in sample_headers:
 #             df_resampled_stats = create_statistics(df, headers, year_name, sample_name)
 # #             plot.create_single_pdf(df, year_name, s, df_resampled_stats, f + ('.out.%s.pdf' % (year_name, s.replace("/",""))),bar_year_header=year_name)
 #             write_resampled_data_to_csv_files(df_resampled_stats, f + ('.out.%s.%s.csv' % (year_name, sample_name.replace("/",""))))
 #     
     
-def resample_by_depths(f:str,inc_amt:float):
+def resample_by_depths(f:str, inc_amt:float):
     '''
     Resampler by Depths
     
@@ -115,7 +118,7 @@ def resample_by_depths(f:str,inc_amt:float):
     b. $ PYTHONPATH=. python climatechange/process_data.py -d ../test/csv_files/small.csv
     c. Output: csv file with statistics for each sample by depths
 
-    i. Pdf of statistics by depths with raw data
+    cur_depth. Pdf of statistics by depths with raw data
     
     1. Mean w/ raw, median w/ raw (by depths) on same plot for each year column
     have 1 pdf with mean and median for each sample
@@ -131,21 +134,42 @@ def resample_by_depths(f:str,inc_amt:float):
 
     df = clean_data(df)
 
+
     depth_headers = [h.original_value for h in headers if h.htype == HeaderType.DEPTH]
-    sample_headers=[h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
+    sample_headers = [h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
     compiled_stats = []
    
     for depth_name in depth_headers:
+        cur_depth = []
         for sample_name in sample_headers:
-            compiled_stats.append(compile_stats_by_depth(df, depth_name, sample_name, inc_amt))
+            cur_depth.append(compile_stats_by_depth(df, depth_name, sample_name, inc_amt))
+        compiled_stats.append(cur_depth)
     
-    for i in compiled_stats:
-        write_resampled_data_to_csv_files(i, f + ('_resampled_%s_%s.csv' % (i.x_value_name, i.sample_value_name.replace("/",""))))
+    for cur_depth in compiled_stats:
+        for c in cur_depth:
+            write_resampled_data_to_csv_files(c.df,
+                                              f + ('_resampled_%s_%s.csv' % (c.x_value_name, c.sample_value_name.replace("/", ""))))
+
+    for i in range(len(depth_headers)):
+        file_name = f + ('_resampled_%s.pdf' % depth_headers[i])
+        with PdfPages(file_name) as pdf:
+            for c in compiled_stats[i]:
+                add_compile_stats_to_pdf(f,
+                                         df,
+                                         c.df,
+                                         pdf,
+                                         c.x_value_name,
+                                         c.sample_value_name,
+                                         headers,
+                                         inc_amt,
+                                         'Depth')    
+                pyplot.close()
+
             
-    for depth_name in depth_headers:
-        plot.create_csv_pdf_resampled(f, df, depth_name, headers,inc_amt)
+#     for depth_name in depth_headers:
+#         plot.create_csv_pdf_resampled(f, df, depth_name, headers,inc_amt)
     
-def double_resample_by_depths(f1:str, f2:str,inc_amt:float):
+def double_resample_by_depths(f1:str, f2:str, inc_amt:float):
     '''
     Double Resampler by Depths
 
@@ -161,8 +185,8 @@ def double_resample_by_depths(f1:str, f2:str,inc_amt:float):
     :param f1:
     :param f2:
     '''
-    resample_by_depths(f1,inc_amt)
-    resample_by_depths(f2,inc_amt)
+    resample_by_depths(f1, inc_amt)
+    resample_by_depths(f2, inc_amt)
     
 def double_resample_by_depth_intervals(f1:str, f2:str):
     '''
@@ -189,7 +213,7 @@ def main(files):
     start_time = time.time()
     for f in files:
 #         resample_by_years(f)
-        resample_by_depths(f)
+        resample_by_depths(f, 0.01)
     print('done')
     print("--- %s seconds ---" % (time.time() - start_time))
     
