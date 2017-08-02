@@ -168,7 +168,7 @@ class Test(unittest.TestCase):
         expected_result.columns=['top depth (m we) ','bottom depth (m we) ','top depth (m abs)','bottom depth (m abs)']
         df_year_sample=pd.concat([input_test.loc[:,'Dat210617'], input_test.loc[:,'Cond (+ALU-S/cm)']], axis=1)
         index=find_index_by_increment(df_year_sample.iloc[:,0].values.tolist(),inc_amt)       
-        result=resampled_depths_by_years(df_year_sample, index, depth_columns, depth_column_headers)
+        result=resampled_depths_by_years(index, depth_columns, depth_column_headers)
         assert_frame_equal(expected_result,result)
         
     def test_resampled_by_inc_years(self): 

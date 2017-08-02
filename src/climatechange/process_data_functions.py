@@ -14,7 +14,6 @@ from climatechange.file import load_csv
 from climatechange.headers import HeaderDictionary, HeaderType, Header
 from builtins import float
 import time
-from climatechange.resampleStats import compile_stats_by_year
 from climatechange.resample_data_by_depths import compile_stats_by_depth
 from climatechange.plot import write_resampled_data_to_csv_files
 
@@ -25,11 +24,6 @@ def process_header_data(df) -> List[Header]:
     hd = HeaderDictionary()
     
     parsedHeaders = hd.parse_headers(list(df.columns))
-    
-#     unknownHeaders = [ h for h in parsedHeaders if h.htype == HeaderType.UNKNOWN ]
-    
-#     print("All headers are: %s" % parsedHeaders)
-#     print("Unknown headers are: %s" % unknownHeaders)
     
     return parsedHeaders
 
