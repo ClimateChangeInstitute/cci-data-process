@@ -146,6 +146,7 @@ class HeaderDictionary(object):
     def load_latest_header_dict(self) -> Mapping[str, HeaderType]:
         header_file_name = 'header_dict.json'
         header_file_path = os.path.join(data_dir(), header_file_name)
+        print('using file as header dictionary'+header_file_path)
         
         hdict = {}
         if os.path.isfile(header_file_path):

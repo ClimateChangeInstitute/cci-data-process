@@ -23,10 +23,10 @@ class Test(unittest.TestCase):
     def testHeaderDictionaryCreation(self):
                 
         h_dict = load_dict_by_package('header_dict.json', obj_hook=to_headers)
-        
         self.assertDictEqual(h_dict,
                              self.hd.get_header_dict(),
                              'Header dictionaries do not match')
+        
 
         self.assertDictEqual(load_dict_by_package('unit_dict.json'),
                              self.hd.get_unit_dict(),

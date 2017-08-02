@@ -4,7 +4,7 @@ Created on Jul 13, 2017
 :author: Heather
 '''
 
-from pandas.core.frame import DataFrame, _to_arrays
+from pandas.core.frame import DataFrame
 from typing import List
 from climatechange.headers import Header, HeaderType
 import numpy as np
@@ -39,7 +39,7 @@ def find_index_by_increment(list_to_inc:List[float],inc_amt:int=1)-> List[List[f
     :param inc_amt:
     '''
     top_range=create_range_by_inc(list_to_inc,inc_amt)
-    bottom_range=[x+1 for x in top_range]
+    bottom_range=[x+inc_amt for x in top_range]
     return [find_indices(list_to_inc,lambda e: e>=top_range[i] and e<bottom_range[i]) for i in range(0,len(top_range))]
 
 
@@ -65,7 +65,7 @@ def resampled_statistics_by_years(df_year_sample,yc,index):
     appended_data=[]
     for i in index:
         appended_data.extend(compileStats(df_year_sample.iloc[i,[1]].transpose().values.tolist()))
-    return DataFrame(appended_data,columns=['Mean','Median','Max','Min','Stdv','Count'])
+    return DataFrame(appended_data,columns=['Mean','Stdv','Median','Max','Min','Count'])
 
 def resampled_depths_by_years(df_year_sample:DataFrame,index,depth_columns:DataFrame,depth_column_headers:List[str]) -> DataFrame:
     append_depth=[]
@@ -152,10 +152,10 @@ def compileStats(array:List[List[float]]) -> List[List[float]]:
     '''
 #     result=[findMean(array), findMedian(array), findMax(array), findMin(array), findStd(array), findLen(array)]
     return [ list(x) for x in zip(findMean(array),
+                                  findStd(array),
                                   findMedian(array),
                                   findMax(array),
                                   findMin(array),
-                                  findStd(array),
                                   findLen(array))]
 
 

@@ -11,9 +11,8 @@ from pandas.util.testing import assert_frame_equal
 import numpy as np
 import pandas as pd
 from climatechange.file import load_csv
-from climatechange.plot import resample_by_years
 from climatechange.process_data_functions import create_statistics, \
-    process_header_data, write_resampled_data_to_csv_files, clean_data
+    process_header_data, clean_data
 from climatechange.resampleStats import compileStats, compile_stats_by_year,\
     resampled_by_inc_years, find_index_by_increment, resampled_depths_by_years,\
     create_range_by_inc
@@ -26,7 +25,6 @@ from climatechange.resampleStats import findStd
 from climatechange.headers import HeaderDictionary,HeaderType, Header
 
 
-
 # list of values by column, first index is column index, for each you get element of row 
 inc_amt=1
 emptyArray = []
@@ -35,7 +33,7 @@ multipleRowArray = [[5.0, 4.0, 3.0, 2.0, 1.0],
                    [2.0, 3.0, 4.0, 5.0, 6.0 ],
                    [1.0, 3.0, 2.0, 5.0, 4.0]]
 test_input = [[7, 5, 7], [3, 5, 4], [6, 4, 9]]
-test_output = [[6.333333333333333, 7.0, 7, 5, 0.94280904158206336, 3], [4.0, 4.0, 5, 3, 0.81649658092772603, 3], [6.333333333333333, 6.0, 9, 4, 2.0548046676563256, 3]]
+test_output = [[6.333333333333333, 0.94280904158206336,7.0, 7, 5,  3], [4.0,0.81649658092772603, 4.0, 5, 3,  3], [6.333333333333333,2.0548046676563256, 6.0, 9, 4,  3]]
 # containingNoneArray = [[5.0, None, None, 2.0, 1.0],
 #                        [2.0, None, None, 5.0, 6.0 ],
 #                        [1.0, None, None, 5.0, 4.0]]
@@ -108,21 +106,20 @@ class Test(unittest.TestCase):
     def testcompileStats(self):
         
         self.assertAlmostEqual([], compileStats(emptyArray))
-        self.assertAlmostEqual([[4, 4, 5, 3, 0.89442719099991586, 5]], compileStats(singleRowArray))
+        self.assertAlmostEqual([[4, 0.89442719099991586, 4, 5, 3, 5]], compileStats(singleRowArray))
         self.assertAlmostEqual(test_output, compileStats(test_input))
         
     def testSmallcsv(self):
-        
-        small_output = [[2009.8, 2009.8, 2011.6, 2008.0, 1.0954451150103279, 19],
-                      [2008.3999999999999, 2008.4000000000001, 2012.0, 2004.8, 2.1908902300206643, 19],
-                      [0.5966279069999999, 0.59662790700000001, 0.599767442, 0.593488372, 0.0019106600718061043, 19],
-                      [1.619, 1.619, 1.6280000000000001, 1.61, 0.0054772255750516448, 19],
-                      [9.0, 9.0, 18.0, 0.0, 5.4772255750516612, 19],
-                      [41.0, 41.0, 50.0, 32.0, 5.4772255750516612, 19],
-                      [6.3684210526315788, 4.0, 14.0, 2.0, 4.1953674491325543, 19],
-                      [5.7894736842105265, 7.0, 9.0, 1.0, 2.6072560161054392, 19],
-                      [4.3684210526315788, 4.0, 6.0, 2.0, 1.086303549502647, 19],
-                      [5.3684210526315788, 5.0, 7.0, 3.0, 1.086303549502647, 19]]
+        small_output=[[2009.8, 1.0954451150103279, 2009.8, 2011.5999999999999, 2008.0, 19], 
+         [2008.3999999999999, 2.1908902300206643, 2008.4000000000001, 2012.0, 2004.8, 19], 
+         [0.5966279069999999, 0.0019106600718061043, 0.59662790700000001, 0.59976744199999998, 0.59348837200000004, 19], 
+         [1.619, 0.0054772255750516448, 1.619, 1.6280000000000001, 1.6100000000000001, 19], 
+         [9.0, 5.4772255750516612, 9.0, 18.0, 0.0, 19], 
+         [41.0, 5.4772255750516612, 41.0, 50.0, 32.0, 19], 
+         [6.3684210526315788, 4.1953674491325543, 4.0, 14.0, 2.0, 19], 
+         [5.7894736842105265, 2.6072560161054392, 7.0, 9.0, 1.0, 19], 
+         [4.3684210526315788, 1.086303549502647, 4.0, 6.0, 2.0, 19], 
+         [5.3684210526315788, 1.086303549502647, 5.0, 7.0, 3.0, 19]]
         frame = load_csv(os.path.join('csv_files', 'small.csv'))
         self.assertAlmostEqual(small_output,
                                compileStats(frame.transpose().values.tolist()))
@@ -211,6 +208,14 @@ class Test(unittest.TestCase):
         headers = process_header_data(input_test)
         result = create_statistics(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)')
         assert_frame_equal(expected_result, result)
+    
+    def create_stats_headers(self):
+        input_test = load_csv(os.path.join('csv_files','input_test_zeros_and_numbers.csv'))
+        input_test = clean_data(input_test)
+        expected_result = load_csv(os.path.join('csv_files','output_test_zeros_and_numbers.csv'))   
+        headers = process_header_data(input_test)
+        result = create_statistics(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)')
+        assert_frame_equal(expected_result.columns, result.columns)
         
         
         
