@@ -5,48 +5,48 @@ Created on Jul 31, 2017
 '''
 
 from pandas.core.frame import DataFrame
-from climatechange.resampleStats import compileStats,find_indices,create_depth_headers
+from climatechange.resampleStats import compileStats, find_indices, create_depth_headers
 import pandas
 from typing import List
 import numpy as np
 from climatechange.compiled_stat import CompiledStat
 
 
-def create_range_for_depths(list_to_inc:List[float],inc_amt: int=0.01) -> List[float]:
+def create_range_for_depths(list_to_inc:List[float], inc_amt: int=0.01) -> List[float]:
     '''
     
     :param list_to_inc:
     :param inc_amt:
     '''
-    if str(min(list_to_inc))[::-1].find('.')>str(inc_amt)[::-1].find('.'):
-        r=str(min(list_to_inc))[::-1].find('.')-1
+    if str(min(list_to_inc))[::-1].find('.') > str(inc_amt)[::-1].find('.'):
+        r = str(min(list_to_inc))[::-1].find('.') - 1
     else:
-        r=str(inc_amt)[::-1].find('.')
-    g=np.arange(np.round(min(list_to_inc),r),max(list_to_inc),inc_amt)
-    return [round(i,r) for i in g.tolist()]
+        r = str(inc_amt)[::-1].find('.')
+    g = np.arange(np.round(min(list_to_inc), r), max(list_to_inc), inc_amt)
+    return [round(i, r) for i in g.tolist()]
 
-def find_index_by_increment_for_depths(list_to_inc:List[float],inc_amt:int=0.01)-> List[List[float]]:
+def find_index_by_increment_for_depths(list_to_inc:List[float], inc_amt:int=0.01) -> List[List[float]]:
     '''
     
     :param list_to_inc:
     :param inc_amt:
     '''
-    top_range=create_range_for_depths(list_to_inc,inc_amt)
-    bottom_range=[x+inc_amt for x in top_range]
-    return [find_indices(list_to_inc,lambda e: e>=top_range[i] and e<bottom_range[i]) for i in range(0,len(top_range))]
+    top_range = create_range_for_depths(list_to_inc, inc_amt)
+    bottom_range = [x + inc_amt for x in top_range]
+    return [find_indices(list_to_inc, lambda e: e >= top_range[i] and e < bottom_range[i]) for i in range(0, len(top_range))]
 
-def resampled_depths(df_x_sample,depth_name,inc_amt:int=1):
-    top_range=create_range_for_depths(df_x_sample.iloc[:,0].values.tolist(),inc_amt)
-    bottom_range=[x+inc_amt for x in top_range]
-    df=DataFrame([top_range,bottom_range]).transpose()
-    df.columns=create_depth_headers([depth_name])
+def resampled_depths(df_x_sample, depth_name, inc_amt:int=1):
+    top_range = create_range_for_depths(df_x_sample.iloc[:, 0].values.tolist(), inc_amt)
+    bottom_range = [x + inc_amt for x in top_range]
+    df = DataFrame([top_range, bottom_range]).transpose()
+    df.columns = create_depth_headers([depth_name])
     return df
 
-def resampled_statistics_by_x(df_x_sample,x_name,index):
-    appended_data=[]
+def resampled_statistics_by_x(df_x_sample, index):
+    appended_data = []
     for i in index:
-        appended_data.extend(compileStats(df_x_sample.iloc[i,[1]].transpose().values.tolist()))
-    return DataFrame(appended_data,columns=['Mean','Stdv','Median','Max','Min','Count'])
+        appended_data.extend(compileStats(df_x_sample.iloc[i, [1]].transpose().values.tolist()))
+    return DataFrame(appended_data, columns=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
 
 
 def resampled_by_inc_depths(df_x_sample:DataFrame,
@@ -56,10 +56,10 @@ def resampled_by_inc_depths(df_x_sample:DataFrame,
     :param df:
     :param inc:
     '''
-    index=find_index_by_increment_for_depths(df_x_sample.iloc[:,0].values.tolist(),inc_amt)
-    df_depths=resampled_depths(df_x_sample,x_name,inc_amt)
-    df_stats=resampled_statistics_by_x(df_x_sample,x_name,index)
-    return pandas.concat([df_depths,df_stats], axis=1)
+    index = find_index_by_increment_for_depths(df_x_sample.iloc[:, 0].values.tolist(), inc_amt)
+    df_depths = resampled_depths(df_x_sample, x_name, inc_amt)
+    df_stats = resampled_statistics_by_x(df_x_sample, index)
+    return pandas.concat([df_depths, df_stats], axis=1)
 
 def compile_stats_by_depth(df:DataFrame, depth_name:str, sample_name:str, inc_amt:int=0.01) -> CompiledStat:
     '''
@@ -75,10 +75,10 @@ def compile_stats_by_depth(df:DataFrame, depth_name:str, sample_name:str, inc_am
     specified sample and year.
     '''
     
-    df_x_sample=pandas.concat([df.loc[:,depth_name], df.loc[:,sample_name]], axis=1)
-    resampled_data=resampled_by_inc_depths(df_x_sample, depth_name, inc_amt)
+    df_x_sample = pandas.concat([df.loc[:, depth_name], df.loc[:, sample_name]], axis=1)
+    resampled_data = resampled_by_inc_depths(df_x_sample, depth_name, inc_amt)
     
-    return CompiledStat(resampled_data,depth_name,sample_name)
+    return CompiledStat(resampled_data, depth_name, sample_name)
 
 # def compile_stats_to_csv_pdf(f:str,
 #                              df:DataFrame,

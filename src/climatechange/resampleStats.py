@@ -11,19 +11,19 @@ import numpy as np
 import pandas
 
 
-def create_range_by_inc(list_to_inc:List[float],inc_amt: int=1) -> List[float]:
+def create_range_by_inc(list_to_inc:List[float], inc_amt: int=1) -> List[float]:
     '''
     
     :param list_to_inc:
     :param inc_amt:
     '''
-    #creates lists of years incrementally by input of increment
-    #list_years must be Years
-    x=min(list_to_inc)
-    y=max(list_to_inc)
-    return [i for i in range(round(x),round(y),inc_amt)]
+    # creates lists of years incrementally by input of increment
+    # list_years must be Years
+    x = min(list_to_inc)
+    y = max(list_to_inc)
+    return [i for i in range(round(x), round(y), inc_amt)]
 
-def find_indices(list_to_inc,condition)-> List[float]:
+def find_indices(list_to_inc, condition) -> List[float]:
     '''
     
     :param list_to_inc:
@@ -32,18 +32,18 @@ def find_indices(list_to_inc,condition)-> List[float]:
     return [i for i, elem in enumerate(list_to_inc) if condition(elem)]
 
 
-def find_index_by_increment(list_to_inc:List[float],inc_amt:int=1)-> List[List[float]]:
+def find_index_by_increment(list_to_inc:List[float], inc_amt:int=1) -> List[List[float]]:
     '''
     
     :param list_to_inc:
     :param inc_amt:
     '''
-    top_range=create_range_by_inc(list_to_inc,inc_amt)
-    bottom_range=[x+inc_amt for x in top_range]
-    return [find_indices(list_to_inc,lambda e: e>=top_range[i] and e<bottom_range[i]) for i in range(0,len(top_range))]
+    top_range = create_range_by_inc(list_to_inc, inc_amt)
+    bottom_range = [x + inc_amt for x in top_range]
+    return [find_indices(list_to_inc, lambda e: e >= top_range[i] and e < bottom_range[i]) for i in range(0, len(top_range))]
 
 
-def create_depth_headers(list_headers: List[str])-> List[str]:
+def create_depth_headers(list_headers: List[str]) -> List[str]:
     '''
     Expected output should look like
     
@@ -58,27 +58,27 @@ def create_depth_headers(list_headers: List[str])-> List[str]:
     
     return result
 
-def resampled_years(df_year_sample,yc,inc_amt:int=1):
-    return DataFrame(create_range_by_inc(df_year_sample.iloc[:,0].values.tolist(),inc_amt), columns=[yc])
+def resampled_years(df_year_sample, yc, inc_amt:int=1):
+    return DataFrame(create_range_by_inc(df_year_sample.iloc[:, 0].values.tolist(), inc_amt), columns=[yc])
 
-def resampled_statistics_by_years(df_year_sample,yc,index):
-    appended_data=[]
+def resampled_statistics_by_years(df_year_sample, index):
+    appended_data = []
     for i in index:
-        appended_data.extend(compileStats(df_year_sample.iloc[i,[1]].transpose().values.tolist()))
-    return DataFrame(appended_data,columns=['Mean','Stdv','Median','Max','Min','Count'])
+        appended_data.extend(compileStats(df_year_sample.iloc[i, [1]].transpose().values.tolist()))
+    return DataFrame(appended_data, columns=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
 
-def resampled_depths_by_years(df_year_sample:DataFrame,index,depth_columns:DataFrame,depth_column_headers:List[str]) -> DataFrame:
-    append_depth=[]
+def resampled_depths_by_years(index, depth_columns:DataFrame, depth_column_headers:List[str]) -> DataFrame:
+    append_depth = []
     for i in index:
-        min_depth=depth_columns.iloc[i,:].min()
-        max_depth=depth_columns.iloc[i,:].max()
-        combined=[]       
+        min_depth = depth_columns.iloc[i, :].min()
+        max_depth = depth_columns.iloc[i, :].max()
+        combined = []       
         for j in range(min_depth.size):
             combined.append(min_depth.iloc[j])
             combined.append(max_depth.iloc[j])
         append_depth.append(combined)
 
-    return DataFrame(append_depth,columns=create_depth_headers(depth_column_headers))
+    return DataFrame(append_depth, columns=create_depth_headers(depth_column_headers))
 
 def resampled_by_inc_years(df_year_sample:DataFrame,
                     yc:str,
@@ -89,11 +89,11 @@ def resampled_by_inc_years(df_year_sample:DataFrame,
     :param df:
     :param inc:
     '''
-    index=find_index_by_increment(df_year_sample.iloc[:,0].values.tolist(),inc_amt)
-    df_years=resampled_years(df_year_sample,yc,inc_amt)
-    df_depth=resampled_depths_by_years(df_year_sample,index,depth_columns,depth_column_headers)
-    df_stats=resampled_statistics_by_years(df_year_sample,yc,index)
-    return pandas.concat([df_years,df_depth,df_stats], axis=1)
+    index = find_index_by_increment(df_year_sample.iloc[:, 0].values.tolist(), inc_amt)
+    df_years = resampled_years(df_year_sample, yc, inc_amt)
+    df_depth = resampled_depths_by_years(index, depth_columns, depth_column_headers)
+    df_stats = resampled_statistics_by_years(df_year_sample, index)
+    return pandas.concat([df_years, df_depth, df_stats], axis=1)
     
 
 def findMean(array:List[List[float]]) -> List[float]:
@@ -174,12 +174,12 @@ def compile_stats_by_year(df:DataFrame, headers: Header, yc:str, sc:str, inc_amt
     specified sample and year.
     '''
     
-    year_column = df.loc[:,yc]
-    sample_column = df.loc[:,sc]
+    year_column = df.loc[:, yc]
+    sample_column = df.loc[:, sc]
     
     depth_column_headers = [ h.original_value for h in headers if h.htype == HeaderType.DEPTH ]
-    depth_columns=DataFrame([df.loc[:,c].values.tolist() for c in df.columns if c in depth_column_headers]).transpose()
-    df_year_sample=pandas.concat([year_column, sample_column], axis=1)
-    resampled_data=resampled_by_inc_years(df_year_sample, yc, depth_columns, depth_column_headers, inc_amt)
+    depth_columns = DataFrame([df.loc[:, c].values.tolist() for c in df.columns if c in depth_column_headers]).transpose()
+    df_year_sample = pandas.concat([year_column, sample_column], axis=1)
+    resampled_data = resampled_by_inc_years(df_year_sample, yc, depth_columns, depth_column_headers, inc_amt)
     
     return resampled_data
