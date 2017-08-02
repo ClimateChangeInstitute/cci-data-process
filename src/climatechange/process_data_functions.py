@@ -126,6 +126,16 @@ def get_compiled_stats_by_depth(inc_amt, df, depth_headers, sample_headers):
     
     return compiled_stats
 
+
+def load_and_clean_data(f):
+    df = load_csv(f)
+    headers = process_header_data(df)
+    df = clean_data(df)
+#     print("load and clean data: %s seconds"%(time.time()-start_time_d))
+    depth_headers = [h.original_value for h in headers if h.htype == HeaderType.DEPTH]
+    sample_headers = [h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
+    return df, depth_headers, sample_headers, headers
+
 def resample_by_depths(f:str, inc_amt:float):
     '''
     Resampler by Depths
@@ -145,15 +155,7 @@ def resample_by_depths(f:str, inc_amt:float):
     start_time_d = time.time()
     print("Creating pdf for %s" % f)
     
-    df = load_csv(f)
-    
-    headers = process_header_data(df)
-
-    df = clean_data(df)
-#     print("load and clean data: %s seconds"%(time.time()-start_time_d))
-
-    depth_headers = [h.original_value for h in headers if h.htype == HeaderType.DEPTH]
-    sample_headers = [h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
+    df, depth_headers, sample_headers, headers = load_and_clean_data(f)
 
     compiled_stats = get_compiled_stats_by_depth(inc_amt, df, depth_headers, sample_headers)
 #     print("compile stats: %s seconds"%(time.time()-start_time_d)) 
