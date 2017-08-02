@@ -106,16 +106,6 @@ class Test(unittest.TestCase):
             warnings.simplefilter("ignore", category=RuntimeWarning)   
             result = compile_stats_by_depth(input_test,'depth (m we)', 'Cond (+ALU-S/cm)',0.01)
         assert_frame_equal(expected_result, result)
-        
-    def test_create_csv_pdf_by_depth(self):
-        f=os.path.join('csv_files','input_depths.csv')
-        df = load_csv(f)  
-        headers = process_header_data(df)
-        df = clean_data(df)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=RuntimeWarning)
-            plot.create_csv_pdf_resampled(f, df, 'depth (m we)', headers)
-        
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
