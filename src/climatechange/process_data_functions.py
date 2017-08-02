@@ -127,14 +127,17 @@ def get_compiled_stats_by_depth(inc_amt, df, depth_headers, sample_headers):
     return compiled_stats
 
 
-def load_and_clean_data(f):
+def load_and_clean_data(f, inc_amt):
     df = load_csv(f)
     headers = process_header_data(df)
     df = clean_data(df)
 #     print("load and clean data: %s seconds"%(time.time()-start_time_d))
     depth_headers = [h.original_value for h in headers if h.htype == HeaderType.DEPTH]
     sample_headers = [h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
-    return df, depth_headers, sample_headers, headers
+    return df, get_compiled_stats_by_depth(inc_amt,
+                                           df,
+                                           depth_headers,
+                                           sample_headers), depth_headers, headers
 
 def resample_by_depths(f:str, inc_amt:float):
     '''
@@ -155,9 +158,8 @@ def resample_by_depths(f:str, inc_amt:float):
     start_time_d = time.time()
     print("Creating pdf for %s" % f)
     
-    df, depth_headers, sample_headers, headers = load_and_clean_data(f)
+    df, compiled_stats, depth_headers, headers = load_and_clean_data(f, inc_amt)
 
-    compiled_stats = get_compiled_stats_by_depth(inc_amt, df, depth_headers, sample_headers)
 #     print("compile stats: %s seconds"%(time.time()-start_time_d)) 
     for cur_depth in compiled_stats:
         for c in cur_depth:
@@ -200,8 +202,9 @@ def double_resample_by_depths(f1:str, f2:str, inc_amt:float):
     :param f2:
     '''
     
-    resample_by_depths(f1, inc_amt)
-    resample_by_depths(f2, inc_amt)
+    df1, compiled_stats1, depth_headers1, headers1 = load_and_clean_data(f1, inc_amt)
+    df2, compiled_stats2, depth_headers2, headers2 = load_and_clean_data(f2, inc_amt)
+    
     
 def double_resample_by_depth_intervals(f1:str, f2:str):
     '''
