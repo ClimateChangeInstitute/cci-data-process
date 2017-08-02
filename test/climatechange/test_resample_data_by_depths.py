@@ -105,6 +105,23 @@ class Test(unittest.TestCase):
             warnings.simplefilter("ignore", category=RuntimeWarning)   
             result = compile_stats_by_depth(input_test,'depth (m we)', 'Cond (+ALU-S/cm)',0.01)
         assert_frame_equal(expected_result, result.df)
+        
+    def test_append_compile_stats_by_depth(self):
+        df = load_csv(os.path.join('csv_files','input_depths.csv'))
+        headers = process_header_data(df)
+        df = clean_data(df)
+        depth_headers = [h.original_value for h in headers if h.htype == HeaderType.DEPTH]
+        sample_headers=[h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
+        compiled_stats = []
+        inc_amt=0.01
+   
+        for depth_name in depth_headers:
+            for sample_name in sample_headers:
+                compiled_stats.append(compile_stats_by_depth(df, depth_name, sample_name, inc_amt))
+        print(compiled_stats)
+        print(len(compiled_stats))
+        print(len(depth_headers))
+        print(len(sample_headers))
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
