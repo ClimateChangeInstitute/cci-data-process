@@ -23,7 +23,6 @@ from climatechange.resampleStats import findMedian
 from climatechange.resampleStats import findMin
 from climatechange.resampleStats import findStd
 from climatechange.headers import HeaderType
-import math
 from math import isnan
 import warnings
 
