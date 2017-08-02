@@ -184,13 +184,12 @@ def compile_stats_to_csv_pdf(f:str,
     for sample_name in sample_headers:
         if HeaderDictionary().parse_headers([x_name])[0].htype == HeaderType.YEARS:
             df_resampled_stats = compile_stats_by_year(df, headers, x_name, sample_name)
-#             label_name='Years'
+            label_name='Year'
         else:
             df_resampled_stats = compile_stats_by_depth(df,x_name, sample_name)
-#             label_name='Depths'
+            label_name='Depth'
         df_name=df_resampled_stats.columns[0]
         write_resampled_data_to_csv_files(df_resampled_stats, f + ('_resampled_%s_%s.csv' % (x_name, sample_name.replace("/",""))))
-    
         plt.figure(figsize=(11, 8.5))
         fig, tg = plt.subplots(1)
         ax = df_resampled_stats[[df_name, bar_header]].plot(x=df_name, kind='line',color='r', ax=tg)
@@ -201,7 +200,8 @@ def compile_stats_to_csv_pdf(f:str,
         vals = ax.get_xticks()
         x_str='{:.%sf}' %str(inc_amt)[::-1].find('.')
         ax.set_xticklabels([x_str.format(x) for x in vals])
-        plt.title('Resampled by %s of %s' % (bar_header, sample_name))
+        
+        plt.title('Resampled to %s %s resolution of %s' % (inc_amt,label_name,sample_name))
         plt.xlabel(x_name)
         plt.ylabel(sample_name)
         plt.legend()    
@@ -209,16 +209,16 @@ def compile_stats_to_csv_pdf(f:str,
         plt.close()
 
 def create_csv_pdf_resampled(f:str,
-                                     df:DataFrame,
-                                     x_name:str,
-                                     headers:Header,
-                                     inc_amt:int=0.04,
-                                     bar_header:str='Mean')->str:
+                             df:DataFrame,
+                             x_name:str,
+                             headers:Header,
+                             inc_amt:int=0.01,
+                             bar_header:str='Mean')->str:
     '''
     Create a pdf file with multiple plots based on the data frame.
     :param f: input file path
     :param df: dataframe of input file
-    :param x_name: name of year column
+    :param x_name: name of x column (year or depth)
     :param headers: headers of input dataframe
     :param bar_header: header of statistic to plot
     

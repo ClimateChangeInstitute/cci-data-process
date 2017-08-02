@@ -108,13 +108,14 @@ class Test(unittest.TestCase):
         assert_frame_equal(expected_result, result)
         
     def test_create_csv_pdf_by_depth(self):
-        f=os.path.join('csv_files','small.csv')
+        f=os.path.join('csv_files','input_depths.csv')
         df = load_csv(f)  
         headers = process_header_data(df)
         df = clean_data(df)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            plot.create_csv_pdf_resampled(f, df, 'depth (m we) ', headers)
+            plot.create_csv_pdf_resampled(f, df, 'depth (m we)', headers)
+        
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
