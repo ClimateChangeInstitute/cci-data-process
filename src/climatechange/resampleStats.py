@@ -102,6 +102,7 @@ def findMean(array:List[List[float]]) -> List[float]:
     :param array: list of lists, 2D array of floats
     :return: list of mean values for each list
     '''
+    
     return [np.nanmean(i) for i in array]  
 
 def findMedian(array:List[List[float]]) -> List[float]:

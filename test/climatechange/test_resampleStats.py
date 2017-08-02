@@ -22,12 +22,17 @@ from climatechange.resampleStats import findMean, create_depth_headers
 from climatechange.resampleStats import findMedian
 from climatechange.resampleStats import findMin
 from climatechange.resampleStats import findStd
-from climatechange.headers import HeaderDictionary,HeaderType, Header
+from climatechange.headers import HeaderType
+import math
+from math import isnan
+import warnings
+
 
 
 # list of values by column, first index is column index, for each you get element of row 
 inc_amt=1
 emptyArray = []
+nanArray=[[np.NaN, np.nan, np.nan]]
 singleRowArray = [[5, 3, 4, 5, 3]]
 multipleRowArray = [[5.0, 4.0, 3.0, 2.0, 1.0],
                    [2.0, 3.0, 4.0, 5.0, 6.0 ],
@@ -44,7 +49,6 @@ test_output = [[6.333333333333333, 0.94280904158206336,7.0, 7, 5,  3], [4.0,0.81
 
 class Test(unittest.TestCase):
 
-
     def setUp(self):
         pass
 
@@ -58,12 +62,15 @@ class Test(unittest.TestCase):
 
 # test for all functions with same name
     def testfindMean(self):
-        self.assertAlmostEqual([], findMean(emptyArray))
-        self.assertAlmostEqual([4.0], findMean(singleRowArray))
-#         self.assertAlmostEqual([3.0, 4.0, 3.0], findMean(multipleRowArray))
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            self.assertAlmostEqual([], findMean(emptyArray))
+            self.assertAlmostEqual([4.0], findMean(singleRowArray))
+            self.assertTrue(isnan(findMean(nanArray)[0]))
+            self.assertAlmostEqual([3.0, 4.0, 3.0], findMean(multipleRowArray))
         
-        str_input=[['f','r','6']]
-        self.assertRaises(TypeError, findMean, str_input)
+            str_input=[['f','r','6']]
+            self.assertRaises(TypeError, findMean, str_input)
 
         
         # Maybe throw an error?
@@ -74,37 +81,32 @@ class Test(unittest.TestCase):
     
         # Also assume that 2D array is rectangular shape? No funny business. :-)
     
-    def testfindMedian(self):       
-        self.assertAlmostEqual([], findMedian(emptyArray))
-        self.assertAlmostEqual([4.0], findMedian(singleRowArray))
-        self.assertAlmostEqual([3.0, 4.0, 3.0], findMedian(multipleRowArray))
+    def testfindMedian(self):     
+            self.assertAlmostEqual([], findMedian(emptyArray))
+            self.assertAlmostEqual([4.0], findMedian(singleRowArray))
+            self.assertAlmostEqual([3.0, 4.0, 3.0], findMedian(multipleRowArray))
     
     def testfindMax(self):
-        self.assertAlmostEqual([], findMax(emptyArray))
-        self.assertAlmostEqual([5.0], findMax(singleRowArray))
-        self.assertAlmostEqual([5.0, 6.0, 5.0], findMax(multipleRowArray))
+            self.assertAlmostEqual([], findMax(emptyArray))
+            self.assertAlmostEqual([5.0], findMax(singleRowArray))
+            self.assertAlmostEqual([5.0, 6.0, 5.0], findMax(multipleRowArray))
     
-    def testfindMin(self):    
-        self.assertAlmostEqual([], findMin(emptyArray))
-        self.assertAlmostEqual([3.0], findMin(singleRowArray))
-        self.assertAlmostEqual([1.0, 2.0, 1.0], findMin(multipleRowArray))
+    def testfindMin(self): 
+            self.assertAlmostEqual([], findMin(emptyArray))
+            self.assertAlmostEqual([3.0], findMin(singleRowArray))
+            self.assertAlmostEqual([1.0, 2.0, 1.0], findMin(multipleRowArray))
     
     def testfindStd(self):
         self.assertAlmostEqual([], findStd(emptyArray))
         self.assertAlmostEqual([0.894427190999915860], findStd(singleRowArray))
         self.assertAlmostEqual([1.4142135623730951, 1.4142135623730951, 1.4142135623730951], findStd(multipleRowArray))
 
-# <<<<<<< HEAD
     def testfindLen(self):
         self.assertAlmostEqual([], findLen(emptyArray))
         self.assertAlmostEqual([5.0], findLen(singleRowArray))
         self.assertAlmostEqual([5.0, 5.0, 5.0], findLen(multipleRowArray))
  
-
-#         pass# =======
-#         
-    def testcompileStats(self):
-        
+    def testcompileStats(self):        
         self.assertAlmostEqual([], compileStats(emptyArray))
         self.assertAlmostEqual([[4, 0.89442719099991586, 4, 5, 3, 5]], compileStats(singleRowArray))
         self.assertAlmostEqual(test_output, compileStats(test_input))
@@ -125,10 +127,10 @@ class Test(unittest.TestCase):
                                compileStats(frame.transpose().values.tolist()))
         
     def test_create_depth_headers(self):
-        input=['depth (m we)','depth (m abs)']
+        input_test=['depth (m we)','depth (m abs)']
         input_empty=[]
         expected_output=['top depth (m we)','bottom depth (m we)','top depth (m abs)','bottom depth (m abs)']
-        result=create_depth_headers(input)
+        result=create_depth_headers(input_test)
         result_empty=create_depth_headers(input_empty)
         self.assertListEqual(expected_output, result)
         self.assertListEqual([],result_empty)
@@ -157,16 +159,13 @@ class Test(unittest.TestCase):
         index=find_index_by_increment(input_test.loc[:,'Dat210617'].values.tolist(), inc_amt)
         self.assertEqual(expected_output, index)
     
-    def test_resampled_depths_by_years(self):
-#         expected_result = load_csv(os.path.join('csv_files','output_test_zeros_and_numbers.csv')) 
-         
+    def test_resampled_depths_by_years(self):      
         input_test = load_csv(os.path.join('csv_files','input_test_zeros_and_numbers.csv'))
         input_test = clean_data(input_test)
         
         headers = process_header_data(input_test)
         depth_column_headers = [ h.original_value for h in headers if h.htype == HeaderType.DEPTH ]
         depth_columns=DataFrame([input_test.loc[:,c].values.tolist() for c in input_test.columns if c in depth_column_headers]).transpose()
-
         expected_result=DataFrame([[0.593488372],[0.916582279],[1.61],[2.48]]).transpose()
         expected_result.columns=['top depth (m we) ','bottom depth (m we) ','top depth (m abs)','bottom depth (m abs)']
         df_year_sample=pd.concat([input_test.loc[:,'Dat210617'], input_test.loc[:,'Cond (+ALU-S/cm)']], axis=1)
@@ -194,11 +193,14 @@ class Test(unittest.TestCase):
         assert_frame_equal(expected_result, result)
         
     def test_empty_rows(self):
+
         expected_result = load_csv(os.path.join('csv_files','output_test_zeros.csv')) 
         input_test = load_csv(os.path.join('csv_files','input_test_zeros.csv'))
         input_test = clean_data(input_test)
         headers = process_header_data(input_test)
-        result = create_statistics(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)')
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            result = create_statistics(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)')
         assert_frame_equal(expected_result, result)
          
     def test_partial_empty_rows(self):
@@ -206,7 +208,9 @@ class Test(unittest.TestCase):
         input_test = clean_data(input_test)
         expected_result = load_csv(os.path.join('csv_files','output_test_zeros_and_numbers.csv'))   
         headers = process_header_data(input_test)
-        result = create_statistics(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)')
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            result = create_statistics(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)')
         assert_frame_equal(expected_result, result)
     
     def create_stats_headers(self):
@@ -215,10 +219,7 @@ class Test(unittest.TestCase):
         expected_result = load_csv(os.path.join('csv_files','output_test_zeros_and_numbers.csv'))   
         headers = process_header_data(input_test)
         result = create_statistics(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)')
-        assert_frame_equal(expected_result.columns, result.columns)
-        
-        
-        
+        assert_frame_equal(expected_result.columns, result.columns)     
         
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']

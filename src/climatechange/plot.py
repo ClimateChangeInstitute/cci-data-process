@@ -4,10 +4,7 @@ Created on Jul 17, 2017
 @author: Mark Royer
 '''
 from pandas.core.frame import DataFrame
-# from typing import List
-
 from matplotlib.backends.backend_pdf import PdfPages
-
 from climatechange.headers import Header, HeaderType, HeaderDictionary
 import matplotlib.pyplot as plt
 from climatechange.resampleStats import compile_stats_by_year
@@ -187,10 +184,10 @@ def compile_stats_to_csv_pdf(f:str,
     for sample_name in sample_headers:
         if HeaderDictionary().parse_headers([x_name])[0].htype == HeaderType.YEARS:
             df_resampled_stats = compile_stats_by_year(df, headers, x_name, sample_name)
-            label_name='Years'
+#             label_name='Years'
         else:
             df_resampled_stats = compile_stats_by_depth(df,x_name, sample_name)
-            label_name='Depths'
+#             label_name='Depths'
         df_name=df_resampled_stats.columns[0]
         write_resampled_data_to_csv_files(df_resampled_stats, f + ('_resampled_%s_%s.csv' % (x_name, sample_name.replace("/",""))))
     

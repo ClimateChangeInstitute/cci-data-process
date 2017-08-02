@@ -9,13 +9,12 @@ from typing import List
 
 import numpy
 
-from climatechange import plot, resampleStats
+from climatechange import plot
 from climatechange.file import load_csv
 from climatechange.headers import HeaderDictionary, HeaderType, Header
-from climatechange.resampleStats import compile_stats_by_year
 from builtins import float
-from climatechange.resample_data_by_depths import compile_stats_by_depth
 import time
+from climatechange.resampleStats import compile_stats_by_year
 
 
 
@@ -25,7 +24,7 @@ def process_header_data(df) -> List[Header]:
     
     parsedHeaders = hd.parse_headers(list(df.columns))
     
-    unknownHeaders = [ h for h in parsedHeaders if h.htype == HeaderType.UNKNOWN ]
+#     unknownHeaders = [ h for h in parsedHeaders if h.htype == HeaderType.UNKNOWN ]
     
 #     print("All headers are: %s" % parsedHeaders)
 #     print("Unknown headers are: %s" % unknownHeaders)
@@ -124,7 +123,7 @@ def resample_by_depths(f:str):
     1. Mean w/ raw, median w/ raw (by depths) on same plot for each year column
     have 1 pdf with mean and median for each sample
     
-    :param f:
+    :param f:This is a CSV file
     '''
     
     print("Creating pdf for %s" % f)

@@ -3,13 +3,9 @@ Created on Jul 31, 2017
 
 @author: Heather
 '''
-# from climatechange.plot import write_resampled_data_to_csv_files
-from matplotlib.backends.backend_pdf import PdfPages
+
 from pandas.core.frame import DataFrame
-from climatechange.headers import Header, HeaderType
-import matplotlib.pyplot as plt
-from climatechange.resampleStats import compileStats, create_range_by_inc,find_indices,find_index_by_increment,\
-    create_depth_headers
+from climatechange.resampleStats import compileStats,find_indices,create_depth_headers
 import pandas
 from typing import List
 import numpy as np
