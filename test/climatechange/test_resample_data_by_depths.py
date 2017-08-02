@@ -7,7 +7,6 @@ import unittest
 from pandas.core.frame import DataFrame
 from pandas.util.testing import assert_frame_equal
 from climatechange.file import load_csv
-from climatechange import plot
 from climatechange.process_data_functions import process_header_data, clean_data
 from climatechange.resample_data_by_depths import resampled_depths,create_range_for_depths,\
     find_index_by_increment_for_depths,resampled_by_inc_depths,compile_stats_by_depth
