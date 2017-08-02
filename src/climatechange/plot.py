@@ -212,7 +212,7 @@ def create_csv_pdf_resampled(f:str,
                              df:DataFrame,
                              x_name:str,
                              headers:Header,
-                             inc_amt:int=0.01,
+                             inc_amt:float,
                              bar_header:str='Mean')->str:
     '''
     Create a pdf file with multiple plots based on the data frame.

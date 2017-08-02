@@ -11,8 +11,7 @@ from pandas.util.testing import assert_frame_equal
 import numpy as np
 import pandas as pd
 from climatechange.file import load_csv
-from climatechange.process_data_functions import create_statistics, \
-    process_header_data, clean_data
+from climatechange.process_data_functions import process_header_data, clean_data
 from climatechange.resampleStats import compileStats, compile_stats_by_year,\
     resampled_by_inc_years, find_index_by_increment, resampled_depths_by_years,\
     create_range_by_inc
@@ -199,7 +198,7 @@ class Test(unittest.TestCase):
         headers = process_header_data(input_test)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            result = create_statistics(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)')
+            result = compile_stats_by_year(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)')
         assert_frame_equal(expected_result, result)
          
     def test_partial_empty_rows(self):
@@ -209,7 +208,7 @@ class Test(unittest.TestCase):
         headers = process_header_data(input_test)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            result = create_statistics(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)')
+            result = compile_stats_by_year(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)')
         assert_frame_equal(expected_result, result)
     
     def create_stats_headers(self):
@@ -217,7 +216,7 @@ class Test(unittest.TestCase):
         input_test = clean_data(input_test)
         expected_result = load_csv(os.path.join('csv_files','output_test_zeros_and_numbers.csv'))   
         headers = process_header_data(input_test)
-        result = create_statistics(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)')
+        result = compile_stats_by_year(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)')
         assert_frame_equal(expected_result.columns, result.columns)     
         
 if __name__ == "__main__":
