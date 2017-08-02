@@ -3,17 +3,20 @@ Created on Jul 13, 2017
 
 @author: Heather
 '''
+from math import isnan, nan
 import os
+from pandas.util.testing import assert_frame_equal
+import sys
 import unittest
+import warnings
 
 from pandas.core.frame import DataFrame
-from pandas.util.testing import assert_frame_equal
-import numpy as np
-import pandas as pd
+
 from climatechange.file import load_csv
+from climatechange.headers import HeaderType
 from climatechange.process_data_functions import process_header_data, clean_data
-from climatechange.resampleStats import compileStats, compile_stats_by_year,\
-    resampled_by_inc_years, find_index_by_increment, resampled_depths_by_years,\
+from climatechange.resampleStats import compileStats, compile_stats_by_year, \
+    resampled_by_inc_years, find_index_by_increment, resampled_depths_by_years, \
     create_range_by_inc
 from climatechange.resampleStats import findLen
 from climatechange.resampleStats import findMax
@@ -21,10 +24,8 @@ from climatechange.resampleStats import findMean, create_depth_headers
 from climatechange.resampleStats import findMedian
 from climatechange.resampleStats import findMin
 from climatechange.resampleStats import findStd
-from climatechange.headers import HeaderType
-from math import isnan
-import warnings
-
+import numpy as np
+import pandas as pd
 
 
 # list of values by column, first index is column index, for each you get element of row 
@@ -134,15 +135,16 @@ class Test(unittest.TestCase):
         self.assertListEqual([],result_empty)
         
     def test_clean_data(self):
-        input_test=DataFrame([['str', 0, 1],[4, 5, 6],[7, 'str', 0]])
-        expected_output=DataFrame([[np.nan, np.nan, 1],[4, 5, 6],[7, np.nan, np.nan]])
+        input_test=DataFrame([['str', 0, 1],
+                              [4, 5, 6],
+                              [7, 'str', 0]])
+        expected_output=DataFrame([[nan, nan, 1],
+                                   [4, 5, 6],
+                                   [7, nan, nan]])
         result=clean_data(input_test)
         
-        try:
-            assert_frame_equal(expected_output, result)
-            return True
-        except AssertionError:
-            return False
+        assert_frame_equal(expected_output, result)
+    
     
     def test_create_range_by_inc(self):
         expected_output=[2011]

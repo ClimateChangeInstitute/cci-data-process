@@ -4,22 +4,23 @@ Created on Jul 24, 2017
 :author: Mark Royer
 '''
 
-from pandas.core.frame import DataFrame
+from builtins import float
+from math import nan
+from matplotlib.backends.backend_pdf import PdfPages
+import time
 from typing import List
 
+from matplotlib import pyplot
+from numpy import float64
 import numpy
+from pandas.core.frame import DataFrame
 
 from climatechange import plot
 from climatechange.file import load_csv
 from climatechange.headers import HeaderDictionary, HeaderType, Header
-from builtins import float
-import time
-from climatechange.resample_data_by_depths import compile_stats_by_depth
-from climatechange.plot import write_resampled_data_to_csv_files,\
+from climatechange.plot import write_resampled_data_to_csv_files, \
     add_compile_stats_to_pdf
-from matplotlib.backends.backend_pdf import PdfPages
-from matplotlib import pyplot
-
+from climatechange.resample_data_by_depths import compile_stats_by_depth
 
 
 def process_header_data(df) -> List[Header]:
@@ -46,18 +47,21 @@ def clean_data(df):
     for r in values :
         for i in range(len(r)):
             if r[i] == 0:
-                r[i] = numpy.nan
+                r[i] = float64(nan)
     
     # Replace str values with nan
     for r in values :
         for i in range(len(r)):
             if is_number(r[i]):
-                r[i] = float(r[i])
+                r[i] = float64(r[i])
             else:
-                r[i] = numpy.nan 
+                r[i] = float64(nan) 
                 
     
-    df = DataFrame(data=values, index=df.index, columns=df.columns)
+    df = DataFrame(data=values,
+                   index=df.index,
+                   columns=df.columns,
+                   dtype=float64)
     
     return df
 
