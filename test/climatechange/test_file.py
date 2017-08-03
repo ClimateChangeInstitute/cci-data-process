@@ -9,8 +9,7 @@ import unittest
 from climatechange.file import load_dictionary, load_csv, data_dir, save_dictionary
 from climatechange.headers import HeaderEncoder, to_headers, HeaderType
 from climatechange.process_data_functions import process_header_data
-from climatechange.read_me_output import create_readme_output_file, \
-    create_readme_output_file_tester
+from climatechange.read_me_output import create_readme_output_file
 
 
 class Test(unittest.TestCase):
@@ -95,17 +94,18 @@ class Test(unittest.TestCase):
          
                 
     def testcreate_readme_output_file_tester(self):
-        input_template="""\
-        Date ran:{run_date}
-        Time to run:{time}
-          
-        Process: Resample Input Data to {inc_amt} {label_name} Resolution
-          
-        Input filename: {file_name}
-        Years: {years}
-        Depths: {depths}
-        Samples: {samples}
-        """
+        input_template=\
+"""
+Date ran:{run_date}
+Time to run:{time}
+  
+Process: Resample Input Data to {inc_amt} {label_name} Resolution
+  
+Input filename: {file_name}
+Years: {years}
+Depths: {depths}
+Samples: {samples}
+"""
         f=os.path.join('csv_files', 'small.csv')
         df = load_csv(f)
         headers = process_header_data(df)
@@ -114,18 +114,19 @@ class Test(unittest.TestCase):
         inc_amt=1
         label_name='year'
         year_headers = [h.original_value for h in headers if h.htype == HeaderType.YEARS]
-        result=create_readme_output_file_tester(input_template,f,headers,time_ran,run_date,inc_amt,label_name,year_headers)
-        expected_result="""\
-        Date ran:2017-08-03
-        Time to run:60
-          
-        Process: Resample Input Data to 1 year Resolution
-          
-        Input filename: csv_files\small.csv
-        Years: ['Dat210617', 'Dat011216V2']
-        Depths: ['depth (m we) ', 'depth (m abs)']
-        Samples: ['Cond (+ALU-S/cm)', 'Na (ppb)', 'Ca (ppb)', 'Dust (part/ml)', 'NH4 (ppb)', 'NO3 (ppb)']
-        """
+        result=create_readme_output_file(input_template,f,headers,time_ran,run_date,inc_amt,label_name,year_headers)
+        expected_result=\
+"""
+Date ran:2017-08-03
+Time to run:60
+  
+Process: Resample Input Data to 1 year Resolution
+  
+Input filename: csv_files"""+ os.sep + """small.csv
+Years: ['Dat210617', 'Dat011216V2']
+Depths: ['depth (m we) ', 'depth (m abs)']
+Samples: ['Cond (+ALU-S/cm)', 'Na (ppb)', 'Ca (ppb)', 'Dust (part/ml)', 'NH4 (ppb)', 'NO3 (ppb)']
+"""
         self.assertEqual(result,expected_result)
 
 
