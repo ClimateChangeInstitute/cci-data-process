@@ -8,14 +8,14 @@ template=
 '''
 Template for text file for README file:
 
-Cci-data-processor
-Authors:
-Date ran:
-Time to run:
+CCI-data-processor
+Authors: Mark Royer and Heather Clifford
+Date ran:{date}
+Time to run:{time}
 
 Input filename: {file_name}
-Process: Resampled to {inc_amt} Year Resolution
-Years Resampled: {years}
+Process: Resample Input Data to {inc_amt} {label_name} Resolution
+Years: {years}
 Depths: {depths}
 Samples: {samples}
 
@@ -23,7 +23,7 @@ Output Files:
 [{#csvfiles}] CSV files created
 
 Ex. Of name of csv files
-({file_name}.resampledby_{inc_amt}_years_yearname_samplename
+({f_base}.resampledby_{inc_amt}_years_yearname_samplename
 
 For each Year and sample, CSV files containing: 
 Years at {inc_amt} Year Resolution

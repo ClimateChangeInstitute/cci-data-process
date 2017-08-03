@@ -103,12 +103,12 @@ def resample_by_years(f:str, inc_amt:float=1):
     
     :param: f: This is a CSV file
     '''
-#     start_time_d = time.time()
+    start_time_d = time.time()
     print("Creating pdf for %s" % f)
 
     df, compiled_stats, year_headers, headers = load_and_clean_year_data(f, inc_amt)
     f_base=os.path.splitext(f)[0]
-#     print("compile stats: %s seconds"%(time.time()-start_time_d)) 
+    print("compile stats: %s seconds"%(time.time()-start_time_d)) 
     for cur_year in compiled_stats:
         for c in cur_year:
             write_resampled_data_to_csv_files(c.df,
@@ -192,20 +192,20 @@ def resample_by_depths(f:str, inc_amt:float):
     '''
     start_time_d = time.time()
     print("Creating pdf for %s" % f)
-    f=os.path.splitext(f)[0]
+    f_base=os.path.splitext(f)[0]
     df, compiled_stats, depth_headers, headers = load_and_clean_depth_data(f, inc_amt)
 
-#     print("compile stats: %s seconds"%(time.time()-start_time_d)) 
+    print("compile stats: %s seconds"%(time.time()-start_time_d)) 
     for cur_depth in compiled_stats:
         for c in cur_depth:
             write_resampled_data_to_csv_files(c.df,
-                                              f+'_stats_%s_inc_resolution_%s_%s.csv' % (inc_amt,c.x_value_name, c.sample_value_name.replace("/", "")))
+                                              f_base+'_stats_%s_inc_resolution_%s_%s.csv' % (inc_amt,c.x_value_name, c.sample_value_name.replace("/", "")))
 #     print("create csvs: %s seconds"%(time.time()-start_time_d))       
     for i in range(len(depth_headers)):
-        file_name = (f+'_plots_%s_inc_resolution_%s.pdf' %(inc_amt,depth_headers[i]))
+        file_name = (f_base+'_plots_%s_inc_resolution_%s.pdf' %(inc_amt,depth_headers[i]))
         with PdfPages(file_name) as pdf:
             for c in compiled_stats[i]:
-                add_compile_stats_to_pdf(f,
+                add_compile_stats_to_pdf(f_base,
                                          df,
                                          c.df,
                                          pdf,
@@ -269,8 +269,8 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
 def main(files):
     start_time = time.time()
     for f in files:
-        resample_by_years(f,1)
-#         resample_by_depths(f, 0.04)
+#         resample_by_years(f,1)
+        resample_by_depths(f, 0.04)
     print('done')
     print(" %s seconds to run" % (time.time() - start_time))
     
