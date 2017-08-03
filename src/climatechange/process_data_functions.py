@@ -21,12 +21,14 @@ from climatechange.file import load_csv
 from climatechange.headers import HeaderDictionary, HeaderType, Header
 from climatechange.plot import write_resampled_data_to_csv_files, \
     add_compile_stats_to_pdf
-from climatechange.read_me_output import create_readme_output_file
+from climatechange.read_me_output import create_readme_output_file,\
+    write_readmefile_to_txtfile
 from climatechange.resampleStats import compile_stats_by_year
 from climatechange.resample_data_by_depths import compile_stats_by_depth
 from climatechange.resample_data_by_depths import compile_stats_by_depth
 import datetime
 from climatechange.read_me_output import template
+from climatechange.compiled_stat import CompiledStat
 
 
 def process_header_data(df) -> List[Header]:
@@ -75,7 +77,7 @@ def get_compiled_stats_by_year(inc_amt:int,
                                df:DataFrame,
                                year_headers:List[Header],
                                sample_headers:List[Header],
-                               headers:List[Header]) -> DataFrame:
+                               headers:List[Header]) -> List[List[CompiledStat]]:
     compiled_stats = []
     for year_name in year_headers:
         cur_year = []
@@ -86,7 +88,7 @@ def get_compiled_stats_by_year(inc_amt:int,
     return compiled_stats
 
 
-def load_and_clean_year_data(f:str, inc_amt:int) -> Tuple[DataFrame, DataFrame, List[Header], List[Header]]:
+def load_and_clean_year_data(f:str, inc_amt:int) -> Tuple[DataFrame, List[List[CompiledStat]], List[Header], List[Header]]:
     df = load_csv(f)
     headers = process_header_data(df)
     df = clean_data(df)
@@ -119,6 +121,9 @@ def resample_by_years(f:str, inc_amt:int=1):
 
     df, compiled_stats, year_headers, headers = load_and_clean_year_data(f, inc_amt)
     f_base=os.path.splitext(f)[0]
+    file_headers=compiled_stats[0][0].df.columns.tolist()
+    num_csvfiles=sum(len(c) for c in compiled_stats)
+    
 #     print("compile stats: %s seconds"%(time.time()-start_time_d)) 
     for cur_year in compiled_stats:
         for c in cur_year:
@@ -145,7 +150,10 @@ def resample_by_years(f:str, inc_amt:int=1):
                 
     time_ran=(time.time() - start_time)
     run_date=str(datetime.date.today())
-    create_readme_output_file(template,f,time_ran,run_date,inc_amt,'year',year_headers)
+    output_path=os.path.dirname(f)
+    readme = create_readme_output_file(template,f,headers,time_ran,run_date,inc_amt,'year',file_headers,num_csvfiles)
+    write_readmefile_to_txtfile(readme,os.path.join(output_path,'00README.txt'))
+
 #     df = load_csv(f)
 #     
 #     headers = process_header_data(df)
@@ -224,6 +232,9 @@ def resample_by_depths(f:str, inc_amt:float):
     print("Creating pdf for %s" % f)
     f_base=os.path.splitext(f)[0]
     df, compiled_stats, depth_headers, headers = load_and_clean_depth_data(f, inc_amt)
+    
+    num_csvfiles=sum(len(c) for c in compiled_stats)
+    file_headers=compiled_stats[0][0].df.columns.tolist()
 
 #     print("compile stats: %s seconds"%(time.time()-start_time)) 
     for cur_depth in compiled_stats:
@@ -251,9 +262,10 @@ def resample_by_depths(f:str, inc_amt:float):
                 
     time_ran=(time.time() - start_time)
     run_date=str(datetime.date.today())
-    create_readme_output_file(template,f,time_ran,run_date,inc_amt,'depth',depth_headers)
-#     print("create_pdfs: %s seconds"%(time.time()-start_time_d))            
-            
+    output_path=os.path.dirname(f)
+    readme=create_readme_output_file(template,f,headers,time_ran,run_date,inc_amt,'depth',file_headers,num_csvfiles)
+    write_readmefile_to_txtfile(readme,os.path.join(output_path,'00README.txt'))     
+
 #     for depth_name in depth_headers:
 #         plot.create_csv_pdf_resampled(f, df, depth_name, headers,inc_amt)
     
@@ -308,8 +320,8 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
 def main(files):
     start_time = time.time()
     for f in files:
-#         resample_by_years(f,1)
-        resample_by_depths(f, 0.04)
+        resample_by_years(f,10)
+#         resample_by_depths(f, 0.04)
     print('done')
     print(" %s seconds to run" % (time.time() - start_time))
     

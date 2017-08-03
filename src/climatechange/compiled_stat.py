@@ -17,7 +17,7 @@ class CompiledStat(object):
     sample_value_name:str
     
 
-    def __init__(self, df,x_value_name,sample_value_name):
+    def __init__(self, df:DataFrame,x_value_name:str,sample_value_name:str):
         '''
         Constructor
         '''

@@ -113,8 +113,9 @@ Samples: {samples}
         run_date='2017-08-03'
         inc_amt=1
         label_name='year'
+        num_csvfiles=12
         year_headers = [h.original_value for h in headers if h.htype == HeaderType.YEARS]
-        result=create_readme_output_file(input_template,f,headers,time_ran,run_date,inc_amt,label_name,year_headers)
+        result=create_readme_output_file(input_template,f,headers,time_ran,run_date,inc_amt,label_name,year_headers,num_csvfiles)
         expected_result=\
 """
 Date ran:2017-08-03
@@ -128,7 +129,6 @@ Depths: ['depth (m we) ', 'depth (m abs)']
 Samples: ['Cond (+ALU-S/cm)', 'Na (ppb)', 'Ca (ppb)', 'Dust (part/ml)', 'NH4 (ppb)', 'NO3 (ppb)']
 """
         self.assertEqual(result,expected_result)
-
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']

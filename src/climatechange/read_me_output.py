@@ -11,7 +11,7 @@ ReadMeFile
 
 CCI-data-processor
 Authors: Mark Royer and Heather Clifford
-Date ran:{date}
+Date ran:{run_date}
 Time to run:{time}
 
 Process: Resample Input Data to {inc_amt} {label_name} Resolution
@@ -29,8 +29,6 @@ Ex. Of name of csv file name:
 
 For each {label_name} and sample, CSV files containing:
 {file_headers}
-% need if statement in code
-{stat_headers}
 
 
 [{#PDFfiles}] PDF files created
@@ -43,19 +41,16 @@ For each {label_name}, PDF files containing:
     raw sample data vs. {label_name}
     resampled mean data vs. {inc_amt}_{label_name}_resolution
 '''
-# def write_readmefile_to_csv(readme:str,output_filename):
-#     data = ['a,x', 'b,y', 'c,z']
-#     f = open('data.csv', 'wb')
-#     w = csv.writer(f, delimiter = ',')
-#     w.writerows([x.split(',') for x in data])
-#     f.close()
+def write_readmefile_to_txtfile(readme:str,output_filename:str):
+    with open(output_filename, "w") as text_file:
+        text_file.write(readme)
+        text_file.flush()
+        
 
-def create_readme_output_file(template,f,headers,time_ran,run_date,inc_amt,label_name,file_headers):
-    stat_headers=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count']
+def create_readme_output_file(template,f,headers,time_ran,run_date,inc_amt,label_name,file_headers,num_csvfiles):
     year_headers = [h.original_value for h in headers if h.htype == HeaderType.YEARS]
     depth_headers = [h.original_value for h in headers if h.htype == HeaderType.DEPTH]
     sample_headers = [h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
-    num_csvfiles=len(file_headers)*len(sample_headers)
     num_pdffiles=len(file_headers)
     
 #     output_filename=os.path.join('00README')
@@ -72,11 +67,9 @@ def create_readme_output_file(template,f,headers,time_ran,run_date,inc_amt,label
             'f_base':os.path.splitext(f)[0],
             'x_name':file_headers[0],
             'sample_name':sample_headers[0],
-            'file_headers':file_headers,
-            'stat_headers':stat_headers}
+            'file_headers':file_headers}
  
 
-    result=template.format(**data)
-    print(result)
-    return result
+    
+    return template.format(**data)
     
