@@ -201,7 +201,7 @@ def add_compile_stats_to_pdf(f:str,
                              headers:Header,
                              inc_amt:float,
                              label_name:str,
-                             bar_header:str='Mean') -> str:
+                             stat_header:str='Mean') -> str:
     '''
     
     :param f: input file path
@@ -209,9 +209,9 @@ def add_compile_stats_to_pdf(f:str,
     :param pdf: pdf file
     :param x_name: name of year column
     :param headers: headers of input dataframe
-    :param bar_header: header of statistic to plot
+    :param stat_header: header of statistic to plot
     
-    :return: csv files with statistics resampled of bar_header, 
+    :return: csv files with statistics resampled of stat_header, 
         pdf files of statistics with raw data
     '''
 
@@ -219,51 +219,55 @@ def add_compile_stats_to_pdf(f:str,
     df_name=df_resampled_stats.columns[0]
     plt.figure(figsize=(11, 8.5))
     fig, tg = plt.subplots(1)
-    ax = df_resampled_stats[[df_name, bar_header]].plot(x=df_name, kind='line',color='r', ax=tg)
+    ax = df_resampled_stats[[df_name, stat_header]].plot(x=df_name, kind='line',color='r', ax=tg)
     ax = df[[x_name, sample_name]].plot(x=x_name, kind='line',
                                            linestyle='-',
                                            color='0.75',
                                            ax=tg,zorder=-1)
     vals = ax.get_xticks()
-    x_str='{:.%sf}' %str(inc_amt)[::-1].find('.')
-    ax.set_xticklabels([x_str.format(x) for x in vals])
+    if label_name=='Depth':
+        x_str='{:.%sf}' %str(inc_amt)[::-1].find('.')
+        ax.set_xticklabels([x_str.format(x) for x in vals])
+        plt.xlabel(x_name)
+    else:
+        ax.set_xticklabels(['{:.0f}'.format(x) for x in vals])
+        plt.xlabel('Year CE')
+    plt.title('%s: %s %s Resolution' % (sample_name,inc_amt,label_name))
     
-    plt.title('%s %s Resolution of %s' % (inc_amt,x_name,sample_name))
-    plt.xlabel(x_name)
     plt.ylabel(sample_name)
     plt.legend()    
     pdf.savefig(fig)
     plt.close()
 
-def create_csv_pdf_resampled(f:str,
-                             df:DataFrame,
-                             x_name:str,
-                             headers:Header,
-                             inc_amt:float,
-                             bar_header:str='Mean')->str:
-    '''
-    Create a pdf file with multiple plots based on the data frame.
-    :param f: input file path
-    :param df: dataframe of input file
-    :param x_name: name of x column (year or depth)
-    :param headers: headers of input dataframe
-    :param bar_header: header of statistic to plot
-    
-    :return: pdf of compiled figures by year,
-        csv file of statistics by sample and year
-    '''
-    file_name=f + ('_resampled_%s.pdf' % x_name)
-    with PdfPages(file_name) as pdf:
-        add_compile_stats_to_pdf(f, df, pdf, x_name, headers,inc_amt, bar_header)    
-        plt.close()
-                    # Meta data for the PdfPages
-#         d = pdf.infodict()
-#         d['Title'] = 'CCI Plot'
-#         d['Author'] = u'Some author'
-#         d['Subject'] = 'CCI Data Parser output'
-#         d['Keywords'] = 'CCI UMaine'
-#         d['CreationDate'] = datetime.datetime.today()
-#         d['ModDate'] = datetime.datetime.utcnow() 
-
-# if __name__ == '__main__':
-#     examplePDFPlot('test.pdf')
+# def create_csv_pdf_resampled(f:str,
+#                              df:DataFrame,
+#                              x_name:str,
+#                              headers:Header,
+#                              inc_amt:float,
+#                              bar_header:str='Mean')->str:
+#     '''
+#     Create a pdf file with multiple plots based on the data frame.
+#     :param f: input file path
+#     :param df: dataframe of input file
+#     :param x_name: name of x column (year or depth)
+#     :param headers: headers of input dataframe
+#     :param bar_header: header of statistic to plot
+#     
+#     :return: pdf of compiled figures by year,
+#         csv file of statistics by sample and year
+#     '''
+#     file_name=f + ('_resampled_%s.pdf' % x_name)
+#     with PdfPages(file_name) as pdf:
+#         add_compile_stats_to_pdf(f, df, pdf, x_name, headers,inc_amt, bar_header)    
+#         plt.close()
+#                     # Meta data for the PdfPages
+# #         d = pdf.infodict()
+# #         d['Title'] = 'CCI Plot'
+# #         d['Author'] = u'Some author'
+# #         d['Subject'] = 'CCI Data Parser output'
+# #         d['Keywords'] = 'CCI UMaine'
+# #         d['CreationDate'] = datetime.datetime.today()
+# #         d['ModDate'] = datetime.datetime.utcnow() 
+# 
+# # if __name__ == '__main__':
+# #     examplePDFPlot('test.pdf')

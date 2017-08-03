@@ -9,6 +9,7 @@ from typing import List
 from climatechange.headers import Header, HeaderType
 import numpy as np
 import pandas
+from climatechange.compiled_stat import CompiledStat
 
 
 def create_range_by_inc(list_to_inc:List[float], inc_amt: int=1) -> List[float]:
@@ -160,26 +161,26 @@ def compileStats(array:List[List[float]]) -> List[List[float]]:
                                   findLen(array))]
 
 
-def compile_stats_by_year(df:DataFrame, headers: Header, yc:str, sc:str, inc_amt:int=1) -> DataFrame:
+def compile_stats_by_year(df:DataFrame, headers: Header, year_name:str, sample_name:str, inc_amt:int=1) -> CompiledStat:
     '''
     From the given data frame compile statistics (mean, median, min, max, etc) 
     based on the parameters.
     
     :param df: The data to compile sats for
-    :param yc: The year column to use for indexing
-    :param sc: The sample compile to create statistics about
+    :param year_name: The year column to use for indexing
+    :param sample_name: The sample compile to create statistics about
     :param inc_amt: The amount to group the year column by.  For example, 
         2012.6, 2012.4, 2012.2 would all be grouped into the year 2012.
     :return: A new DataFrame containing the resampled statistics for the 
     specified sample and year.
     '''
     
-    year_column = df.loc[:, yc]
-    sample_column = df.loc[:, sc]
+    year_column = df.loc[:, year_name]
+    sample_column = df.loc[:, sample_name]
     
     depth_column_headers = [ h.original_value for h in headers if h.htype == HeaderType.DEPTH ]
     depth_columns = DataFrame([df.loc[:, c].values.tolist() for c in df.columns if c in depth_column_headers]).transpose()
     df_year_sample = pandas.concat([year_column, sample_column], axis=1)
-    resampled_data = resampled_by_inc_years(df_year_sample, yc, depth_columns, depth_column_headers, inc_amt)
+    resampled_data = resampled_by_inc_years(df_year_sample, year_name, depth_columns, depth_column_headers, inc_amt)
     
-    return resampled_data
+    return CompiledStat(resampled_data,year_name,sample_name)
