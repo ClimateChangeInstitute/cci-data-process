@@ -10,6 +10,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 import time
 from typing import List
 import os
+from typing import List, Tuple
 from matplotlib import pyplot
 from numpy import float64
 import numpy
@@ -20,6 +21,7 @@ from climatechange.plot import write_resampled_data_to_csv_files, \
     add_compile_stats_to_pdf
 from climatechange.resample_data_by_depths import compile_stats_by_depth
 from climatechange.resampleStats import compile_stats_by_year
+from climatechange.resample_data_by_depths import compile_stats_by_depth
 
 
 def process_header_data(df) -> List[Header]:
@@ -64,12 +66,12 @@ def clean_data(df):
     
     return df
 
-def get_compiled_stats_by_year(inc_amt, df, year_headers, sample_headers,headers):
+def get_compiled_stats_by_year(inc_amt, df, year_headers, sample_headers, headers):
     compiled_stats = []
     for year_name in year_headers:
         cur_year = []
         for sample_name in sample_headers:
-            cur_year.append(compile_stats_by_year(df,headers, year_name, sample_name, inc_amt))
+            cur_year.append(compile_stats_by_year(df, headers, year_name, sample_name, inc_amt))
         compiled_stats.append(cur_year)
     
     return compiled_stats
@@ -85,7 +87,7 @@ def load_and_clean_year_data(f, inc_amt):
     return df, get_compiled_stats_by_year(inc_amt,
                                            df,
                                            year_headers,
-                                           sample_headers,headers), year_headers, headers
+                                           sample_headers, headers), year_headers, headers
 
 def resample_by_years(f:str, inc_amt:float=1):
     '''
@@ -111,9 +113,12 @@ def resample_by_years(f:str, inc_amt:float=1):
     print("compile stats: %s seconds"%(time.time()-start_time_d)) 
     for cur_year in compiled_stats:
         for c in cur_year:
+            csv_filename=f_base+'_stats_%s_year_resolution_%s_%s.csv' % (inc_amt,
+                                                                         c.x_value_name,
+                                                                         c.sample_value_name.replace("/", ""))
             write_resampled_data_to_csv_files(c.df,
-                                              (f_base+'_stats_%s_year_resolution_%s_%s.csv' % (inc_amt,c.x_value_name, c.sample_value_name.replace("/", ""))))
-#     print("create csvs: %s seconds"%(time.time()-start_time_d))       
+                                              csv_filename)
+
     for i in range(len(year_headers)):
         file_name=(f_base+'_plots_%s_year_resolution_%s.pdf' %(inc_amt,year_headers[i]))
         with PdfPages(file_name) as pdf:
@@ -149,7 +154,10 @@ def resample_by_years(f:str, inc_amt:float=1):
 # #     
 #     
 
-def get_compiled_stats_by_depth(inc_amt, df, depth_headers, sample_headers):
+def get_compiled_stats_by_depth(inc_amt:float,
+                                df:DataFrame,
+                                depth_headers:List[Header],
+                                sample_headers:List[Header]) -> DataFrame:
     compiled_stats = []
     for depth_name in depth_headers:
         cur_depth = []
@@ -162,7 +170,16 @@ def get_compiled_stats_by_depth(inc_amt, df, depth_headers, sample_headers):
     return compiled_stats
 
 
-def load_and_clean_depth_data(f, inc_amt):
+def load_and_clean_depth_data(f:str, inc_amt:float) -> Tuple[DataFrame,
+                                                             DataFrame,
+                                                             List[Header],
+                                                             List[Header]]:
+    '''
+    
+    :param f:
+    :param inc_amt:
+    :return: 
+    '''
     df = load_csv(f)
     headers = process_header_data(df)
     df = clean_data(df)
@@ -198,8 +215,11 @@ def resample_by_depths(f:str, inc_amt:float):
     print("compile stats: %s seconds"%(time.time()-start_time_d)) 
     for cur_depth in compiled_stats:
         for c in cur_depth:
+            csv_filename=f_base+'_stats_%s_inc_resolution_%s_%s.csv' % (inc_amt,
+                                                                        c.x_value_name,
+                                                                        c.sample_value_name.replace("/", ""))
             write_resampled_data_to_csv_files(c.df,
-                                              f_base+'_stats_%s_inc_resolution_%s_%s.csv' % (inc_amt,c.x_value_name, c.sample_value_name.replace("/", "")))
+                                              csv_filename)
 #     print("create csvs: %s seconds"%(time.time()-start_time_d))       
     for i in range(len(depth_headers)):
         file_name = (f_base+'_plots_%s_inc_resolution_%s.pdf' %(inc_amt,depth_headers[i]))
@@ -239,6 +259,8 @@ def double_resample_by_depths(f1:str, f2:str, inc_amt:float):
     
     df1, compiled_stats1, depth_headers1, headers1 = load_and_clean_depth_data(f1, inc_amt)
     df2, compiled_stats2, depth_headers2, headers2 = load_and_clean_depth_data(f2, inc_amt)
+
+    
     
     # if they have the same sample name, correlate them
     # separate the units from the sample name, and save the sample name Na

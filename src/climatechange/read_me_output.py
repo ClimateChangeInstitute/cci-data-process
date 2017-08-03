@@ -22,16 +22,18 @@ Samples: {samples}
 Output Files:
 [{#csvfiles}] CSV files created
 
-Ex. Of name of csv files
-({f_base}.resampledby_{inc_amt}_years_yearname_samplename
+Ex. Of name of csv file name: 
+{f_base}_stats_{inc_amt}_inc_resolution_{x_name}_{sample_name}.csv
 
-For each Year and sample, CSV files containing: 
-Years at {inc_amt} Year Resolution
-top depth (m we) bottom depth (m we)
-top depth(m abs) bottom depth (m abs)
-Mean, Standard Deviation, Median, Maximum, Minimum, Count
+For each {label_name} and sample, CSV files containing:
+{year_file_headers}
+{stat_headers}
+if resampled by depth:
+{depth_file_headers}
+{stat_headers}
 
-[# of PDF files] PDF files created
+
+[{#ofPDFfiles}] PDF files created
 
 Ex. of name of pdf files
 (name of file).resampledto_inc_amt_year_resolution_for_nameofdepth
