@@ -190,7 +190,7 @@ class Test(unittest.TestCase):
         expected_result = load_csv(os.path.join('csv_files','output_test_zeros_and_numbers.csv')) 
         headers = process_header_data(input_test)
         result=compile_stats_by_year(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)', inc_amt)
-        assert_frame_equal(expected_result, result)
+        assert_frame_equal(expected_result, result.df)
         
     def test_empty_rows(self):
 
@@ -201,7 +201,7 @@ class Test(unittest.TestCase):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
             result = compile_stats_by_year(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)')
-        assert_frame_equal(expected_result, result)
+        assert_frame_equal(expected_result, result.df)
          
     def test_partial_empty_rows(self):
         input_test = load_csv(os.path.join('csv_files','input_test_zeros_and_numbers.csv'))
@@ -211,7 +211,7 @@ class Test(unittest.TestCase):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
             result = compile_stats_by_year(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)')
-        assert_frame_equal(expected_result, result)
+        assert_frame_equal(expected_result, result.df)
     
     def create_stats_headers(self):
         input_test = load_csv(os.path.join('csv_files','input_test_zeros_and_numbers.csv'))

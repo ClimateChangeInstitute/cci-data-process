@@ -21,7 +21,6 @@ from climatechange.headers import HeaderDictionary, HeaderType, Header
 from climatechange.plot import write_resampled_data_to_csv_files, \
     add_compile_stats_to_pdf
 from climatechange.resample_data_by_depths import compile_stats_by_depth
-from astropy.units import year
 from climatechange.resampleStats import compile_stats_by_year
 
 
