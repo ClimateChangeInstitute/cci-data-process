@@ -66,7 +66,11 @@ def clean_data(df):
     
     return df
 
-def get_compiled_stats_by_year(inc_amt, df, year_headers, sample_headers, headers):
+def get_compiled_stats_by_year(inc_amt:int,
+                               df:DataFrame,
+                               year_headers:List[Header],
+                               sample_headers:List[Header],
+                               headers:List[Header]) -> DataFrame:
     compiled_stats = []
     for year_name in year_headers:
         cur_year = []
@@ -77,7 +81,7 @@ def get_compiled_stats_by_year(inc_amt, df, year_headers, sample_headers, header
     return compiled_stats
 
 
-def load_and_clean_year_data(f, inc_amt):
+def load_and_clean_year_data(f:str, inc_amt:int) -> Tuple[DataFrame, DataFrame, List[Header], List[Header]]:
     df = load_csv(f)
     headers = process_header_data(df)
     df = clean_data(df)
@@ -89,7 +93,7 @@ def load_and_clean_year_data(f, inc_amt):
                                            year_headers,
                                            sample_headers, headers), year_headers, headers
 
-def resample_by_years(f:str, inc_amt:float=1):
+def resample_by_years(f:str, inc_amt:int=1):
     '''
     Resampler by Years
     a. Input: dataset with years, depths, samples

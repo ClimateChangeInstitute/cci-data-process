@@ -56,7 +56,7 @@ def main(argv=None): # IGNORE:C0111
     program_shortdesc = __import__('__main__').__doc__.split("\n")[1]
     program_license = '''%s
 
-  Created by Mark Royer on %s.
+  Created by Heather Clifford, Andrei Kurbatov, and Mark Royer on %s.
   Copyright 2017 Climate Change Institute. All rights reserved.
 
   Distributed on an "AS IS" basis without warranties
@@ -68,21 +68,42 @@ USAGE
     try:
         # Setup argument parser
         parser = ArgumentParser(description=program_license, formatter_class=RawDescriptionHelpFormatter)
+        
+        
+        parser.add_argument("-y", "--year", dest="year_file", action="store", help="resample %(dest)s by years and depth [default: %(default)s]")
+        
+        parser.add_argument("-i", "--inc_amt", dest="inc_amt", action="store", default=1, help="the size of the resampling increment [default: %(default)s]")
+        
+        
+        
         parser.add_argument("-r", "--recursive", dest="recurse", action="store_true", help="recurse into subfolders [default: %(default)s]")
         parser.add_argument("-v", "--verbose", dest="verbose", action="count", help="set verbosity level [default: %(default)s]")
         parser.add_argument('-V', '--version', action='version', version=program_version_message)
-        parser.add_argument(dest="paths", default=".", help="paths to folder(s) with data file(s) [default: %(default)s]", metavar="path", nargs='+')
+
+#         parser.add_argument(dest="paths", default=".", help="paths to folder(s) with data file(s) [default: %(default)s]", metavar="path", nargs='+')
 
         # Process arguments
         args = parser.parse_args()
 
-        paths = args.paths
+#         paths = args.paths
         verbose = args.verbose
+        
+        inc_amt = int(args.inc_amt)
         
         if verbose and verbose > 0:
             print("Verbose mode on")
         
-        return process_data_functions.main(paths)
+        
+        if args.year_file:
+            
+            year_file = args.year_file
+            
+            if year_file.endswith('.csv'):            
+                process_data_functions.resample_by_years(year_file, inc_amt)
+            else:
+                print("The specified year_file must be a CSV file.", file=sys.stderr)
+                sys.exit(-1)
+                
 
     except KeyboardInterrupt:
         ### handle keyboard interrupt ###
