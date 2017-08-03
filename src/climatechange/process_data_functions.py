@@ -6,22 +6,27 @@ Created on Jul 24, 2017
 
 from builtins import float
 from math import nan
-from matplotlib.backends.backend_pdf import PdfPages
+import os
 import time
 from typing import List
-import os
 from typing import List, Tuple
+
 from matplotlib import pyplot
+from matplotlib.backends.backend_pdf import PdfPages
 from numpy import float64
 import numpy
 from pandas.core.frame import DataFrame
+
 from climatechange.file import load_csv
 from climatechange.headers import HeaderDictionary, HeaderType, Header
 from climatechange.plot import write_resampled_data_to_csv_files, \
     add_compile_stats_to_pdf
-from climatechange.resample_data_by_depths import compile_stats_by_depth
+from climatechange.read_me_output import create_readme_output_file
 from climatechange.resampleStats import compile_stats_by_year
 from climatechange.resample_data_by_depths import compile_stats_by_depth
+from climatechange.resample_data_by_depths import compile_stats_by_depth
+import datetime
+from climatechange.read_me_output import template
 
 
 def process_header_data(df) -> List[Header]:
@@ -109,12 +114,12 @@ def resample_by_years(f:str, inc_amt:int=1):
     
     :param: f: This is a CSV file
     '''
-    start_time_d = time.time()
+    start_time = time.time()
     print("Creating pdf for %s" % f)
 
     df, compiled_stats, year_headers, headers = load_and_clean_year_data(f, inc_amt)
     f_base=os.path.splitext(f)[0]
-    print("compile stats: %s seconds"%(time.time()-start_time_d)) 
+#     print("compile stats: %s seconds"%(time.time()-start_time_d)) 
     for cur_year in compiled_stats:
         for c in cur_year:
             csv_filename=f_base+'_stats_%s_year_resolution_%s_%s.csv' % (inc_amt,
@@ -137,6 +142,10 @@ def resample_by_years(f:str, inc_amt:int=1):
                                          inc_amt,
                                          'year')    
                 pyplot.close()
+                
+    time_ran=(time.time() - start_time)
+    run_date=str(datetime.date.today())
+    create_readme_output_file(template,f,time_ran,run_date,inc_amt,'year',year_headers)
 #     df = load_csv(f)
 #     
 #     headers = process_header_data(df)
@@ -211,12 +220,12 @@ def resample_by_depths(f:str, inc_amt:float):
     
     :param f:This is a CSV file
     '''
-    start_time_d = time.time()
+    start_time = time.time()
     print("Creating pdf for %s" % f)
     f_base=os.path.splitext(f)[0]
     df, compiled_stats, depth_headers, headers = load_and_clean_depth_data(f, inc_amt)
 
-    print("compile stats: %s seconds"%(time.time()-start_time_d)) 
+#     print("compile stats: %s seconds"%(time.time()-start_time)) 
     for cur_depth in compiled_stats:
         for c in cur_depth:
             csv_filename=f_base+'_stats_%s_inc_resolution_%s_%s.csv' % (inc_amt,
@@ -239,6 +248,10 @@ def resample_by_depths(f:str, inc_amt:float):
                                          inc_amt,
                                          'depth')    
                 pyplot.close()
+                
+    time_ran=(time.time() - start_time)
+    run_date=str(datetime.date.today())
+    create_readme_output_file(template,f,time_ran,run_date,inc_amt,'depth',depth_headers)
 #     print("create_pdfs: %s seconds"%(time.time()-start_time_d))            
             
 #     for depth_name in depth_headers:
