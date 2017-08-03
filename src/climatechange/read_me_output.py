@@ -13,17 +13,17 @@ Authors:
 Date ran:
 Time to run:
 
-Input filename: CFA..
+Input filename: {file_name}
 Process: Resampled to {inc_amt} Year Resolution
-Years Resampled: Dat7123, Dat234V2
-Depths: depth(m we), depth(m abs)
-Samples: Na(ppb), Ca(ppb)
+Years Resampled: {years}
+Depths: {depths}
+Samples: {samples}
 
 Output Files:
-[# of output csv files] CSV files created
+[{#csvfiles}] CSV files created
 
 Ex. Of name of csv files
-(name of file).resampledby_{inc_amt}_years_yearname_samplename
+({file_name}.resampledby_{inc_amt}_years_yearname_samplename
 
 For each Year and sample, CSV files containing: 
 Years at {inc_amt} Year Resolution

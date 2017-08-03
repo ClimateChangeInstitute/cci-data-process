@@ -225,14 +225,15 @@ def add_compile_stats_to_pdf(f:str,
                                            color='0.75',
                                            ax=tg,zorder=-1)
     vals = ax.get_xticks()
-    if label_name=='Depth':
+    if label_name=='depth':
         x_str='{:.%sf}' %str(inc_amt)[::-1].find('.')
         ax.set_xticklabels([x_str.format(x) for x in vals])
         plt.xlabel(x_name)
+        plt.title('%s: %s inc. %s resolution' % (sample_name,inc_amt,label_name))
     else:
         ax.set_xticklabels(['{:.0f}'.format(x) for x in vals])
         plt.xlabel('Year CE')
-    plt.title('%s: %s %s Resolution' % (sample_name,inc_amt,label_name))
+        plt.title('%s: %s %s resolution' % (sample_name,inc_amt,label_name))
     
     plt.ylabel(sample_name)
     plt.legend()    
