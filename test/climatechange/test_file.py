@@ -115,7 +115,11 @@ Samples: {samples}
         label_name='year'
         num_csvfiles=12
         year_headers = [h.original_value for h in headers if h.htype == HeaderType.YEARS]
+<<<<<<< HEAD
         result=create_readme_output_file(input_template,f,headers,time_ran,run_date,inc_amt,label_name,year_headers,num_csvfiles)
+=======
+        result=create_readme_output_file(input_template,f,headers,time_ran,run_date,inc_amt,label_name,year_headers)
+>>>>>>> branch 'master' of https://github.com/ClimateChangeInstitute/cci-data-process.git
         expected_result=\
 """
 Date ran:2017-08-03
