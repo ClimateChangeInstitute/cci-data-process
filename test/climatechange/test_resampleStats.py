@@ -5,16 +5,16 @@ Created on Jul 13, 2017
 '''
 from math import isnan, nan
 import os
-from pandas.util.testing import assert_frame_equal
 import sys
 import unittest
 import warnings
 
 from pandas.core.frame import DataFrame
+from pandas.util.testing import assert_frame_equal
 
 from climatechange.file import load_csv
 from climatechange.headers import HeaderType
-from climatechange.process_data_functions import process_header_data, clean_data
+from climatechange.process_data_functions import clean_data, process_header_data
 from climatechange.resampleStats import compileStats, compile_stats_by_year, \
     resampled_by_inc_years, find_index_by_increment, resampled_depths_by_years, \
     create_range_by_inc
