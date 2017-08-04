@@ -1,68 +1,79 @@
-{
-	"Dat210617": {
-		"type": "Years",
-		"class": "Years",
-		"unit": "CE",
-		"label": "Year_Dat210617_CE"
-	},
-	"Dat011216V2": {
-		"type": "Years",
-		"class": "Years",
-		"unit": "CE",
-		"label": "Year_Dat011216V2_CE"
-	},
-	"depth (m we) ": {
-		"type": "Depth",
-		"class": "Depth",
-		"unit": "meters",
-		"label": "depth_we_(m)"
-	},
-	"depth (m we)": {
-		"type": "Depth",
-		"class": "Depth",
-		"unit": "meters",
-		"label": "depth_we_(m)"
-	},
-	"depth (m abs)": {
-		"type": "Depth",
-		"class": "Depth",
-		"unit": "meters",
-		"label": "depth_abs_(m)"
-	},
-	"Cond (+ALU-S/cm)": {
-		"type": "Sample",
-		"class": "Conductivity",
-		"unit": "alu-s/cm",
-		"label": "Cond_(+ALU-S/cm)"
-	},
-	"Na (ppb)": {
-		"type": "Sample",
-		"class": "Na",
-		"unit": "ppb",
-		"label": "Na_(ppb)"
-	},
-	"Ca (ppb)": {
-		"type": "Sample",
-		"class": "Ca",
-		"unit": "ppb",
-		"label": "Ca_(ppb)"
-	},
-	"Dust (part/ml)": {
-		"type": "Sample",
-		"class": "Dust",
-		"unit": "part/ml",
-		"label": "Dust_(part/ml)"
-	},
-	"NH4 (ppb)": {
-		"type": "Sample",
-		"class": "NH4",
-		"unit": "ppb",
-		"label": "NH4_(ppb)"
-	},
-	"NO3 (ppb)": {
-		"type": "Sample",
-		"class": "NO3",
-		"unit": "ppb",
-		"label": "NO3_(ppb)"
-	}
-}
+[
+   {
+      "name":"Dat210617",
+      "type":"Years",
+      "class":"Years",
+      "unit":"CE",
+      "label":"Year_Dat210617_(CE)"
+   },
+   {
+      "name":"Dat011216V2",
+      "type":"Years",
+      "class":"Years",
+      "unit":"CE",
+      "label":"Year_Dat011216V2_(CE)"
+   },
+   {
+      "name":"depth (m we) ",
+      "type":"Depth",
+      "class":"Depth",
+      "unit":"meters",
+      "label":"depth_we_(m)"
+   },
+   {
+      "name":"depth (m we)",
+      "type":"Depth",
+      "class":"Depth",
+      "unit":"meters",
+      "label":"depth_we_(m)"
+   },
+   {
+      "name":"depth (m abs)",
+      "type":"Depth",
+      "class":"Depth",
+      "unit":"meters",
+      "label":"depth_abs_(m)"
+   },
+   {
+      "name":"Cond (+ALU-S/cm)",
+      "type":"Sample",
+      "class":"Conductivity",
+      "unit":"alu-s/cm",
+      "label":"Cond_(+ALU-S/cm)"
+   },
+   {
+      "name":"Na (ppb)",
+      "type":"Sample",
+      "class":"Na",
+      "unit":"ppb",
+      "label":"Na_(ppb)"
+   },
+   {
+      "name":"Ca (ppb)",
+      "type":"Sample",
+      "class":"Ca",
+      "unit":"ppb",
+      "label":"Ca_(ppb)"
+   },
+   {
+      "name":"Dust (part/ml)",
+      "type":"Sample",
+      "class":"Dust",
+      "unit":"part/ml",
+      "label":"Dust_(part/ml)"
+   },
+   {
+      "name":"NH4 (ppb)",
+      "type":"Sample",
+      "class":"NH4",
+      "unit":"ppb",
+      "label":"NH4_(ppb)"
+   },
+   {
+      "name":"NO3 (ppb)",
+      "type":"Sample",
+      "class":"NO3",
+      "unit":"ppb",
+      "label":"NO3_(ppb)"
+   }
+]

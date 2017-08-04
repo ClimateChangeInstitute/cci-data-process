@@ -41,7 +41,10 @@ def load_dictionary(file:IO[str], obj_hook:Callable=None) -> Mapping[str, str]:
     '''
     result = {}
     try:
-        result = json.load(file, object_hook=obj_hook)
+        array = json.load(file, object_hook=obj_hook)
+        for r in array:
+            result[r.name] = r # The name of the header is the dictionary key
+            
     except ValueError:
         contents = file.read()
         if len(contents) > 0:  # File was not empty and still could not read
@@ -54,7 +57,7 @@ def save_dictionary(dictionary:Mapping[str, Any],
                     file_path:str,
                     enc_cls:JSONEncoder=None):
     with open(file_path, 'w') as f:
-        json.dump(dictionary, f, cls=enc_cls)
+        json.dump([ h for (_,h) in dictionary.items()], f, cls=enc_cls)
 
 
 def load_dict_by_package(file_name:str,

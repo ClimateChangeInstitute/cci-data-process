@@ -93,8 +93,8 @@ def load_and_clean_year_data(f:str, inc_amt:int) -> Tuple[DataFrame, List[List[C
     headers = process_header_data(df)
     df = clean_data(df)
 #     print("load and clean data: %s seconds"%(time.time()-start_time_d))
-    year_headers = [h.original_value for h in headers if h.htype == HeaderType.YEARS]
-    sample_headers = [h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
+    year_headers = [h.name for h in headers if h.htype == HeaderType.YEARS]
+    sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
     return df, get_compiled_stats_by_year(inc_amt,
                                            df,
                                            year_headers,
@@ -160,11 +160,11 @@ def resample_by_years(f:str, inc_amt:int=1):
 # 
 #     df = clean_data(df)
 # 
-#     year_headers = [h.original_value for h in headers if h.htype == HeaderType.YEARS]
+#     year_headers = [h.name for h in headers if h.htype == HeaderType.YEARS]
 # 
-# #     depth_headers = [h.original_value for h in headers if h.htype == HeaderType.DEPTH]
+# #     depth_headers = [h.name for h in headers if h.htype == HeaderType.DEPTH]
 # # 
-# #     sample_headers = [h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
+# #     sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
 #     
 #     for year_name in year_headers:
 #         plot.create_csv_pdf_resampled(f, df, year_name, headers, inc_amt)
@@ -205,8 +205,8 @@ def load_and_clean_depth_data(f:str, inc_amt:float) -> Tuple[DataFrame,
     headers = process_header_data(df)
     df = clean_data(df)
 #     print("load and clean data: %s seconds"%(time.time()-start_time_d))
-    depth_headers = [h.original_value for h in headers if h.htype == HeaderType.DEPTH]
-    sample_headers = [h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
+    depth_headers = [h.name for h in headers if h.htype == HeaderType.DEPTH]
+    sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
     return df, get_compiled_stats_by_depth(inc_amt,
                                            df,
                                            depth_headers,

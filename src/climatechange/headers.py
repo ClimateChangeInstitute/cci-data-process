@@ -11,6 +11,8 @@ from typing import Mapping, Tuple, List, Any
 
 from climatechange.file import data_dir, load_dictionary, \
     save_dictionary, load_dict_by_package
+from pkg_resources._vendor.pyparsing import withClass
+from matplotlib.patheffects import Stroke
 
 
 class HeaderType(Enum):
@@ -32,10 +34,10 @@ class HeaderEncoder(json.JSONEncoder):
     def default(self, obj:Any):
         '''
         Write out header types as simply the value  
-        :param obj: This is likely to be a dictionary object, but could be any object
+        :param obj: Object to be save
         '''
-        if type(obj) == HeaderType:
-            return str(obj.value)
+        if type(obj) == Header:
+            return eval(str(obj))
         else:
             return json.JSONEncoder.default(self, obj)
 
@@ -45,34 +47,45 @@ def to_headers(d:Mapping[str, str]) -> Mapping[str, HeaderType]:
     :param d: A dictionary of header information
     :return: A fully instantiated header dictionary
     '''
-    return {k: HeaderType(h) for (k, h) in d.items()}    
+    return Header(d['name'], d['type'], d['class'], d['unit'], d['label'])
 
 class Header(object):
     '''
     A header parsed by the system.  This object contains the raw header, the 
-    type of header, and also a parsed version which is has the name of the 
-    header and unit separated. 
+    type of header, the class of the unit (which is basically a subcategory), 
+    the unit, and a label used for plotting. 
     '''
+    
+    # Read/Raw header value
+    # For example, "Dat210617"
+    name: str
     
     # The type of the column data as determined from the header_dict.json file
     htype: HeaderType = HeaderType.UNKNOWN
     
-    # Read/Raw header value
-    original_value: str
+    # The class/subcategory of the header
+    # For example, "Years"
+    hclass: str
     
-    # The tuple is (Header name, unit)
-    parsed_value: Tuple[str, str]
-        
+    # The unit of the
+    # For example, "CE" 
+    unit: str
+    
+    # The label used for plotting the data
+    # For example, "Year_Dat210617_CE"
+    label: str
+    
     def __init__(self,
-                 original_value:str,
+                 name:str,
                  htype:HeaderType,
-                 parsed_value:Tuple[str, str]=None,
-                 regexp:str=r"\s*(.*?)\s*\(\s*(.*?)\s*\)"):
-        self.original_value = original_value
-        self.parsed_value = parsed_value 
-        if not parsed_value:
-            self.parsed_value = self.parse_header(original_value, regexp)
-        self.htype = htype
+                 hclass:str,
+                 unit:str,
+                 label:str):
+        self.name = name
+        self.htype = htype 
+        self.hclass = hclass
+        self.unit = unit
+        self.label = label
     
     @staticmethod
     def parse_header(rawHeader:str, regexp:str=r"\s*(.*?)\s*\(\s*(.*?)\s*\)") -> 'Header':
@@ -99,10 +112,13 @@ class Header(object):
         
         .. code-block:: python
         
-            {"original_value": "test", "parsed_value": ["test", null], "htype": "Sample"}
+            '{"name": "%s", "type": "%s",' "class": "%s", "unit": "%s", "label": "%s"}'
+            
         :return: A JSON-like object
         '''
-        return '{"original_value": "%s", "parsed_value": "%s", "htype": "%s"}' % (self.original_value, self.parsed_value, self.htype)
+        return ('{"name": "%s", "type": "%s",'
+                ' "class": "%s", "unit": "%s", "label": "%s"}') \
+                % (self.name, self.htype, self.hclass, self.unit, self.label)    
      
     def __eq__(self, other):
         '''
@@ -125,7 +141,7 @@ class HeaderDictionary(object):
     
     unit_dictionary = {}
 
-    def __init__(self, headerDict:Mapping[str, HeaderType]=None, unitDict:Mapping[str, str]=None): 
+    def __init__(self, headerDict:Mapping[str, Header]=None, unitDict:Mapping[str, str]=None): 
         '''
         Create a new HeaderDictionary object.
         
@@ -143,10 +159,10 @@ class HeaderDictionary(object):
         else:
             self.unit_dictionary = load_dict_by_package('unit_dict.json')
   
-    def load_latest_header_dict(self) -> Mapping[str, HeaderType]:
+    def load_latest_header_dict(self) -> Mapping[str, Header]:
         header_file_name = 'header_dict.json'
         header_file_path = os.path.join(data_dir(), header_file_name)
-#         print('using file as header dictionary'+header_file_path)
+        print('using file as header dictionary'+header_file_path)
         
         hdict = {}
         if os.path.isfile(header_file_path):
@@ -160,7 +176,7 @@ class HeaderDictionary(object):
         return hdict
         
 
-    def get_header_dict(self) -> Mapping[str, HeaderType]:
+    def get_header_dict(self) -> Mapping[str, Header]:
         '''
         Returns the **already** loaded header dictionary.
         :return: The known header mappings
@@ -189,15 +205,15 @@ class HeaderDictionary(object):
         
         .. code-block:: python
         
-            [{"original_value": "Years (BP)", 
+            [{"name": "Years (BP)", 
               "parsed_value": "('Years', 'BP')", 
               "htype": "HeaderType.UNKNOWN"
              }, 
-             {"original_value": "Na (ppb)", 
+             {"name": "Na (ppb)", 
               "parsed_value": "('Na', 'ppb')", 
               "htype": "HeaderType.SAMPLE"
              }, 
-             {"original_value": "Not Known (hmm)",
+             {"name": "Not Known (hmm)",
               "parsed_value": "('Not Known', 'hmm')", 
               "htype": "HeaderType.UNKNOWN"
              }
@@ -207,4 +223,11 @@ class HeaderDictionary(object):
         :return: A list of parsed headers.  If the header is not known, its 
             value is :py:attr:`HeaderType.UNKNOWN`.
         '''
-        return [ Header(e, self.header_dictionary.get(e, HeaderType.UNKNOWN)) for e in rawHeaders ]
+        
+        result = []
+        for s in rawHeaders:
+            h = self.header_dictionary.get(s)
+            if not h:
+                h = Header(s, HeaderType.UNKNOWN, None, None, None)
+            result.append(h)
+        return result

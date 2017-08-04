@@ -15,7 +15,6 @@ class Test(unittest.TestCase):
     def setUp(self):
         self.abcDict = { "a": "a", "b": "a", "c": "c", "d": "c", "e": "e"}
         self.hd = HeaderDictionary()  # Should be the default header dictionaries
-        pass
 
     def tearDown(self):
         pass
@@ -23,6 +22,8 @@ class Test(unittest.TestCase):
     def testHeaderDictionaryCreation(self):
                 
         h_dict = load_dict_by_package('header_dict.json', obj_hook=to_headers)
+        print(h_dict)
+        print(self.hd.get_header_dict())
         self.assertDictEqual(h_dict,
                              self.hd.get_header_dict(),
                              'Header dictionaries do not match')
@@ -74,7 +75,7 @@ class Test(unittest.TestCase):
         
         oneHeaderNoUnit = ['test_sample']
         
-        self.assertEqual(str([Header('test_sample', HeaderType.SAMPLE, ('test_sample', None))]),
+        self.assertEqual(str([Header('test_sample', HeaderType.SAMPLE, 'test_sample', None, 'test_sample')]),
                          str(testHeaderDict.parse_headers(oneHeaderNoUnit)))
         
         oneHeaderWithUnit = ['test_sample (ppb)']
@@ -84,14 +85,14 @@ class Test(unittest.TestCase):
         
         oneHeaderWithUnitAndNotExisting = ['test_sample (ppb)', 'test2 Not in (ppb)']
         
-        self.assertListEqual([Header(oneHeaderWithUnitAndNotExisting[0], HeaderType.SAMPLE, ('test_sample', 'ppb')),
-                              Header(oneHeaderWithUnitAndNotExisting[1], HeaderType.UNKNOWN, ('test2 Not in', 'ppb'))],
+        self.assertListEqual([Header(oneHeaderWithUnitAndNotExisting[0], HeaderType.SAMPLE, 'test_sample', 'ppb', 'test_sample_(ppb)'),
+                              Header(oneHeaderWithUnitAndNotExisting[1], HeaderType.UNKNOWN, 'test2 Not in', 'ppb', 'test2_Not_in')],
                              testHeaderDict.parse_headers(oneHeaderWithUnitAndNotExisting))
         
         oneHeaderWithUnitAndNotExistingUnit = ['test_sample (ppb)', 'test_sample (not in unit)']
         
-        self.assertListEqual([Header(oneHeaderWithUnitAndNotExistingUnit[0], HeaderType.SAMPLE, ('test_sample', 'ppb')),
-                              Header(oneHeaderWithUnitAndNotExistingUnit[1], HeaderType.UNKNOWN, ('test_sample', 'not in unit'))],
+        self.assertListEqual([Header(oneHeaderWithUnitAndNotExistingUnit[0], HeaderType.SAMPLE, 'test_sample', 'ppb', 'test_sample_(ppb)'),
+                              Header(oneHeaderWithUnitAndNotExistingUnit[1], HeaderType.UNKNOWN, 'test2 Not in', 'ppb', 'test2_Not_in')],
                              testHeaderDict.parse_headers(oneHeaderWithUnitAndNotExistingUnit))
         
 

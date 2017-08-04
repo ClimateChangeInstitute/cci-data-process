@@ -178,7 +178,7 @@ def compile_stats_by_year(df:DataFrame, headers: Header, year_name:str, sample_n
     year_column = df.loc[:, year_name]
     sample_column = df.loc[:, sample_name]
     
-    depth_column_headers = [ h.original_value for h in headers if h.htype == HeaderType.DEPTH ]
+    depth_column_headers = [ h.name for h in headers if h.htype == HeaderType.DEPTH ]
     depth_columns = DataFrame([df.loc[:, c].values.tolist() for c in df.columns if c in depth_column_headers]).transpose()
     df_year_sample = pandas.concat([year_column, sample_column], axis=1)
     resampled_data = resampled_by_inc_years(df_year_sample, year_name, depth_columns, depth_column_headers, inc_amt)

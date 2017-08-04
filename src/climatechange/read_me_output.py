@@ -48,9 +48,9 @@ def write_readmefile_to_txtfile(readme:str,output_filename:str):
         
 
 def create_readme_output_file(template,f,headers,time_ran,run_date,inc_amt,label_name,file_headers,num_csvfiles):
-    year_headers = [h.original_value for h in headers if h.htype == HeaderType.YEARS]
-    depth_headers = [h.original_value for h in headers if h.htype == HeaderType.DEPTH]
-    sample_headers = [h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
+    year_headers = [h.name for h in headers if h.htype == HeaderType.YEARS]
+    depth_headers = [h.name for h in headers if h.htype == HeaderType.DEPTH]
+    sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
     num_pdffiles=len(file_headers)
     
 #     output_filename=os.path.join('00README')
