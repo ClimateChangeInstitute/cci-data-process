@@ -32,7 +32,7 @@ def process_header_data(df) -> List[Header]:
     
     hd = HeaderDictionary()
     
-    parsedHeaders = hd.parse_headers(list(df.columns))
+    parsedHeaders = hd.parse_headers(df.columns.tolist())
     
     return parsedHeaders
 
@@ -70,11 +70,9 @@ def clean_data(df):
     
     return df
 
-def get_compiled_stats_by_year(inc_amt:int,
-                               df:DataFrame,
-                               year_headers:List[Header],
-                               sample_headers:List[Header],
-                               headers:List[Header]) -> List[List[CompiledStat]]:
+def get_compiled_stats_by_year(inc_amt:int, df:DataFrame, headers:List[Header]) -> List[List[CompiledStat]]:
+    year_headers = [h.name for h in headers if h.htype == HeaderType.YEARS]
+    sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
     compiled_stats = []
     for year_name in year_headers:
         cur_year = []
@@ -85,17 +83,12 @@ def get_compiled_stats_by_year(inc_amt:int,
     return compiled_stats
 
 
-def load_and_clean_year_data(f:str, inc_amt:int) -> Tuple[DataFrame, List[List[CompiledStat]], List[Header], List[Header]]:
+def load_and_clean_year_data(f:str, inc_amt:int) -> Tuple[DataFrame, List[List[CompiledStat]], List[Header]]:
     df = load_csv(f)
     headers = process_header_data(df)
     df = clean_data(df)
 #     print("load and clean data: %s seconds"%(time.time()-start_time_d))
-    year_headers = [h.name for h in headers if h.htype == HeaderType.YEARS]
-    sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
-    return df, get_compiled_stats_by_year(inc_amt,
-                                           df,
-                                           year_headers,
-                                           sample_headers, headers), year_headers, headers
+    return df, get_compiled_stats_by_year(inc_amt, df, headers), headers
 
 def resample_by_years(f:str, inc_amt:int=1):
     '''
@@ -116,7 +109,7 @@ def resample_by_years(f:str, inc_amt:int=1):
     start_time = time.time()
     print("Creating pdf for %s" % f)
 
-    df, compiled_stats, year_headers, headers = load_and_clean_year_data(f, inc_amt)
+    df, compiled_stats, headers = load_and_clean_year_data(f, inc_amt)
     f_base=os.path.splitext(f)[0]
     file_headers=compiled_stats[0][0].df.columns.tolist()
     num_csvfiles=sum(len(c) for c in compiled_stats)
@@ -129,6 +122,8 @@ def resample_by_years(f:str, inc_amt:int=1):
                                                                          c.sample_value_name.replace("/", ""))
             write_resampled_data_to_csv_files(c.df,
                                               csv_filename)
+
+    year_headers = [h.name for h in headers if h.htype == HeaderType.YEARS]
 
     for i in range(len(year_headers)):
         file_name=(f_base+'_plots_%s_year_resolution_%s.pdf' %(inc_amt,year_headers[i]))
@@ -174,8 +169,9 @@ def resample_by_years(f:str, inc_amt:int=1):
 
 def get_compiled_stats_by_depth(inc_amt:float,
                                 df:DataFrame,
-                                depth_headers:List[Header],
-                                sample_headers:List[Header]) -> DataFrame:
+                                headers:List[Header]) -> DataFrame:
+    depth_headers = [h.name for h in headers if h.htype == HeaderType.DEPTH]
+    sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
     compiled_stats = []
     for depth_name in depth_headers:
         cur_depth = []
@@ -190,7 +186,6 @@ def get_compiled_stats_by_depth(inc_amt:float,
 
 def load_and_clean_depth_data(f:str, inc_amt:float) -> Tuple[DataFrame,
                                                              DataFrame,
-                                                             List[Header],
                                                              List[Header]]:
     '''
     
@@ -202,12 +197,7 @@ def load_and_clean_depth_data(f:str, inc_amt:float) -> Tuple[DataFrame,
     headers = process_header_data(df)
     df = clean_data(df)
 #     print("load and clean data: %s seconds"%(time.time()-start_time_d))
-    depth_headers = [h.name for h in headers if h.htype == HeaderType.DEPTH]
-    sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
-    return df, get_compiled_stats_by_depth(inc_amt,
-                                           df,
-                                           depth_headers,
-                                           sample_headers), depth_headers, headers
+    return df, get_compiled_stats_by_depth(inc_amt, df, headers), headers
 
 def resample_by_depths(f:str, inc_amt:float):
     '''
@@ -228,7 +218,7 @@ def resample_by_depths(f:str, inc_amt:float):
     start_time = time.time()
     print("Creating pdf for %s" % f)
     f_base=os.path.splitext(f)[0]
-    df, compiled_stats, depth_headers, headers = load_and_clean_depth_data(f, inc_amt)
+    df, compiled_stats, headers = load_and_clean_depth_data(f, inc_amt)
     
     num_csvfiles=sum(len(c) for c in compiled_stats)
     file_headers=compiled_stats[0][0].df.columns.tolist()
@@ -241,7 +231,9 @@ def resample_by_depths(f:str, inc_amt:float):
                                                                         c.sample_value_name.replace("/", ""))
             write_resampled_data_to_csv_files(c.df,
                                               csv_filename)
-#     print("create csvs: %s seconds"%(time.time()-start_time_d))       
+#     print("create csvs: %s seconds"%(time.time()-start_time_d))      
+
+    depth_headers = [h.name for h in headers if h.htype == HeaderType.DEPTH] 
     for i in range(len(depth_headers)):
         file_name = (f_base+'_plots_%s_inc_resolution_%s.pdf' %(inc_amt,depth_headers[i]))
         with PdfPages(file_name) as pdf:
@@ -283,8 +275,8 @@ def double_resample_by_depths(f1:str, f2:str, inc_amt:float):
     :param f2:
     '''
     
-    df1, compiled_stats1, depth_headers1, headers1 = load_and_clean_depth_data(f1, inc_amt)
-    df2, compiled_stats2, depth_headers2, headers2 = load_and_clean_depth_data(f2, inc_amt)
+    df1, compiled_stats1, headers1 = load_and_clean_depth_data(f1, inc_amt)
+    df2, compiled_stats2, headers2 = load_and_clean_depth_data(f2, inc_amt)
 
     
     
