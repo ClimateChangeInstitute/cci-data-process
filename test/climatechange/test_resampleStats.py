@@ -15,15 +15,10 @@ from pandas.util.testing import assert_frame_equal
 from climatechange.file import load_csv
 from climatechange.headers import HeaderType
 from climatechange.process_data_functions import clean_data, process_header_data
-from climatechange.resampleStats import compileStats, compile_stats_by_year, \
+from climatechange.resample_stats import compileStats, compile_stats_by_year, \
     resampled_by_inc_years, find_index_by_increment, resampled_depths_by_years, \
-    create_range_by_inc
-from climatechange.resampleStats import findLen
-from climatechange.resampleStats import findMax
-from climatechange.resampleStats import findMean, create_depth_headers
-from climatechange.resampleStats import findMedian
-from climatechange.resampleStats import findMin
-from climatechange.resampleStats import findStd
+    create_range_by_inc, findMean, findMedian, findMax, findMin, findStd, \
+    findLen, create_depth_headers
 import numpy as np
 import pandas as pd
 

@@ -11,7 +11,7 @@ from climatechange.process_data_functions import process_header_data, clean_data
 from climatechange.resample_data_by_depths import resampled_depths,create_range_for_depths,\
     find_index_by_increment_for_depths,resampled_by_inc_depths,compile_stats_by_depth
 import os
-from climatechange.resampleStats import create_depth_headers
+from climatechange.resample_stats import create_depth_headers
 from climatechange.headers import HeaderType
 import pandas
 import warnings

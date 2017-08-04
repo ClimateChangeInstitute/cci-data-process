@@ -24,7 +24,7 @@ from climatechange.plot import write_resampled_data_to_csv_files, \
 from climatechange.read_me_output import create_readme_output_file, \
     write_readmefile_to_txtfile
 from climatechange.read_me_output import template
-from climatechange.resampleStats import compile_stats_by_year
+from climatechange.resample_stats import compile_stats_by_year
 from climatechange.resample_data_by_depths import compile_stats_by_depth
 
 
