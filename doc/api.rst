@@ -33,10 +33,10 @@ climatechange\.process_data module
     :undoc-members:
     :show-inheritance:
 
-climatechange\.resampleStats module
------------------------------------
+climatechange\.resample\_stats module
+-------------------------------------
 
-.. automodule:: climatechange.resampleStats
+.. automodule:: climatechange.resample_stats
     :members:
     :undoc-members:
     :show-inheritance:
