@@ -8,6 +8,7 @@ import os
 import unittest
 import warnings
 
+from numpy.testing.utils import assert_almost_equal
 from pandas.core.frame import DataFrame
 from pandas.util.testing import assert_frame_equal
 
@@ -36,13 +37,9 @@ multipleRowArray = [[5.0, 4.0, 3.0, 2.0, 1.0],
                    [2.0, 3.0, 4.0, 5.0, 6.0 ],
                    [1.0, 3.0, 2.0, 5.0, 4.0]]
 test_input = [[7, 5, 7], [3, 5, 4], [6, 4, 9]]
-test_output = [[6.333333333333333, 0.94280904158206336,7.0, 7, 5,  3], [4.0,0.81649658092772603, 4.0, 5, 3,  3], [6.333333333333333,2.0548046676563256, 6.0, 9, 4,  3]]
-# containingNoneArray = [[5.0, None, None, 2.0, 1.0],
-#                        [2.0, None, None, 5.0, 6.0 ],
-#                        [1.0, None, None, 5.0, 4.0]]
-# containingNaNArray = [[5.0, nan, nan, 2.0, 1.0],
-#                        [2.0, nan, nan, 5.0, 6.0 ],
-#                        [1.0, nan, nan, 5.0, 4.0]]
+test_output = [[6.333333333333333, 0.94280904158206336,7.0, 7, 5,  3],
+               [4.0,0.81649658092772603, 4.0, 5, 3,  3],
+               [6.333333333333333,2.0548046676563256, 6.0, 9, 4,  3]]
 
 
 class Test(unittest.TestCase):
@@ -58,76 +55,68 @@ class Test(unittest.TestCase):
     def testName(self):
         pass
 
-# test for all functions with same name
     def testfindMean(self):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            self.assertAlmostEqual([], findMean(emptyArray))
-            self.assertAlmostEqual([4.0], findMean(singleRowArray))
+            assert_almost_equal([], findMean(emptyArray))
+            assert_almost_equal([4.0], findMean(singleRowArray))
             self.assertTrue(isnan(findMean(nanArray)[0]))
-            self.assertAlmostEqual([3.0, 4.0, 3.0], findMean(multipleRowArray))
+            assert_almost_equal([3.0, 4.0, 3.0], findMean(multipleRowArray))
         
             str_input=[['f','r','6']]
             self.assertRaises(TypeError, findMean, str_input)
-
-        
-        # Maybe throw an error?
-        # self.assertAlmostEqual([None, None, None], findMean(containingNoneArray))
-        
-        # Similarly what to do with nan values?
-        # self.assertAlmostEqual([nan, nan, nan], findMean(containingNaNArray))
-    
-        # Also assume that 2D array is rectangular shape? No funny business. :-)
     
     def testfindMedian(self):     
-            self.assertAlmostEqual([], findMedian(emptyArray))
-            self.assertAlmostEqual([4.0], findMedian(singleRowArray))
-            self.assertAlmostEqual([3.0, 4.0, 3.0], findMedian(multipleRowArray))
+            assert_almost_equal([], findMedian(emptyArray))
+            assert_almost_equal([4.0], findMedian(singleRowArray))
+            assert_almost_equal([3.0, 4.0, 3.0], findMedian(multipleRowArray))
     
     def testfindMax(self):
-            self.assertAlmostEqual([], findMax(emptyArray))
-            self.assertAlmostEqual([5.0], findMax(singleRowArray))
-            self.assertAlmostEqual([5.0, 6.0, 5.0], findMax(multipleRowArray))
+            assert_almost_equal([], findMax(emptyArray))
+            assert_almost_equal([5.0], findMax(singleRowArray))
+            assert_almost_equal([5.0, 6.0, 5.0], findMax(multipleRowArray))
     
     def testfindMin(self): 
-            self.assertAlmostEqual([], findMin(emptyArray))
-            self.assertAlmostEqual([3.0], findMin(singleRowArray))
-            self.assertAlmostEqual([1.0, 2.0, 1.0], findMin(multipleRowArray))
+            assert_almost_equal([], findMin(emptyArray))
+            assert_almost_equal([3.0], findMin(singleRowArray))
+            assert_almost_equal([1.0, 2.0, 1.0], findMin(multipleRowArray))
     
     def testfindStd(self):
-        self.assertAlmostEqual([], findStd(emptyArray))
-        self.assertAlmostEqual([0.894427190999915860], findStd(singleRowArray))
-        self.assertAlmostEqual([1.4142135623730951, 1.4142135623730951, 1.4142135623730951], findStd(multipleRowArray))
+        assert_almost_equal([], findStd(emptyArray))
+        assert_almost_equal([0.8944271], findStd(singleRowArray))
+        assert_almost_equal([1.4142135, 1.4142135, 1.4142135], findStd(multipleRowArray))
 
     def testfindLen(self):
-        self.assertAlmostEqual([], findLen(emptyArray))
-        self.assertAlmostEqual([5.0], findLen(singleRowArray))
-        self.assertAlmostEqual([5.0, 5.0, 5.0], findLen(multipleRowArray))
+        assert_almost_equal([], findLen(emptyArray))
+        assert_almost_equal([5.0], findLen(singleRowArray))
+        assert_almost_equal([5.0, 5.0, 5.0], findLen(multipleRowArray))
  
     def testcompileStats(self):        
-        self.assertAlmostEqual([], compileStats(emptyArray))
-        self.assertAlmostEqual([[4, 0.89442719099991586, 4, 5, 3, 5]], compileStats(singleRowArray))
-        self.assertAlmostEqual(test_output, compileStats(test_input))
+        assert_almost_equal([], compileStats(emptyArray))
+        assert_almost_equal([[4, 0.8944271, 4, 5, 3, 5]], compileStats(singleRowArray))
+        assert_almost_equal(test_output, compileStats(test_input))
         
     def testSmallcsv(self):
-        small_output=[[2009.8, 1.0954451150103279, 2009.8, 2011.5999999999999, 2008.0, 19], 
-         [2008.3999999999999, 2.1908902300206643, 2008.4000000000001, 2012.0, 2004.8, 19], 
-         [0.5966279069999999, 0.0019106600718061043, 0.59662790700000001, 0.59976744199999998, 0.59348837200000004, 19], 
-         [1.619, 0.0054772255750516448, 1.619, 1.6280000000000001, 1.6100000000000001, 19], 
-         [9.0, 5.4772255750516612, 9.0, 18.0, 0.0, 19], 
-         [41.0, 5.4772255750516612, 41.0, 50.0, 32.0, 19], 
-         [6.3684210526315788, 4.1953674491325543, 4.0, 14.0, 2.0, 19], 
-         [5.7894736842105265, 2.6072560161054392, 7.0, 9.0, 1.0, 19], 
-         [4.3684210526315788, 1.086303549502647, 4.0, 6.0, 2.0, 19], 
-         [5.3684210526315788, 1.086303549502647, 5.0, 7.0, 3.0, 19]]
+        small_output=[[2009.8000000, 1.0954451, 2009.8000000, 2011.5999999, 2008.0000000, 19.0000000],
+                      [2008.3999999, 2.1908902, 2008.4000000, 2012.0000000, 2004.8000000, 19.0000000],
+                      [0000.5966279, 0.0019106, 0000.5966279, 0000.5997674, 0000.5934883, 19.0000000],
+                      [0001.6190000, 0.0054772, 0001.6190000, 0001.6280000, 0001.6100000, 19.0000000],
+                      [0009.0000000, 5.4772255, 0009.0000000, 0018.0000000, 0000.0000000, 19.0000000],
+                      [0041.0000000, 5.4772255, 0041.0000000, 0050.0000000, 0032.0000000, 19.0000000],
+                      [0006.3684210, 4.1953674, 0004.0000000, 0014.0000000, 0002.0000000, 19.0000000],
+                      [0005.7894736, 2.6072560, 0007.0000000, 0009.0000000, 0001.0000000, 19.0000000],
+                      [0004.3684210, 1.0863035, 0004.0000000, 0006.0000000, 0002.0000000, 19.0000000],
+                      [0005.3684210, 1.0863035, 0005.0000000, 0007.0000000, 0003.0000000, 19.0000000]]
         frame = load_csv(os.path.join('csv_files', 'small.csv'))
-        self.assertAlmostEqual(small_output,
-                               compileStats(frame.transpose().values.tolist()))
+        assert_almost_equal(small_output, compileStats(frame.transpose().values.tolist()))
         
     def test_create_depth_headers(self):
         input_test=['depth (m we)','depth (m abs)']
         input_empty=[]
-        expected_output=['top depth (m we)','bottom depth (m we)','top depth (m abs)','bottom depth (m abs)']
+        expected_output=['top depth (m we)',
+                         'bottom depth (m we)',
+                         'top depth (m abs)',
+                         'bottom depth (m abs)']
         result=create_depth_headers(input_test)
         result_empty=create_depth_headers(input_empty)
         self.assertListEqual(expected_output, result)
