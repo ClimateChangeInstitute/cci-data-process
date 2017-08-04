@@ -3,68 +3,71 @@ Created on Jul 17, 2017
 
 @author: Mark Royer
 '''
-from pandas.core.frame import DataFrame
+import datetime
+
 from matplotlib.backends.backend_pdf import PdfPages
+from pandas.core.frame import DataFrame
+
+from climatechange.file import load_csv
 from climatechange.headers import Header, HeaderType, HeaderDictionary
-import matplotlib.pyplot as plt
 from climatechange.resampleStats import compile_stats_by_year
 from climatechange.resample_data_by_depths import compile_stats_by_depth
+import matplotlib.pyplot as plt
 
 
-
-# def examplePDFPlot(file_name:str):
-#     '''
-#     Just a simple example of how to generated multiple page PDF from DataFrames
-#     '''
-#     
-#     df = load_csv('../../test/csv_files/small.csv')
-#     
-#     with PdfPages(file_name) as pdf:
-#     
-#         ys = ['Cond (+ALU-S/cm)', 'Na (ppb)', 'Ca (ppb)', 'Dust (part/ml)', 'NH4 (ppb)', 'NO3 (ppb)']
-#         
-#         xaxisLabel = 'depth (m we) '
-#         
-#         df_indexed:DataFrame = df.set_index(xaxisLabel)
-#                 
-#         for i in range(len(ys)):
-#             fig = plt.figure(figsize=(11, 8.5))
-#             
-#             fig, tg = plt.subplots(1)
-# #             ax = df_indexed.plot(x=df_indexed.index.name, y=ys[i], kind='bar', ax=tg)
-# #             
-# #             vals = ax.get_xticks()
-# #             ax.set_xticklabels(['{:.2f}'.format(x) for x in vals])
-#             
-#             ax = df[['depth (m we) ', ys[i]]].plot(x='depth (m we) ', kind='bar', ax=tg, color='C%d' % (i))
-#                         
-#             ax = df[[ys[i]]].plot(kind='line', linestyle='-', marker='o', ax=ax, color='C%d' % (i + 1))
+def examplePDFPlot(file_name:str):
+    '''
+    Just a simple example of how to generated multiple page PDF from DataFrames
+    '''
+     
+    df = load_csv('../../test/csv_files/small.csv')
+     
+    with PdfPages(file_name) as pdf:
+     
+        ys = ['Cond (+ALU-S/cm)', 'Na (ppb)', 'Ca (ppb)', 'Dust (part/ml)', 'NH4 (ppb)', 'NO3 (ppb)']
+         
+        xaxisLabel = 'depth (m we) '
+         
+        df_indexed:DataFrame = df.set_index(xaxisLabel)
+                 
+        for i in range(len(ys)):
+            fig = plt.figure(figsize=(11, 8.5))
+             
+            fig, tg = plt.subplots(1)
+#             ax = df_indexed.plot(x=df_indexed.index.name, y=ys[i], kind='bar', ax=tg)
 #             
 #             vals = ax.get_xticks()
-#             ax.set_xticklabels(['{:.1f}'.format(x) for x in vals])
-#             
-# #             df_indexed.plot(x=df_indexed.index.name, y=ys[i], color='red', ax=tg)
-# #             plt.plot(df_indexed[ys[i]], '-o', color='C%d' % (i))
-#             plt.title('The title of plot %d' % (i + 1))
-#             plt.xlabel('x axis %s' % xaxisLabel)
-#             plt.ylabel(ys[i])
-#             plt.legend()
-#         
-#             pdf.savefig(fig)
-#             plt.close()
-#             
-#                 
-#         # Meta data for the PdfPages
-#         d = pdf.infodict()
-#         d['Title'] = 'CCI Plot'
-#         d['Author'] = u'Some author'
-#         d['Subject'] = 'CCI Data Parser output'
-#         d['Keywords'] = 'CCI UMaine'
-#         d['CreationDate'] = datetime.datetime.today()
-#         d['ModDate'] = datetime.datetime.utcnow()
-#         
-# 
-# 
+#             ax.set_xticklabels(['{:.2f}'.format(x) for x in vals])
+             
+            ax = df[['depth (m we) ', ys[i]]].plot(x='depth (m we) ', kind='bar', ax=tg, color='C%d' % (i))
+                         
+            ax = df[[ys[i]]].plot(kind='line', linestyle='-', marker='o', ax=ax, color='C%d' % (i + 1))
+             
+            vals = ax.get_xticks()
+            ax.set_xticklabels(['{:.1f}'.format(x) for x in vals])
+             
+#             df_indexed.plot(x=df_indexed.index.name, y=ys[i], color='red', ax=tg)
+#             plt.plot(df_indexed[ys[i]], '-o', color='C%d' % (i))
+            plt.title('The title of plot %d' % (i + 1))
+            plt.xlabel('x axis %s' % xaxisLabel)
+            plt.ylabel(ys[i])
+            plt.legend()
+         
+            pdf.savefig(fig)
+            plt.close()
+             
+                 
+        # Meta data for the PdfPages
+        d = pdf.infodict()
+        d['Title'] = 'CCI Plot'
+        d['Author'] = u'Some author'
+        d['Subject'] = 'CCI Data Parser output'
+        d['Keywords'] = 'CCI UMaine'
+        d['CreationDate'] = datetime.datetime.today()
+        d['ModDate'] = datetime.datetime.utcnow()
+         
+ 
+ 
 # def add_plot_to_pdf(pdf, df, bar_header, year_headers, sample_headers, count):
 #     for y in year_headers:
 #         for s in sample_headers:
