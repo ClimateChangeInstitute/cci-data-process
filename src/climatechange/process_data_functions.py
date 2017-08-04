@@ -5,30 +5,27 @@ Created on Jul 24, 2017
 '''
 
 from builtins import float
+import datetime
 from math import nan
 import os
 import time
-from typing import List
 from typing import List, Tuple
 
 from matplotlib import pyplot
 from matplotlib.backends.backend_pdf import PdfPages
 from numpy import float64
-import numpy
 from pandas.core.frame import DataFrame
 
+from climatechange.compiled_stat import CompiledStat
 from climatechange.file import load_csv
 from climatechange.headers import HeaderDictionary, HeaderType, Header
 from climatechange.plot import write_resampled_data_to_csv_files, \
     add_compile_stats_to_pdf
-from climatechange.read_me_output import create_readme_output_file,\
+from climatechange.read_me_output import create_readme_output_file, \
     write_readmefile_to_txtfile
+from climatechange.read_me_output import template
 from climatechange.resampleStats import compile_stats_by_year
 from climatechange.resample_data_by_depths import compile_stats_by_depth
-from climatechange.resample_data_by_depths import compile_stats_by_depth
-import datetime
-from climatechange.read_me_output import template
-from climatechange.compiled_stat import CompiledStat
 
 
 def process_header_data(df) -> List[Header]:

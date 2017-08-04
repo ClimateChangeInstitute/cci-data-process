@@ -67,7 +67,7 @@ class Test(unittest.TestCase):
         input_test = load_csv(os.path.join('csv_files','input_depth_decimal.csv'))
         input_test = clean_data(input_test)
         headers = process_header_data(input_test)
-        depth_headers = [h.original_value for h in headers if h.htype == HeaderType.DEPTH]
+        depth_headers = [h.name for h in headers if h.htype == HeaderType.DEPTH]
         result=create_depth_headers([depth_headers[0]])
         self.assertEqual(expected_result,result)
         
@@ -110,8 +110,8 @@ class Test(unittest.TestCase):
 #         df = load_csv(os.path.join('csv_files','input_depths.csv'))
 #         headers = process_header_data(df)
 #         df = clean_data(df)
-#         depth_headers = [h.original_value for h in headers if h.htype == HeaderType.DEPTH]
-#         sample_headers=[h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
+#         depth_headers = [h.name for h in headers if h.htype == HeaderType.DEPTH]
+#         sample_headers=[h.name for h in headers if h.htype == HeaderType.SAMPLE]
 #         compiled_stats = []
 #         inc_amt=0.01
 #     

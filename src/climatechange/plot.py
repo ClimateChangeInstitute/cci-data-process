@@ -9,9 +9,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from pandas.core.frame import DataFrame
 
 from climatechange.file import load_csv
-from climatechange.headers import Header, HeaderType, HeaderDictionary
-from climatechange.resampleStats import compile_stats_by_year
-from climatechange.resample_data_by_depths import compile_stats_by_depth
+from climatechange.headers import Header
 import matplotlib.pyplot as plt
 
 

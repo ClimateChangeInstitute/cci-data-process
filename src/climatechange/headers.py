@@ -7,12 +7,10 @@ from enum import Enum
 import json
 import os
 import re
-from typing import Mapping, Tuple, List, Any
+from typing import Mapping, List, Any
 
 from climatechange.file import data_dir, load_dictionary, \
     save_dictionary, load_dict_by_package
-from pkg_resources._vendor.pyparsing import withClass
-from matplotlib.patheffects import Stroke
 
 
 class HeaderType(Enum):
@@ -47,7 +45,7 @@ def to_headers(d:Mapping[str, str]) -> Mapping[str, HeaderType]:
     :param d: A dictionary of header information
     :return: A fully instantiated header dictionary
     '''
-    return Header(d['name'], d['type'], d['class'], d['unit'], d['label'])
+    return Header(d['name'], HeaderType(d['type']), d['class'], d['unit'], d['label'])
 
 class Header(object):
     '''
@@ -118,7 +116,7 @@ class Header(object):
         '''
         return ('{"name": "%s", "type": "%s",'
                 ' "class": "%s", "unit": "%s", "label": "%s"}') \
-                % (self.name, self.htype, self.hclass, self.unit, self.label)    
+                % (self.name, self.htype.value, self.hclass, self.unit, self.label)    
      
     def __eq__(self, other):
         '''

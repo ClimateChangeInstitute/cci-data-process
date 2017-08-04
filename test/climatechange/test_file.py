@@ -7,7 +7,7 @@ import os
 import unittest
 
 from climatechange.file import load_dictionary, load_csv, data_dir, save_dictionary
-from climatechange.headers import HeaderEncoder, to_headers, HeaderType
+from climatechange.headers import HeaderEncoder, to_headers, HeaderType, Header
 from climatechange.process_data_functions import process_header_data
 from climatechange.read_me_output import create_readme_output_file
 
@@ -15,11 +15,16 @@ from climatechange.read_me_output import create_readme_output_file
 class Test(unittest.TestCase):
 
     def setUp(self):
-        self.abc_dict = to_headers({"a": "Years",
-                                  "b": "Years",
-                                  "c": "Depth",
-                                  "d": "Depth",
-                                  "e": "Sample"})
+        self.a = Header("a",HeaderType.YEARS, "aclass", "aunit", "alabel")
+        self.b = Header("b",HeaderType.YEARS, "aclass", "aunit", "alabel")
+        self.c = Header("c",HeaderType.DEPTH, "cclass", "cunit", "clabel")
+        self.d = Header("d",HeaderType.SAMPLE, "dclass", "dunit", "dlabel")
+        self.e = Header("e",HeaderType.SAMPLE, "eclass", "eunit", "elabel")
+        self.abc_dict = {"a": self.a,
+                         "b": self.b,
+                         "c": self.c,
+                         "d": self.d,
+                         "e": self.e}
         pass
 
 
@@ -114,7 +119,7 @@ Samples: {samples}
         inc_amt=1
         label_name='year'
         num_csvfiles=12
-        year_headers = [h.original_value for h in headers if h.htype == HeaderType.YEARS]
+        year_headers = [h.name for h in headers if h.htype == HeaderType.YEARS]
         result=create_readme_output_file(input_template,f,headers,time_ran,run_date,inc_amt,label_name,year_headers,num_csvfiles)
         expected_result=\
 """

@@ -1,7 +1,37 @@
-{
-	"a": "Years",
-	"b": "Years",
-	"c": "Depth",
-	"d": "Depth",
-	"e": "Sample"
-}
+[
+  {
+      "name":"a",
+      "type":"Years",
+      "class":"aclass",
+      "unit":"aunit",
+      "label":"alabel"
+   },
+   {
+      "name":"b",
+      "type":"Years",
+      "class":"aclass",
+      "unit":"aunit",
+      "label":"alabel"
+   },
+   {
+      "name":"c",
+      "type":"Depth",
+      "class":"cclass",
+      "unit":"cunit",
+      "label":"clabel"
+   },
+   {
+      "name":"d",
+      "type":"Sample",
+      "class":"dclass",
+      "unit":"dunit",
+      "label":"dlabel"
+   },
+   {
+      "name":"e",
+      "type":"Sample",
+      "class":"eclass",
+      "unit":"eunit",
+      "label":"elabel"
+   }
+]

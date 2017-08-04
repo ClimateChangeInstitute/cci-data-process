@@ -5,7 +5,6 @@ Created on Jul 13, 2017
 '''
 from math import isnan, nan
 import os
-import sys
 import unittest
 import warnings
 
@@ -164,7 +163,7 @@ class Test(unittest.TestCase):
         input_test = clean_data(input_test)
         
         headers = process_header_data(input_test)
-        depth_column_headers = [ h.original_value for h in headers if h.htype == HeaderType.DEPTH ]
+        depth_column_headers = [ h.name for h in headers if h.htype == HeaderType.DEPTH ]
         depth_columns=DataFrame([input_test.loc[:,c].values.tolist() for c in input_test.columns if c in depth_column_headers]).transpose()
         expected_result=DataFrame([[0.593488372],[0.916582279],[1.61],[2.48]]).transpose()
         expected_result.columns=['top depth (m we) ','bottom depth (m we) ','top depth (m abs)','bottom depth (m abs)']
@@ -178,7 +177,7 @@ class Test(unittest.TestCase):
         input_test = load_csv(os.path.join('csv_files','input_test_zeros_and_numbers.csv'))
         input_test=clean_data(input_test)
         headers = process_header_data(input_test)
-        depth_column_headers = [ h.original_value for h in headers if h.htype == HeaderType.DEPTH ]
+        depth_column_headers = [ h.name for h in headers if h.htype == HeaderType.DEPTH ]
         depth_columns=DataFrame([input_test.loc[:,c].values.tolist() for c in input_test.columns if c in depth_column_headers]).transpose()
         df_year_sample=pd.concat([input_test.loc[:,'Dat210617'], input_test.loc[:,'Cond (+ALU-S/cm)']], axis=1)
         result=resampled_by_inc_years(df_year_sample,'Dat210617',depth_columns,depth_column_headers,inc_amt)
