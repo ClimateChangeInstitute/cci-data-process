@@ -7,7 +7,7 @@ from enum import Enum
 import json
 import os
 import re
-from typing import Mapping, List, Any
+from typing import Mapping, List, Any, Sequence
 
 from climatechange.file import data_dir, load_dictionary, \
     save_dictionary, load_dict_by_package
@@ -39,11 +39,11 @@ class HeaderEncoder(json.JSONEncoder):
         else:
             return json.JSONEncoder.default(self, obj)
 
-def to_headers(d:Mapping[str, str]) -> Mapping[str, HeaderType]:
+def to_headers(d:Mapping[str, str]) -> Header:
     '''
-    Use this function to specify how a header dictionary should be loaded.
+    Use this function to specify how a header should be loaded.
     :param d: A dictionary of header information
-    :return: A fully instantiated header dictionary
+    :return: A fully instantiated header object
     '''
     return Header(d['name'], HeaderType(d['type']), d['class'], d['unit'], d['label'])
 
@@ -78,15 +78,16 @@ class Header(object):
                  htype:HeaderType,
                  hclass:str,
                  unit:str,
-                 label:str):
+                 label:str) -> None:
         self.name = name
         self.htype = htype 
         self.hclass = hclass
         self.unit = unit
         self.label = label
+        
     
     @staticmethod
-    def parse_header(rawHeader:str, regexp:str=r"\s*(.*?)\s*\(\s*(.*?)\s*\)") -> 'Header':
+    def parse_header(rawHeader:str, regexp:str=r"\s*(.*?)\s*\(\s*(.*?)\s*\)") -> Sequence[str]:
         '''
         Parses a header string into a 2-tuple of the header name and unit.
         
@@ -135,11 +136,11 @@ class HeaderDictionary(object):
     to default values.
     '''
 
-    header_dictionary = {}
+    header_dictionary:Mapping[str, Header] = {}
     
-    unit_dictionary = {}
+    unit_dictionary:Mapping[str, str] = {}
 
-    def __init__(self, headerDict:Mapping[str, Header]=None, unitDict:Mapping[str, str]=None): 
+    def __init__(self, headerDict:Mapping[str, Header]=None, unitDict:Mapping[str, str]=None) -> None: 
         '''
         Create a new HeaderDictionary object.
         
@@ -161,7 +162,7 @@ class HeaderDictionary(object):
         header_file_name = 'header_dict.json'
         header_file_path = os.path.join(data_dir(), header_file_name)
         
-        hdict = {}
+        hdict:Mapping[str, Header] = {}
         if os.path.isfile(header_file_path):
             with open(header_file_path, 'r') as f:
                 hdict = load_dictionary(f, obj_hook=to_headers) 

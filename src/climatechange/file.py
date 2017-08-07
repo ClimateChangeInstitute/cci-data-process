@@ -6,13 +6,14 @@ A collection of interfaces for working with files.
 import json
 from json.encoder import JSONEncoder
 import os
+from pandas.core.frame import DataFrame
 from pip.utils import appdirs
 from typing import Mapping, IO, Any, Callable
 import warnings
 
-from pandas.core.frame import DataFrame
 import pkg_resources
 
+from climatechange.headers import Header
 import pandas as pd
 
 
@@ -27,7 +28,7 @@ def data_dir() -> str:
         os.makedirs(directory)
     return directory
 
-def load_dictionary(file:IO[str], obj_hook:Callable=None) -> Mapping[str, str]:
+def load_dictionary(file:IO[str], obj_hook:Callable=None) -> Mapping[str, Header]:
     '''
     Load the specified JSON file. If empty, then a warning message is raised 
     and an empty dictionary is returned.  If loading the JSON file from a 
@@ -62,7 +63,7 @@ def save_dictionary(dictionary:Mapping[str, Any],
 
 def load_dict_by_package(file_name:str,
                          package:str='climatechange',
-                         obj_hook:Callable=None) -> Mapping[str, str]:
+                         obj_hook:Callable=None) -> Mapping:
     '''
     Loads the specified file from the given package.  If the file is empty, 
     then a warning message is given and an empty dictionary is returned.
