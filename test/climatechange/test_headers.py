@@ -3,11 +3,13 @@ Created on Jul 12, 2017
 
 @author: Mark Royer
 '''
+from builtins import ValueError
+import os
 import unittest
 
 from climatechange.file import load_dict_by_package
-from climatechange.headers import HeaderDictionary, HeaderType, Header, to_headers
-from builtins import ValueError
+from climatechange.headers import HeaderDictionary, HeaderType, Header, to_headers, \
+    load_headers
 
 
 class Test(unittest.TestCase):
@@ -124,7 +126,15 @@ class Test(unittest.TestCase):
                          hdict.add_header(h),
                          "Previous header should be returned")
         
-
+    def testLoadHeaders(self):
+        
+        h1 = Header("Sr (ng/L)",HeaderType.SAMPLE,"Sr","ng/L","Sr_(ng/L)")
+        h_last = Header("K (ug/L)",HeaderType.SAMPLE,"K", "ug/L","K_(ug/L)")
+        
+        with open(os.path.join('csv_files','header_input.csv'), 'r') as f:
+            headers = load_headers(f)
+            self.assertEqual(h1, headers[0], "First header is Strontium")
+            self.assertEquals(h_last, headers[len(headers)-1], "Last header is Potasium")
         
 
 if __name__ == "__main__":

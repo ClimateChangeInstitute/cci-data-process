@@ -7,10 +7,11 @@ from enum import Enum
 import json
 import os
 import re
-from typing import Mapping, List, Any, Sequence
+from typing import Mapping, List, Any, Sequence, IO
 
-from climatechange.file import save_dictionary, load_dict_by_package, data_dir,\
-    load_dictionary
+from climatechange.file import save_dictionary, load_dict_by_package, data_dir, \
+    load_dictionary, load_csv
+import pandas
 
 
 class HeaderType(Enum):
@@ -255,3 +256,18 @@ class HeaderDictionary(object):
         previous = self.header_dictionary.get(h.name)
         self.header_dictionary[h.name] = h
         return previous
+
+def load_headers(file_name:IO[str]) -> List[Header]:
+    '''
+    Loads headers into a list from a CSV file.  Each row should contain name,
+    type, class, unit, and label data.
+    :param file_name: The name of a CSV file containing header information
+    :return: A list containing the headers
+    '''
+    df = pandas.read_csv(file_name, sep=',')
+    
+    result = []
+    for r in df.values:
+        result.append(Header(r[0], HeaderType(r[1]), r[2], r[3], r[4]))
+    
+    return result
