@@ -280,7 +280,19 @@ def double_resample_by_depths(f1:str, f2:str, inc_amt:float):
     df1, compiled_stats1, headers1 = load_and_clean_depth_data(f1, inc_amt)
     df2, compiled_stats2, headers2 = load_and_clean_depth_data(f2, inc_amt)
     #remove headers?
-#     for c in compiled_stats:
+    #compiledstats:list[list[compiledstat]] by depth
+    #topdepth,bottomdepth,mean,stdv,median,max,min,count
+    
+#     for depth1 in compiled_stats1:
+#         for depth2 in compiled_stats2:
+#             if depth1.name==depth2.name
+                
+                #for sample1 in depth1:
+                    #for sample2 in depth2:
+                        #correlate
+                        #slope, intercept, r_value, p_value, std_err=linregress(x, y)
+                        #append create_csv_file_with_sample1.label,sample2.label,slope, intercept, r_value, p_value, std_err
+            #
     
     
     # if they have the same sample name, correlate them
