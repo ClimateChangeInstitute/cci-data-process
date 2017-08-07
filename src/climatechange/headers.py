@@ -237,3 +237,20 @@ class HeaderDictionary(object):
                 h = Header(s, HeaderType.UNKNOWN, None, None, None)
             result.append(h)
         return result
+
+    def add_header(self, h:Header) -> Header:
+        '''
+        Adds the given header to the dictionary. This is only the in memory 
+        dictionary, if you want the dictionary persisted, you must save the 
+        dictionary to disk. Throws a ValueError if the given header is an 
+        Unknown type.
+        :param h: The new header to add
+        :return: None or the previous value if a header with the same name 
+            already existed
+        '''
+        if h.htype is HeaderType.UNKNOWN:
+            raise ValueError("Unwilling to add unknown header type")
+            
+        previous = self.header_dictionary.get(h.name)
+        self.header_dictionary[h.name] = h
+        return previous

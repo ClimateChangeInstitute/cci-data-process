@@ -7,16 +7,18 @@ import unittest
 
 from climatechange.file import load_dict_by_package
 from climatechange.headers import HeaderDictionary, HeaderType, Header, to_headers
+from builtins import ValueError
 
 
 class Test(unittest.TestCase):
 
 
     def setUp(self):
-        self.a = Header("a",HeaderType.YEARS, "aclass", "aunit", "alabel")
-        self.c = Header("c",HeaderType.SAMPLE, "cclass", "cunit", "clabel")
-        self.d = Header("d",HeaderType.SAMPLE, "dclass", "dunit", "dlabel")
-        self.e = Header("e",HeaderType.YEARS, "eclass", "eunit", "elabel")
+        self.a = Header("a", HeaderType.YEARS, "aclass", "aunit", "alabel")
+        self.c = Header("c", HeaderType.SAMPLE, "cclass", "cunit", "clabel")
+        self.d = Header("d", HeaderType.SAMPLE, "dclass", "dunit", "dlabel")
+        self.e = Header("e", HeaderType.YEARS, "eclass", "eunit", "elabel")
+        self.unknown_header = Header("not known", HeaderType.UNKNOWN, None, None, None)
         self.abcDict = { "a": self.a,
                          "b": self.a,
                          "c": self.c,
@@ -101,6 +103,26 @@ class Test(unittest.TestCase):
         
         self.assertListEqual([test_sample, test_sample_nounit],
                              testHeaderDict.parse_headers(oneHeaderWithUnitAndOneWithoutUnit))
+    
+    def testAddHeader(self):
+        
+        self.assertRaises(ValueError, self.hd.add_header, self.unknown_header)     
+        
+        hdict = HeaderDictionary(self.abcDict)
+        
+        self.assertEqual(self.a,
+                         hdict.add_header(self.a),
+                         "Previous header should be returned")
+        
+        h = Header("test", HeaderType.YEARS, "Years", "CE", "test_(BP)")
+
+        self.assertEqual(None,
+                         hdict.add_header(h),
+                         "New header should return None")
+        
+        self.assertEqual(h,
+                         hdict.add_header(h),
+                         "Previous header should be returned")
         
 
 if __name__ == "__main__":
