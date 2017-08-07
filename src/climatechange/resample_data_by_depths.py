@@ -20,6 +20,7 @@ def create_range_for_depths(list_to_inc:List[float], inc_amt: int=0.01) -> List[
     :param inc_amt:
     '''
     if str(min(list_to_inc))[::-1].find('.') > str(inc_amt)[::-1].find('.'):
+        
         r = str(min(list_to_inc))[::-1].find('.') - 1
     else:
         r = str(inc_amt)[::-1].find('.')

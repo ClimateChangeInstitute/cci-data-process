@@ -26,6 +26,7 @@ from climatechange.read_me_output import create_readme_output_file, \
 from climatechange.read_me_output import template
 from climatechange.resample_stats import compile_stats_by_year
 from climatechange.resample_data_by_depths import compile_stats_by_depth
+import numpy as np
 
 
 def process_header_data(df) -> List[Header]:
@@ -84,12 +85,29 @@ def get_compiled_stats_by_year(inc_amt:int, df:DataFrame, headers:List[Header]) 
     
     return compiled_stats
 
+def find_round_values():
+    pass
+
+def round_values_to_sigfig(df:DataFrame):
+    year_round_amt = 0
+    depth_round_amt = 4
+    sample_round_amt = 3
+    df.iloc[:,0]=[np.round(i,year_round_amt) for i in df.iloc[:,0]]
+    for col in range(1,5):
+        df.iloc[:,col]=[np.round(i,depth_round_amt) for i in df.iloc[:,col]]
+    for col in range(5,10):
+        df.iloc[:,col]=[np.round(i,sample_round_amt) for i in df.iloc[:,col]]
+ 
+
+    return df         
+        
+    
 
 def load_and_clean_year_data(f:str, inc_amt:int) -> Tuple[DataFrame, List[List[CompiledStat]], List[Header]]:
     df = load_csv(f)
     headers = process_header_data(df)
     df = clean_data(df)
-#     print("load and clean data: %s seconds"%(time.time()-start_time_d))
+    #round_values=find_round_values(df)
     return df, get_compiled_stats_by_year(inc_amt, df, headers), headers
 
 def resample_by_years(f:str, inc_amt:int=1):
@@ -117,13 +135,15 @@ def resample_by_years(f:str, inc_amt:int=1):
     num_csvfiles=sum(len(c) for c in compiled_stats)
     stat_header='Mean'
     
+
 #     print("compile stats: %s seconds"%(time.time()-start_time_d)) 
     for cur_year in compiled_stats:
         for c in cur_year:
             csv_filename=f_base+'_stats_%s_year_resolution_%s_%s.csv' % (inc_amt,
                                                                          c.x_header.name,
                                                                          c.sample_header.hclass.replace("/", ""))
-            write_resampled_data_to_csv_files(c.df,
+            df_round=round_values_to_sigfig(c.df)
+            write_resampled_data_to_csv_files(df_round,
                                               csv_filename)
 
     year_headers = [h.name for h in headers if h.htype == HeaderType.YEARS]

@@ -67,6 +67,7 @@ def resampled_statistics_by_years(df_year_sample, index):
     for i in index:
         appended_data.extend(compileStats(df_year_sample.iloc[i, [1]].transpose().values.tolist()))
     return DataFrame(appended_data, columns=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
+    #add units to column names
 
 def resampled_depths_by_years(index, depth_columns:DataFrame, depth_column_headers:List[Header]) -> DataFrame:
     append_depth = []

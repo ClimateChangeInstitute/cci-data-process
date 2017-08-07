@@ -12,7 +12,6 @@ ReadMeFile
 CCI-data-processor
 Authors: Mark Royer and Heather Clifford
 Date ran:{run_date}
-Time to run:{time}
 
 Process: Resample Input Data to {inc_amt} {label_name} Resolution
 
@@ -55,8 +54,7 @@ def create_readme_output_file(template,f,headers,time_ran,run_date,inc_amt,label
     
 #     output_filename=os.path.join('00README')
     data = {'run_date': run_date,
-            'time': time_ran,
-            'file_name':f,
+            'file_name':os.path.splitext(f),
             'inc_amt':inc_amt,
             'label_name':label_name,
             'years':year_headers,

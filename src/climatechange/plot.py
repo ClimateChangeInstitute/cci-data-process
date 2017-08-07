@@ -228,15 +228,16 @@ def add_compile_stats_to_pdf(f:str,
         x_str='{:.%sf}' %str(inc_amt)[::-1].find('.')
         ax.set_xticklabels([x_str.format(x) for x in vals])
         plt.xlabel(x_header.label)
-        plt.title('%s: %s inc. %s resolution' % (sample_header.hclass,inc_amt,label_name))
+        plt.title('Raw %s Data vs. Resampled %s inc. %s resolution %s Data' % (sample_header.hclass,inc_amt,label_name,stat_header))
         #add class name instead of sample_header name
     else:
         ax.set_xticklabels(['{:.0f}'.format(x) for x in vals])
         plt.xlabel(x_header.label)
-        plt.title('%s: %s %s resolution' % (sample_header.hclass,inc_amt,label_name))
+        plt.title('Raw %s Data vs. Resampled %s %s resolution %s Data' % (sample_header.hclass,inc_amt,label_name,stat_header))
     
     plt.ylabel(sample_header.label)
     plt.legend()    
+    #fix legend
     pdf.savefig(fig)
     plt.close()
 
