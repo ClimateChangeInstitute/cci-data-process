@@ -215,9 +215,6 @@ def add_compile_stats_to_pdf(f:str,
     :return: csv files with statistics resampled of stat_header, 
         pdf files of statistics with raw data
     '''
-    print(sample)
-    print(sample.htype)
-            
     df_name=df_resampled_stats.columns[0]
     plt.figure(figsize=(11, 8.5))
     fig, tg = plt.subplots(1)

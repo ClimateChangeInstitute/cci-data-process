@@ -4,7 +4,6 @@ Created on Aug 2, 2017
 @author: Heather
 '''
 from pandas.core.frame import DataFrame
-from builtins import str
 from climatechange.headers import Header
 
 class CompiledStat(object):
@@ -13,17 +12,17 @@ class CompiledStat(object):
     '''
     df:DataFrame
     
-    x_value_name:str
+    x_header:Header
     
     sample_header:Header
     
 
-    def __init__(self, df:DataFrame,x_value_name:str,sample_header:Header):
+    def __init__(self, df:DataFrame,x_header:Header,sample_header:Header):
         '''
         Constructor
         '''
         self.df=df
-        self.x_value_name=x_value_name
+        self.x_header=x_header
         self.sample_header=sample_header
         
         

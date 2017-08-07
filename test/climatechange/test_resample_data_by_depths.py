@@ -12,10 +12,13 @@ from climatechange.resample_data_by_depths import resampled_depths,create_range_
     find_index_by_increment_for_depths,resampled_by_inc_depths,compile_stats_by_depth
 import os
 from climatechange.resample_stats import create_depth_headers
-from climatechange.headers import HeaderType
+from climatechange.headers import HeaderType, Header
 import pandas
 import warnings
 
+test_sample_header=Header("Cond (+ALU-S/cm)", HeaderType.SAMPLE,"Conductivity","alu-s/cm","Cond_(+ALU-S/cm)")
+test_depth_we_header=Header("depth (m we)", HeaderType.DEPTH,"Depth","meters","depth_we_(m)")
+test_depth_abs_header=Header("depth (m abs) ", HeaderType.DEPTH,"Depth","meters","depth_abs_(m)")
 
 class Test(unittest.TestCase):
 
@@ -63,12 +66,12 @@ class Test(unittest.TestCase):
         self.assertEqual(expected_result,result)
     
     def test_create_resample_depth_headers(self):
-        expected_result=['top depth (m we) ','bottom depth (m we) ']
+        expected_result=['top_depth_we_(m)','bottom_depth_we_(m)']
         input_test = load_csv(os.path.join('csv_files','input_depth_decimal.csv'))
         input_test = clean_data(input_test)
         headers = process_header_data(input_test)
         depth_headers = [h.name for h in headers if h.htype == HeaderType.DEPTH]
-        result=create_depth_headers([depth_headers[0]])
+        result=create_depth_headers([test_depth_we_header])
         self.assertEqual(expected_result,result)
         
     def test_find_index_by_increment_for_depth(self):
@@ -81,11 +84,11 @@ class Test(unittest.TestCase):
     
     def test_resampled_depths(self):
         inc_amt=0.01
-        expected_result = DataFrame([[0.605,0.615],[0.615,0.625]],columns=['top depth (m we)','bottom depth (m we)'])
+        expected_result = DataFrame([[0.605,0.615],[0.615,0.625]],columns=['top_depth_we_(m)', 'bottom_depth_we_(m)'])
         input_test = load_csv(os.path.join('csv_files','input_depths.csv'))
         input_test = clean_data(input_test)
         df_x_sample=pandas.concat([input_test.loc[:,'depth (m we)'],input_test.loc[:,'Cond (+ALU-S/cm)']], axis=1)
-        result=resampled_depths(df_x_sample,'depth (m we)',inc_amt)
+        result=resampled_depths(df_x_sample,test_depth_we_header,inc_amt)
         assert_frame_equal(expected_result,result)
         
     def test_resampled_by_inc_depths(self):
@@ -94,7 +97,7 @@ class Test(unittest.TestCase):
         input_test = load_csv(os.path.join('csv_files','input_depths.csv'))
         input_test = clean_data(input_test)
         df_x_sample=pandas.concat([input_test.loc[:,'depth (m we)'],input_test.loc[:,'Cond (+ALU-S/cm)']], axis=1)
-        result=resampled_by_inc_depths(df_x_sample,'depth (m we)',inc_amt)
+        result=resampled_by_inc_depths(df_x_sample,test_depth_we_header,inc_amt)
         assert_frame_equal(expected_result,result)
         
     def test_compile_stats_by_depth(self):
@@ -103,7 +106,7 @@ class Test(unittest.TestCase):
         expected_result = load_csv(os.path.join('csv_files','output_bydepth.csv'))
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)   
-            result = compile_stats_by_depth(input_test,'depth (m we)', 'Cond (+ALU-S/cm)',0.01)
+            result = compile_stats_by_depth(input_test,test_depth_we_header, test_sample_header,0.01)
         assert_frame_equal(expected_result, result.df)
         
 #     def test_append_compile_stats_by_depth(self):

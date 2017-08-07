@@ -36,7 +36,20 @@ test_output = [[6.333333333333333, 0.94280904158206336,7.0, 7, 5,  3],
                [4.0,0.81649658092772603, 4.0, 5, 3,  3],
                [6.333333333333333,2.0548046676563256, 6.0, 9, 4,  3]]
 
-test_header=Header("Cond (+ALU-S/cm)",HeaderType.SAMPLE,"Conductivity","alu-s/cm","Cond_(+ALU-S/cm)")
+test_depth_we_header=Header("depth (m we)", HeaderType.DEPTH,"Depth","meters","depth_we_(m)")
+test_sample_header=Header("Cond (+ALU-S/cm)",HeaderType.SAMPLE,"Conductivity","alu-s/cm","Cond_(+ALU-S/cm)")
+test_year_header= Header("Dat210617",HeaderType.YEARS,"Years","CE","Year_Dat210617_(CE)")
+input_test_zeros_and_numbers=load_csv(os.path.join('csv_files','input_test_zeros_and_numbers.csv'))
+input_test_zeros_and_numbers = clean_data(input_test_zeros_and_numbers)
+headers = process_header_data(input_test_zeros_and_numbers)
+depth_column_headers = [ h for h in headers if h.htype == HeaderType.DEPTH ]
+test_depth_column_headers_name= [ h.name for h in headers if h.htype == HeaderType.DEPTH ]
+depth_columns=DataFrame([input_test_zeros_and_numbers.loc[:,c].values.tolist() for c in input_test_zeros_and_numbers.columns if c in test_depth_column_headers_name]).transpose()
+
+
+input_test_zeros = load_csv(os.path.join('csv_files','input_test_zeros.csv'))
+input_test_zeros = clean_data(input_test_zeros)
+headers_zeros = process_header_data(input_test_zeros)
 
 class Test(unittest.TestCase):
 
@@ -107,12 +120,10 @@ class Test(unittest.TestCase):
         assert_almost_equal(small_output, compileStats(frame.transpose().values.tolist()))
         
     def test_create_depth_headers(self):
-        input_test=['depth (m we)','depth (m abs)']
+        input_test=[Header("depth (m we)", HeaderType.DEPTH,"Depth","meters","depth_we_(m)")]
         input_empty=[]
-        expected_output=['top depth (m we)',
-                         'bottom depth (m we)',
-                         'top depth (m abs)',
-                         'bottom depth (m abs)']
+        expected_output=['top_depth_we_(m)',
+                         'bottom_depth_we_(m)']
         result=create_depth_headers(input_test)
         result_empty=create_depth_headers(input_empty)
         self.assertListEqual(expected_output, result)
@@ -129,80 +140,59 @@ class Test(unittest.TestCase):
         
         assert_frame_equal(expected_output, result)
     
+
+    
+    
     
     def test_create_range_by_inc(self):
         expected_output=[2011]
-        input_test = load_csv(os.path.join('csv_files','input_test_zeros_and_numbers.csv'))
-        input_test = clean_data(input_test)
-        result=create_range_by_inc(input_test.loc[:,'Dat210617'].values.tolist(),inc_amt)
+        result=create_range_by_inc(input_test_zeros_and_numbers.loc[:,'Dat210617'].values.tolist(),inc_amt)
         self.assertEqual(expected_output,result)  
           
     def test_index_by_increment(self):
         expected_output=[list(range(0,871,inc_amt))]
-        input_test = load_csv(os.path.join('csv_files','input_test_zeros_and_numbers.csv'))
-        index=find_index_by_increment(input_test.loc[:,'Dat210617'].values.tolist(), inc_amt)
+        index=find_index_by_increment(input_test_zeros_and_numbers.loc[:,'Dat210617'].values.tolist(), inc_amt)
         self.assertEqual(expected_output, index)
     
-    def test_resampled_depths_by_years(self):      
-        input_test = load_csv(os.path.join('csv_files','input_test_zeros_and_numbers.csv'))
-        input_test = clean_data(input_test)
-        
-        headers = process_header_data(input_test)
-        depth_column_headers = [ h.name for h in headers if h.htype == HeaderType.DEPTH ]
-        depth_columns=DataFrame([input_test.loc[:,c].values.tolist() for c in input_test.columns if c in depth_column_headers]).transpose()
+    def test_resampled_depths_by_years(self):            
         expected_result=DataFrame([[0.593488372],[0.916582279],[1.61],[2.48]]).transpose()
-        expected_result.columns=['top depth (m we) ','bottom depth (m we) ','top depth (m abs)','bottom depth (m abs)']
-        df_year_sample=pd.concat([input_test.loc[:,'Dat210617'], input_test.loc[:,'Cond (+ALU-S/cm)']], axis=1)
+        expected_result.columns=['top_depth_we_(m)','bottom_depth_we_(m)','top_depth_abs_(m)','bottom_depth_abs_(m)']
+        df_year_sample=pd.concat([input_test_zeros_and_numbers.loc[:,test_year_header.name], input_test_zeros_and_numbers.loc[:,test_sample_header.name]], axis=1)
         index=find_index_by_increment(df_year_sample.iloc[:,0].values.tolist(),inc_amt)       
         result=resampled_depths_by_years(index, depth_columns, depth_column_headers)
         assert_frame_equal(expected_result,result)
         
     def test_resampled_by_inc_years(self): 
         expected_result = load_csv(os.path.join('csv_files','output_test_zeros_and_numbers.csv')) 
-        input_test = load_csv(os.path.join('csv_files','input_test_zeros_and_numbers.csv'))
-        input_test=clean_data(input_test)
-        headers = process_header_data(input_test)
-        depth_column_headers = [ h.name for h in headers if h.htype == HeaderType.DEPTH ]
-        depth_columns=DataFrame([input_test.loc[:,c].values.tolist() for c in input_test.columns if c in depth_column_headers]).transpose()
-        df_year_sample=pd.concat([input_test.loc[:,'Dat210617'], input_test.loc[:,'Cond (+ALU-S/cm)']], axis=1)
-        result=resampled_by_inc_years(df_year_sample,'Dat210617',depth_columns,depth_column_headers,inc_amt)
+        df_year_sample=pd.concat([input_test_zeros_and_numbers.loc[:,test_year_header.name], input_test_zeros_and_numbers.loc[:,test_sample_header.name]], axis=1)
+        result=resampled_by_inc_years(df_year_sample,test_year_header,depth_columns,depth_column_headers,inc_amt)
         assert_frame_equal(expected_result, result)
         
+        
+     #fixed    
     def test_compile_stats_by_year(self):
-        input_test = load_csv(os.path.join('csv_files','input_test_zeros_and_numbers.csv'))
-        input_test=clean_data(input_test)
         expected_result = load_csv(os.path.join('csv_files','output_test_zeros_and_numbers.csv')) 
-        headers = process_header_data(input_test)
-        result=compile_stats_by_year(input_test, headers, 'Dat210617', test_header, inc_amt)
+        result=compile_stats_by_year(input_test_zeros_and_numbers, headers, test_year_header, test_sample_header, inc_amt)
         assert_frame_equal(expected_result, result.df)
         
     def test_empty_rows(self):
 
         expected_result = load_csv(os.path.join('csv_files','output_test_zeros.csv')) 
-        input_test = load_csv(os.path.join('csv_files','input_test_zeros.csv'))
-        input_test = clean_data(input_test)
-        headers = process_header_data(input_test)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            result = compile_stats_by_year(input_test, headers, 'Dat210617', test_header)
+            result = compile_stats_by_year(input_test_zeros, headers_zeros, test_year_header, test_sample_header)
         assert_frame_equal(expected_result, result.df)
          
     def test_partial_empty_rows(self):
-        input_test = load_csv(os.path.join('csv_files','input_test_zeros_and_numbers.csv'))
-        input_test = clean_data(input_test)
-        expected_result = load_csv(os.path.join('csv_files','output_test_zeros_and_numbers.csv'))   
-        headers = process_header_data(input_test)
+        expected_result = load_csv(os.path.join('csv_files','output_test_zeros_and_numbers.csv'))
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            result = compile_stats_by_year(input_test, headers, 'Dat210617', test_header)
+            result = compile_stats_by_year(input_test_zeros_and_numbers, headers, test_year_header, test_sample_header)
         assert_frame_equal(expected_result, result.df)
     
     def create_stats_headers(self):
-        input_test = load_csv(os.path.join('csv_files','input_test_zeros_and_numbers.csv'))
-        input_test = clean_data(input_test)
         expected_result = load_csv(os.path.join('csv_files','output_test_zeros_and_numbers.csv'))   
-        headers = process_header_data(input_test)
-        result = compile_stats_by_year(input_test, headers, 'Dat210617', test_header)
+        result = compile_stats_by_year(input_test_zeros_and_numbers, headers, test_year_header, test_sample_header)
         assert_frame_equal(expected_result.columns, result.columns)     
         
 if __name__ == "__main__":
