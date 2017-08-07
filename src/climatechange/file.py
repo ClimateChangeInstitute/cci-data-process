@@ -50,7 +50,6 @@ def load_dictionary(file:IO[str], obj_hook:Callable=None) -> Mapping[str, Any]:
             warnings.warn("Warning unable to parse file %s" % file)
     
     return result
-
     
 def save_dictionary(dictionary:Mapping[str, Any],
                     file_path:str,
