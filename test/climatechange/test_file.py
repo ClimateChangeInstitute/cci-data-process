@@ -118,9 +118,10 @@ Samples: {samples}
         run_date='2017-08-03'
         inc_amt=1
         label_name='year'
+        stat_header='Mean'
         num_csvfiles=12
         year_headers = [h.name for h in headers if h.htype == HeaderType.YEARS]
-        result=create_readme_output_file(input_template,f,headers,time_ran,run_date,inc_amt,label_name,year_headers,num_csvfiles)
+        result=create_readme_output_file(input_template,f,headers,time_ran,run_date,inc_amt,label_name,year_headers,num_csvfiles,stat_header)
         expected_result=\
 """
 Date ran:2017-08-03

@@ -198,8 +198,8 @@ def add_compile_stats_to_pdf(f:str,
                              df:DataFrame,
                              df_resampled_stats:DataFrame,
                              pdf,
-                             x_name:str,
-                             sample:Header,
+                             x_header:Header,
+                             sample_header:Header,
                              inc_amt:float,
                              label_name:str,
                              stat_header:str='Mean') -> str:
@@ -208,7 +208,7 @@ def add_compile_stats_to_pdf(f:str,
     :param f: input file path
     :param df: dataframe of input file
     :param pdf: pdf file
-    :param x_name: name of year column
+    :param x_header: name of year column
     :param headers: headers of input dataframe
     :param stat_header: header of statistic to plot
     
@@ -219,7 +219,7 @@ def add_compile_stats_to_pdf(f:str,
     plt.figure(figsize=(11, 8.5))
     fig, tg = plt.subplots(1)
     ax = df_resampled_stats[[df_name, stat_header]].plot(x=df_name, kind='line',color='r', ax=tg)
-    ax = df[[x_name, sample.name]].plot(x=x_name, kind='line',
+    ax = df[[x_header.name, sample_header.name]].plot(x=x_header.name, kind='line',
                                            linestyle='-',
                                            color='0.75',
                                            ax=tg,zorder=-1)
@@ -227,22 +227,22 @@ def add_compile_stats_to_pdf(f:str,
     if label_name=='depth':
         x_str='{:.%sf}' %str(inc_amt)[::-1].find('.')
         ax.set_xticklabels([x_str.format(x) for x in vals])
-        plt.xlabel(x_name)
-        plt.title('%s: %s inc. %s resolution' % (sample.hclass,inc_amt,label_name))
-        #add class name instead of sample name
+        plt.xlabel(x_header.label)
+        plt.title('%s: %s inc. %s resolution' % (sample_header.hclass,inc_amt,label_name))
+        #add class name instead of sample_header name
     else:
         ax.set_xticklabels(['{:.0f}'.format(x) for x in vals])
-        plt.xlabel('Year CE')
-        plt.title('%s: %s %s resolution' % (sample.hclass,inc_amt,label_name))
+        plt.xlabel(x_header.label)
+        plt.title('%s: %s %s resolution' % (sample_header.hclass,inc_amt,label_name))
     
-    plt.ylabel(sample.label)
+    plt.ylabel(sample_header.label)
     plt.legend()    
     pdf.savefig(fig)
     plt.close()
 
 # def create_csv_pdf_resampled(f:str,
 #                              df:DataFrame,
-#                              x_name:str,
+#                              x_header:str,
 #                              headers:Header,
 #                              inc_amt:float,
 #                              bar_header:str='Mean')->str:
@@ -250,16 +250,16 @@ def add_compile_stats_to_pdf(f:str,
 #     Create a pdf file with multiple plots based on the data frame.
 #     :param f: input file path
 #     :param df: dataframe of input file
-#     :param x_name: name of x column (year or depth)
+#     :param x_header: name of x column (year or depth)
 #     :param headers: headers of input dataframe
 #     :param bar_header: header of statistic to plot
 #     
 #     :return: pdf of compiled figures by year,
-#         csv file of statistics by sample and year
+#         csv file of statistics by sample_header and year
 #     '''
-#     file_name=f + ('_resampled_%s.pdf' % x_name)
+#     file_name=f + ('_resampled_%s.pdf' % x_header)
 #     with PdfPages(file_name) as pdf:
-#         add_compile_stats_to_pdf(f, df, pdf, x_name, headers,inc_amt, bar_header)    
+#         add_compile_stats_to_pdf(f, df, pdf, x_header, headers,inc_amt, bar_header)    
 #         plt.close()
 #                     # Meta data for the PdfPages
 # #         d = pdf.infodict()

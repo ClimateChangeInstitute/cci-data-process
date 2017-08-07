@@ -49,10 +49,7 @@ def clean_data(df):
     # Remove zeroes.  Zeroes go to nan
     values = df.values
     
-    for r in values :
-        for i in range(len(r)):
-            if r[i] == 0:
-                r[i] = float64(nan)
+
     
     # Replace str values with nan
     for r in values :
@@ -61,6 +58,11 @@ def clean_data(df):
                 r[i] = float64(r[i])
             else:
                 r[i] = float64(nan) 
+
+    for r in values :
+        for i in range(len(r)):
+            if r[i] == 0:
+                r[i] = float64(nan)
                 
     
     df = DataFrame(data=values,
@@ -113,13 +115,14 @@ def resample_by_years(f:str, inc_amt:int=1):
     f_base=os.path.splitext(f)[0]
     file_headers=compiled_stats[0][0].df.columns.tolist()
     num_csvfiles=sum(len(c) for c in compiled_stats)
+    stat_header='Mean'
     
 #     print("compile stats: %s seconds"%(time.time()-start_time_d)) 
     for cur_year in compiled_stats:
         for c in cur_year:
             csv_filename=f_base+'_stats_%s_year_resolution_%s_%s.csv' % (inc_amt,
-                                                                         c.x_header,
-                                                                         c.sample_header.name.replace("/", ""))
+                                                                         c.x_header.name,
+                                                                         c.sample_header.hclass.replace("/", ""))
             write_resampled_data_to_csv_files(c.df,
                                               csv_filename)
 
@@ -142,7 +145,7 @@ def resample_by_years(f:str, inc_amt:int=1):
     time_ran=(time.time() - start_time)
     run_date=str(datetime.date.today())
     output_path=os.path.dirname(f)
-    readme = create_readme_output_file(template,f,headers,time_ran,run_date,inc_amt,'year',file_headers,num_csvfiles)
+    readme = create_readme_output_file(template,f,headers,time_ran,run_date,inc_amt,'year',file_headers,num_csvfiles,stat_header)
     write_readmefile_to_txtfile(readme,os.path.join(output_path,'00README.txt'))
 
 #     df = load_csv(f)
@@ -168,7 +171,7 @@ def resample_by_years(f:str, inc_amt:int=1):
 
 def get_compiled_stats_by_depth(inc_amt:float,
                                 df:DataFrame,
-                                headers:List[Header]) -> DataFrame:
+                                headers:List[Header]) -> List[List[CompiledStat]]:
     depth_headers = [h.name for h in headers if h.htype == HeaderType.DEPTH]
     sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
     compiled_stats = []
@@ -184,7 +187,7 @@ def get_compiled_stats_by_depth(inc_amt:float,
 
 
 def load_and_clean_depth_data(f:str, inc_amt:float) -> Tuple[DataFrame,
-                                                             DataFrame,
+                                                             List[List[CompiledStat]],
                                                              List[Header]]:
     '''
     
@@ -226,8 +229,8 @@ def resample_by_depths(f:str, inc_amt:float):
     for cur_depth in compiled_stats:
         for c in cur_depth:
             csv_filename=f_base+'_stats_%s_inc_resolution_%s_%s.csv' % (inc_amt,
-                                                                        c.x_header,
-                                                                        c.sample_header.replace("/", ""))
+                                                                        c.x_header.name,
+                                                                        c.sample_header.name.replace("/", ""))
             write_resampled_data_to_csv_files(c.df,
                                               csv_filename)
 #     print("create csvs: %s seconds"%(time.time()-start_time_d))      
@@ -276,7 +279,8 @@ def double_resample_by_depths(f1:str, f2:str, inc_amt:float):
     
     df1, compiled_stats1, headers1 = load_and_clean_depth_data(f1, inc_amt)
     df2, compiled_stats2, headers2 = load_and_clean_depth_data(f2, inc_amt)
-
+    #remove headers?
+#     for c in compiled_stats:
     
     
     # if they have the same sample name, correlate them

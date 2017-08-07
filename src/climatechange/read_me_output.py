@@ -39,7 +39,7 @@ Ex. of name of pdf file name:
 For each {label_name}, PDF files containing:
 -plot for each sample with:
     raw sample data vs. {label_name}
-    resampled mean data vs. {inc_amt}_{label_name}_resolution
+    resampled {stat_header} data vs. {inc_amt}_{label_name}_resolution
 '''
 def write_readmefile_to_txtfile(readme:str,output_filename:str):
     with open(output_filename, "w") as text_file:
@@ -47,7 +47,7 @@ def write_readmefile_to_txtfile(readme:str,output_filename:str):
         text_file.flush()
         
 
-def create_readme_output_file(template,f,headers,time_ran,run_date,inc_amt,label_name,file_headers,num_csvfiles):
+def create_readme_output_file(template,f,headers,time_ran,run_date,inc_amt,label_name,file_headers,num_csvfiles,stat_header):
     year_headers = [h.name for h in headers if h.htype == HeaderType.YEARS]
     depth_headers = [h.name for h in headers if h.htype == HeaderType.DEPTH]
     sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
@@ -67,7 +67,8 @@ def create_readme_output_file(template,f,headers,time_ran,run_date,inc_amt,label
             'f_base':os.path.splitext(f)[0],
             'x_name':file_headers[0],
             'sample_name':sample_headers[0],
-            'file_headers':file_headers}
+            'file_headers':file_headers,
+            'stat_header':stat_header}
  
 
     
