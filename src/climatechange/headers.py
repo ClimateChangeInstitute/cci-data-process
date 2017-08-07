@@ -9,8 +9,8 @@ import os
 import re
 from typing import Mapping, List, Any, Sequence
 
-from climatechange.file import data_dir, load_dictionary, \
-    save_dictionary, load_dict_by_package
+from climatechange.file import save_dictionary, load_dict_by_package, data_dir,\
+    load_dictionary
 
 
 class HeaderType(Enum):
@@ -38,14 +38,6 @@ class HeaderEncoder(json.JSONEncoder):
             return eval(str(obj))
         else:
             return json.JSONEncoder.default(self, obj)
-
-def to_headers(d:Mapping[str, str]) -> Header:
-    '''
-    Use this function to specify how a header should be loaded.
-    :param d: A dictionary of header information
-    :return: A fully instantiated header object
-    '''
-    return Header(d['name'], HeaderType(d['type']), d['class'], d['unit'], d['label'])
 
 class Header(object):
     '''
@@ -128,6 +120,14 @@ class Header(object):
         if isinstance(other, self.__class__):
             return self.__dict__ == other.__dict__
         return NotImplemented
+
+def to_headers(d:Mapping[str, str]) -> Header:
+    '''
+    Use this function to specify how a header should be loaded.
+    :param d: A dictionary of header information
+    :return: A fully instantiated header object
+    '''
+    return Header(d['name'], HeaderType(d['type']), d['class'], d['unit'], d['label'])
           
 
 class HeaderDictionary(object):

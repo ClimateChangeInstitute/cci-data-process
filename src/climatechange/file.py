@@ -13,13 +13,11 @@ import warnings
 
 import pkg_resources
 
-from climatechange.headers import Header
 import pandas as pd
 
 
 APPNAME = 'CCI-DATA-PROCESSOR'
 APPAUTHOR = 'CCI'
-
 
 
 def data_dir() -> str:
@@ -28,7 +26,7 @@ def data_dir() -> str:
         os.makedirs(directory)
     return directory
 
-def load_dictionary(file:IO[str], obj_hook:Callable=None) -> Mapping[str, Header]:
+def load_dictionary(file:IO[str], obj_hook:Callable=None) -> Mapping[str, Any]:
     '''
     Load the specified JSON file. If empty, then a warning message is raised 
     and an empty dictionary is returned.  If loading the JSON file from a 
