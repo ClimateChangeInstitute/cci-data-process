@@ -46,7 +46,7 @@ def write_readmefile_to_txtfile(readme:str,output_filename:str):
         text_file.flush()
         
 
-def create_readme_output_file(template,f,headers,time_ran,run_date,inc_amt,label_name,file_headers,num_csvfiles,stat_header):
+def create_readme_output_file(template,f,headers,run_date,inc_amt,label_name,file_headers,num_csvfiles,stat_header):
     year_headers = [h.name for h in headers if h.htype == HeaderType.YEARS]
     depth_headers = [h.name for h in headers if h.htype == HeaderType.DEPTH]
     sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
@@ -54,7 +54,7 @@ def create_readme_output_file(template,f,headers,time_ran,run_date,inc_amt,label
     
 #     output_filename=os.path.join('00README')
     data = {'run_date': run_date,
-            'file_name':os.path.splitext(f),
+            'file_name':os.path.relpath(f),
             'inc_amt':inc_amt,
             'label_name':label_name,
             'years':year_headers,

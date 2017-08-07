@@ -82,16 +82,14 @@ class Test(unittest.TestCase):
     def test_string_format(self):
         input_template="""\
         Date ran:{run_date}
-        Time to run:{time_ran}
         another variable:{var}
         """
         time_ran=[60,70]
         run_date='2017-08-03'
         var='variable'
-        data = {'run_date': run_date,'time_ran': time_ran,'var':var}
+        data = {'run_date': run_date,'var':var}
         output_template="""\
         Date ran:2017-08-03
-        Time to run:[60, 70]
         another variable:variable
         """
         result=input_template.format(**data)
@@ -102,7 +100,6 @@ class Test(unittest.TestCase):
         input_template=\
 """
 Date ran:{run_date}
-Time to run:{time}
   
 Process: Resample Input Data to {inc_amt} {label_name} Resolution
   
@@ -114,18 +111,16 @@ Samples: {samples}
         f=os.path.join('csv_files', 'small.csv')
         df = load_csv(f)
         headers = process_header_data(df)
-        time_ran=60
         run_date='2017-08-03'
         inc_amt=1
         label_name='year'
         stat_header='Mean'
         num_csvfiles=12
         year_headers = [h.name for h in headers if h.htype == HeaderType.YEARS]
-        result=create_readme_output_file(input_template,f,headers,time_ran,run_date,inc_amt,label_name,year_headers,num_csvfiles,stat_header)
+        result=create_readme_output_file(input_template,f,headers,run_date,inc_amt,label_name,year_headers,num_csvfiles,stat_header)
         expected_result=\
 """
 Date ran:2017-08-03
-Time to run:60
   
 Process: Resample Input Data to 1 year Resolution
   
