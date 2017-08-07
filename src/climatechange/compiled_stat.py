@@ -5,6 +5,7 @@ Created on Aug 2, 2017
 '''
 from pandas.core.frame import DataFrame
 from builtins import str
+from climatechange.headers import Header
 
 class CompiledStat(object):
     '''
@@ -14,16 +15,16 @@ class CompiledStat(object):
     
     x_value_name:str
     
-    sample_value_name:str
+    sample_header:Header
     
 
-    def __init__(self, df:DataFrame,x_value_name:str,sample_value_name:str):
+    def __init__(self, df:DataFrame,x_value_name:str,sample_header:Header):
         '''
         Constructor
         '''
         self.df=df
         self.x_value_name=x_value_name
-        self.sample_value_name=sample_value_name
+        self.sample_header=sample_header
         
         
         

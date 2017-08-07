@@ -72,12 +72,12 @@ def clean_data(df):
 
 def get_compiled_stats_by_year(inc_amt:int, df:DataFrame, headers:List[Header]) -> List[List[CompiledStat]]:
     year_headers = [h.name for h in headers if h.htype == HeaderType.YEARS]
-    sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
+    sample_headers = [h for h in headers if h.htype == HeaderType.SAMPLE]
     compiled_stats = []
     for year_name in year_headers:
         cur_year = []
-        for sample_name in sample_headers:
-            cur_year.append(compile_stats_by_year(df, headers, year_name, sample_name, inc_amt))
+        for sample_header in sample_headers:
+            cur_year.append(compile_stats_by_year(df, headers, year_name, sample_header, inc_amt))
         compiled_stats.append(cur_year)
     
     return compiled_stats
@@ -119,7 +119,7 @@ def resample_by_years(f:str, inc_amt:int=1):
         for c in cur_year:
             csv_filename=f_base+'_stats_%s_year_resolution_%s_%s.csv' % (inc_amt,
                                                                          c.x_value_name,
-                                                                         c.sample_value_name.replace("/", ""))
+                                                                         c.sample_header.replace("/", ""))
             write_resampled_data_to_csv_files(c.df,
                                               csv_filename)
 
@@ -134,8 +134,7 @@ def resample_by_years(f:str, inc_amt:int=1):
                                          c.df,
                                          pdf,
                                          c.x_value_name,
-                                         c.sample_value_name,
-                                         headers,
+                                         c.sample_header,
                                          inc_amt,
                                          'year')    
                 pyplot.close()
@@ -228,7 +227,7 @@ def resample_by_depths(f:str, inc_amt:float):
         for c in cur_depth:
             csv_filename=f_base+'_stats_%s_inc_resolution_%s_%s.csv' % (inc_amt,
                                                                         c.x_value_name,
-                                                                        c.sample_value_name.replace("/", ""))
+                                                                        c.sample_header.replace("/", ""))
             write_resampled_data_to_csv_files(c.df,
                                               csv_filename)
 #     print("create csvs: %s seconds"%(time.time()-start_time_d))      
@@ -243,7 +242,7 @@ def resample_by_depths(f:str, inc_amt:float):
                                          c.df,
                                          pdf,
                                          c.x_value_name,
-                                         c.sample_value_name,
+                                         c.sample_header,
                                          headers,
                                          inc_amt,
                                          'depth')    

@@ -13,7 +13,7 @@ from pandas.core.frame import DataFrame
 from pandas.util.testing import assert_frame_equal
 
 from climatechange.file import load_csv
-from climatechange.headers import HeaderType
+from climatechange.headers import HeaderType, Header
 from climatechange.process_data_functions import clean_data, process_header_data
 from climatechange.resample_stats import compileStats, compile_stats_by_year, \
     resampled_by_inc_years, find_index_by_increment, resampled_depths_by_years, \
@@ -36,6 +36,7 @@ test_output = [[6.333333333333333, 0.94280904158206336,7.0, 7, 5,  3],
                [4.0,0.81649658092772603, 4.0, 5, 3,  3],
                [6.333333333333333,2.0548046676563256, 6.0, 9, 4,  3]]
 
+test_header=Header("Cond (+ALU-S/cm)",HeaderType.SAMPLE,"Conductivity","alu-s/cm","Cond_(+ALU-S/cm)")
 
 class Test(unittest.TestCase):
 
@@ -172,7 +173,7 @@ class Test(unittest.TestCase):
         input_test=clean_data(input_test)
         expected_result = load_csv(os.path.join('csv_files','output_test_zeros_and_numbers.csv')) 
         headers = process_header_data(input_test)
-        result=compile_stats_by_year(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)', inc_amt)
+        result=compile_stats_by_year(input_test, headers, 'Dat210617', test_header, inc_amt)
         assert_frame_equal(expected_result, result.df)
         
     def test_empty_rows(self):
@@ -183,7 +184,7 @@ class Test(unittest.TestCase):
         headers = process_header_data(input_test)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            result = compile_stats_by_year(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)')
+            result = compile_stats_by_year(input_test, headers, 'Dat210617', test_header)
         assert_frame_equal(expected_result, result.df)
          
     def test_partial_empty_rows(self):
@@ -193,7 +194,7 @@ class Test(unittest.TestCase):
         headers = process_header_data(input_test)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            result = compile_stats_by_year(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)')
+            result = compile_stats_by_year(input_test, headers, 'Dat210617', test_header)
         assert_frame_equal(expected_result, result.df)
     
     def create_stats_headers(self):
@@ -201,7 +202,7 @@ class Test(unittest.TestCase):
         input_test = clean_data(input_test)
         expected_result = load_csv(os.path.join('csv_files','output_test_zeros_and_numbers.csv'))   
         headers = process_header_data(input_test)
-        result = compile_stats_by_year(input_test, headers, 'Dat210617', 'Cond (+ALU-S/cm)')
+        result = compile_stats_by_year(input_test, headers, 'Dat210617', test_header)
         assert_frame_equal(expected_result.columns, result.columns)     
         
 if __name__ == "__main__":

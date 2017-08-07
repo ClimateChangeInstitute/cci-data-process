@@ -7,6 +7,7 @@ import datetime
 
 from matplotlib.backends.backend_pdf import PdfPages
 from pandas.core.frame import DataFrame
+from typing import List
 
 from climatechange.file import load_csv
 from climatechange.headers import Header
@@ -198,8 +199,7 @@ def add_compile_stats_to_pdf(f:str,
                              df_resampled_stats:DataFrame,
                              pdf,
                              x_name:str,
-                             sample_name:str,
-                             headers:Header,
+                             sample:Header,
                              inc_amt:float,
                              label_name:str,
                              stat_header:str='Mean') -> str:
@@ -215,13 +215,14 @@ def add_compile_stats_to_pdf(f:str,
     :return: csv files with statistics resampled of stat_header, 
         pdf files of statistics with raw data
     '''
-
+    print(sample)
+    print(sample.htype)
             
     df_name=df_resampled_stats.columns[0]
     plt.figure(figsize=(11, 8.5))
     fig, tg = plt.subplots(1)
     ax = df_resampled_stats[[df_name, stat_header]].plot(x=df_name, kind='line',color='r', ax=tg)
-    ax = df[[x_name, sample_name]].plot(x=x_name, kind='line',
+    ax = df[[x_name, sample.name]].plot(x=x_name, kind='line',
                                            linestyle='-',
                                            color='0.75',
                                            ax=tg,zorder=-1)
@@ -230,13 +231,14 @@ def add_compile_stats_to_pdf(f:str,
         x_str='{:.%sf}' %str(inc_amt)[::-1].find('.')
         ax.set_xticklabels([x_str.format(x) for x in vals])
         plt.xlabel(x_name)
-        plt.title('%s: %s inc. %s resolution' % (sample_name,inc_amt,label_name))
+        plt.title('%s: %s inc. %s resolution' % (sample.hclass,inc_amt,label_name))
+        #add class name instead of sample name
     else:
         ax.set_xticklabels(['{:.0f}'.format(x) for x in vals])
         plt.xlabel('Year CE')
-        plt.title('%s: %s %s resolution' % (sample_name,inc_amt,label_name))
+        plt.title('%s: %s %s resolution' % (sample.hclass,inc_amt,label_name))
     
-    plt.ylabel(sample_name)
+    plt.ylabel(sample.label)
     plt.legend()    
     pdf.savefig(fig)
     plt.close()
