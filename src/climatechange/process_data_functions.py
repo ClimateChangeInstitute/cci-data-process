@@ -30,6 +30,7 @@ from climatechange.read_me_output import template
 from climatechange.resample_data_by_depths import compile_stats_by_depth
 from climatechange.resample_stats import compile_stats_by_year
 import numpy as np
+from scipy.stats._stats_mstats_common import linregress
 
 
 def process_header_data(df) -> List[Header]:
@@ -294,11 +295,14 @@ def resample_by_depths(f:str, inc_amt:float):
     :param f:This is a CSV file
     '''
     print("Creating pdf for %s" % f)
-    f_base=os.path.splitext(f)[0]
+    
+    print(f)
     df, compiled_stats, headers = load_and_clean_depth_data(f, inc_amt)
+    
     stat_header='Mean'
     num_csvfiles=sum(len(c) for c in compiled_stats)
     file_headers=compiled_stats[0][0].df.columns.values.tolist()
+    f_base=os.path.splitext(f)[0]
     
     
 
@@ -352,13 +356,18 @@ def double_resample_by_depths(f1:str, f2:str, inc_amt:float):
     :param f1:
     :param f2:
     '''
-    
+    print(inc_amt)
+    print(f1)
+    print(f2)
     df1, compiled_stats1, headers1 = load_and_clean_depth_data(f1, inc_amt)
     df2, compiled_stats2, headers2 = load_and_clean_depth_data(f2, inc_amt)
-
-    #compiledstats:list[list[compiledstat]] by depth
-    #topdepth,bottomdepth,mean,stdv,median,max,min,count
+    f1_file_path=os.path.splitext(f1)[0]
+    f2_base=os.path.basename(f2).split('.')[0]
     
+    csv_filename=f1_file_path+'_vs_ %s__stat_correlation.csv' %(f2_base)
+
+    print(csv_filename)
+    corr_stats=[]
     for dlist1 in compiled_stats1:
         for dlist2 in compiled_stats2:
             for d1 in dlist1:
@@ -366,15 +375,25 @@ def double_resample_by_depths(f1:str, f2:str, inc_amt:float):
                     if d1.x_header.name == d2.x_header.name:
                         print("Processing depth %s" % d1.x_header.name)
  
+ 
                         # correlate
                         print("correlating %s and %s" % (d1.sample_header.name, d2.sample_header.name))
-                        #slope, intercept, r_value, p_value, std_err=linregress(x, y)
-                        #append create_csv_file_with_sample1.label,sample2.label,slope, intercept, r_value, p_value, std_err
-         
-    # separate the units from the sample name, and save the sample name Na
-    # correlate the two files
-    # plot the means by each other, medians, min, max
+                        corr_stats.append(correlate_samples(d1, d2))
+    df_corr_stats=DataFrame(corr_stats,columns=['slope', 'intercept', 'r_value', 'p_value', 'std_err'])    
+    print(df_corr_stats)
+    write_resampled_data_to_csv_files(df_corr_stats,csv_filename)  
+
     
+def correlate_samples(d1:CompiledStat,d2:CompiledStat,stat_header:str='Mean')->Tuple[float,float,float,float,float]:
+        d1_stat=d1.df.loc[:,stat_header]
+        d2_stat=d2.df.loc[:,stat_header]
+        slope, intercept, r_value, p_value, std_err=linregress(d1_stat, d2_stat)
+        return slope, intercept, r_value, p_value, std_err
+
+        
+        
+        
+        
 def double_resample_by_depth_intervals(f1:str, f2:str):
     '''
     

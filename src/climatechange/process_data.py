@@ -124,7 +124,7 @@ USAGE
 #         paths = args.paths
         verbose = args.verbose
         
-        inc_amt = args.inc_amt
+        inc_amt = float(args.inc_amt)
         
         if verbose and verbose > 0:
             print("Verbose mode on")
@@ -153,7 +153,7 @@ USAGE
             depth_file = args.depth_file
             
             if depth_file.endswith('.csv'):
-                resample_by_depths(depth_file, float(inc_amt))
+                resample_by_depths(depth_file, inc_amt)
             else:
                 print("The specified depth_file must be a CSV file.", file=sys.stderr)
                 sys.exit(-1)

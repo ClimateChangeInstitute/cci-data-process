@@ -89,7 +89,7 @@ class Test(unittest.TestCase):
         input_test = clean_data(input_test)
         index_to_remove=[]
         df_x_sample=pandas.concat([input_test.loc[:,'depth (m we)'],input_test.loc[:,'Cond (+ALU-S/cm)']], axis=1)
-        result=resampled_depths(df_x_sample,test_depth_we_header,inc_amt,index_to_remove)
+        result=resampled_depths(df_x_sample,test_depth_we_header,inc_amt)
         assert_frame_equal(expected_result,result)
         
     def test_resampled_by_inc_depths(self):
