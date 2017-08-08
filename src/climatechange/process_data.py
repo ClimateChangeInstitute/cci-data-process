@@ -94,7 +94,7 @@ USAGE
                             dest="headers_file",
                             action="store",
                             help="load the headers of the CSV and store them in the header dictionary.  "
-                                 "This file should contain rows of (name, type, class, unit, label data)")
+                                 "This file should contain rows of (name, type, class, unit, label)")
         
         parser.add_argument("-r",
                             "--recursive",
