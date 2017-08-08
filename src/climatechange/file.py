@@ -6,12 +6,13 @@ A collection of interfaces for working with files.
 import json
 from json.encoder import JSONEncoder
 import os
-from pandas.core.frame import DataFrame
 from pip.utils import appdirs
-from typing import Mapping, IO, Any, Callable
+import pkg_resources
+import sys
+from typing import Mapping, IO, Any, Callable, Sequence
 import warnings
 
-import pkg_resources
+from pandas.core.frame import DataFrame
 
 import pandas as pd
 
@@ -41,9 +42,14 @@ def load_dictionary(file:IO[str], obj_hook:Callable=None) -> Mapping[str, Any]:
     result = {}
     try:
         array = json.load(file, object_hook=obj_hook)
-        for r in array:
-            result[r.name] = r # The name of the header is the dictionary key
-            
+
+        if isinstance(array, Sequence):
+            for r in array:
+                result[r.name] = r # The name of the header is the dictionary key
+        elif isinstance(array, Mapping):
+            pass # do nothing
+        else:
+            print("Loaded an unknown dictionary file type.", file=sys.stderr)
     except ValueError:
         contents = file.read()
         if len(contents) > 0:  # File was not empty and still could not read
