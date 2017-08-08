@@ -260,6 +260,11 @@ class HeaderDictionary(object):
 
        
     def save_dictionary(self, file_path:str=None):
+        '''
+        Persist the current dictionary.  If no file path is specified, then the 
+        default dictionary location is used.
+        :param file_path: The path to the dictionary
+        '''
         if file_path is None:
             file_path = self.header_file_path
         save_dictionary(self.get_header_dict(), file_path, enc_cls=HeaderEncoder)
