@@ -21,7 +21,7 @@ import os
 import sys
 
 from climatechange.process_data_functions import resample_by_years, \
-    resample_by_depths, load_and_store_header_file
+    resample_by_depths, load_and_store_header_file, double_resample_by_depths
 
 
 __all__ = []
@@ -76,10 +76,18 @@ USAGE
                             dest="year_file",
                             action="store",
                             help="resample %(dest)s by years and depth [default: %(default)s]")
+
         parser.add_argument("-d",
                             "--depth",
                             dest="depth_file",
                             action="store",
+                            help="resample %(dest)s by depth [default: %(default)s]")
+        
+        parser.add_argument("-dd",
+                            "--double-depth",
+                            dest="double_depth_files",
+                            action="store",
+                            nargs=2,
                             help="resample %(dest)s by depth [default: %(default)s]")
         
         parser.add_argument("-i",
@@ -124,7 +132,11 @@ USAGE
         if args.headers_file:
             load_and_store_header_file(args.headers_file)
             return
-            
+        
+        if args.double_depth_files: 
+            double_resample_by_depths(args.double_depth_files[0],
+                                      args.double_depth_files[1],
+                                      inc_amt)    
         
         if args.year_file:
             
