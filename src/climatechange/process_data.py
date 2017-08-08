@@ -21,7 +21,7 @@ import os
 import sys
 
 from climatechange.process_data_functions import resample_by_years, \
-    resample_by_depths
+    resample_by_depths, load_and_store_header_file
 
 
 __all__ = []
@@ -89,7 +89,12 @@ USAGE
                             default=1,
                             help="the size of the resampling increment [default: %(default)s]")
         
-        
+        parser.add_argument("-l",
+                            "--load",
+                            dest="headers_file",
+                            action="store",
+                            help="load the headers of the CSV and store them in the header dictionary.  "
+                                 "This file should contain rows of (name, type, class, unit, label data)")
         
         parser.add_argument("-r",
                             "--recursive",
@@ -116,6 +121,10 @@ USAGE
         if verbose and verbose > 0:
             print("Verbose mode on")
         
+        if args.headers_file:
+            load_and_store_header_file(args.headers_file)
+            return
+            
         
         if args.year_file:
             

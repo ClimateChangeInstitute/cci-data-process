@@ -9,8 +9,8 @@ import os
 import re
 from typing import Mapping, List, Any, Sequence, IO
 
-from climatechange.file import save_dictionary, load_dict_by_package, data_dir, \
-    load_dictionary, load_csv
+from climatechange.file import load_dict_by_package, data_dir, load_dictionary,\
+    save_dictionary
 import pandas
 
 
@@ -136,6 +136,9 @@ class HeaderDictionary(object):
     Stores and retrieves header values.  Also contains mappings from headers 
     to default values.
     '''
+    
+    header_file_name = 'header_dict.json'
+    header_file_path = os.path.join(data_dir(), header_file_name)
 
     header_dictionary:Mapping[str, Header] = {}
     
@@ -160,17 +163,16 @@ class HeaderDictionary(object):
             self.unit_dictionary = load_dict_by_package('unit_dict.json')
   
     def load_latest_header_dict(self) -> Mapping[str, Header]:
-        header_file_name = 'header_dict.json'
-        header_file_path = os.path.join(data_dir(), header_file_name)
+        
         
         hdict:Mapping[str, Header] = {}
-        if os.path.isfile(header_file_path):
-            with open(header_file_path, 'r') as f:
+        if os.path.isfile(self.header_file_path):
+            with open(self.header_file_path, 'r') as f:
                 hdict = load_dictionary(f, obj_hook=to_headers) 
         else:  # Load default header file from package
-            hdict = load_dict_by_package(header_file_name, obj_hook=to_headers)
+            hdict = load_dict_by_package(self.header_file_name, obj_hook=to_headers)
             # Copy default header file to user data directory
-            save_dictionary(hdict, header_file_path, enc_cls=HeaderEncoder)
+            self.save_dictionary()
             
         return hdict
         
@@ -256,6 +258,13 @@ class HeaderDictionary(object):
         previous = self.header_dictionary.get(h.name)
         self.header_dictionary[h.name] = h
         return previous
+
+       
+    def save_dictionary(self, file_path:str=None):
+        if file_path is None:
+            file_path = self.header_file_path
+        save_dictionary(self.get_header_dict(), file_path, enc_cls=HeaderEncoder)
+
 
 def load_headers(file_name:IO[str]) -> List[Header]:
     '''

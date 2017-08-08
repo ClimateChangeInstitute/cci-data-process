@@ -7,25 +7,26 @@ Created on Jul 24, 2017
 from builtins import float
 import datetime
 from math import nan
+from matplotlib import pyplot
+from matplotlib.backends.backend_pdf import PdfPages
 import os
 import time
 from typing import List, Tuple
 
-from matplotlib import pyplot
-from matplotlib.backends.backend_pdf import PdfPages
 from numpy import float64
 from pandas.core.frame import DataFrame
 
 from climatechange.compiled_stat import CompiledStat
 from climatechange.file import load_csv
-from climatechange.headers import HeaderDictionary, HeaderType, Header
+from climatechange.headers import HeaderDictionary, HeaderType, Header, \
+    load_headers
 from climatechange.plot import write_resampled_data_to_csv_files, \
     add_compile_stats_to_pdf
 from climatechange.read_me_output import create_readme_output_file, \
     write_readmefile_to_txtfile
 from climatechange.read_me_output import template
-from climatechange.resample_stats import compile_stats_by_year
 from climatechange.resample_data_by_depths import compile_stats_by_depth
+from climatechange.resample_stats import compile_stats_by_year
 import numpy as np
 
 
@@ -332,7 +333,33 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     :param f2:
     '''
     pass
+
+
+def load_and_store_header_file(path:str):
+    print("Adding headers from %s to header dictionary." % path) 
+    new_headers = load_headers(path)
     
+    hd = HeaderDictionary()
+    
+    all_new = []
+    all_replaced = []
+    for h in new_headers:
+        old_h = hd.add_header(h)
+        if old_h:
+            print("Replaced existing header")
+            print("Old header: %s" % old_h)
+            all_replaced.append(old_h)
+        else:
+            all_new.append(h)
+        print("New header: %s" % h)
+    
+    hd.save_dictionary()
+    
+    print("Finished importing new headers")
+    print("Imported %d new headers and "
+          "replaced %d old headers with new definitions" % (len(all_new),
+                                                            len(all_replaced)))
+            
     
 def main(files):
     start_time = time.time()
