@@ -84,7 +84,6 @@ class Test(unittest.TestCase):
         Date ran:{run_date}
         another variable:{var}
         """
-        time_ran=[60,70]
         run_date='2017-08-03'
         var='variable'
         data = {'run_date': run_date,'var':var}
