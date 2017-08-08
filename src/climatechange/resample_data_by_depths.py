@@ -37,14 +37,14 @@ def find_index_by_increment_for_depths(list_to_inc:List[float], inc_amt:int=0.01
     bottom_range = [x + inc_amt for x in top_range]
     return [find_indices(list_to_inc, lambda e: e >= top_range[i] and e < bottom_range[i]) for i in range(0, len(top_range))]
 
-def resampled_depths(df_x_sample:DataFrame, depth_header:Header, inc_amt, index_to_remove:List[List[float]]):
+def resampled_depths(df_x_sample:DataFrame, depth_header:Header, inc_amt):
     top_range = create_range_for_depths(df_x_sample.iloc[:, 0].values.tolist(), inc_amt)
     bottom_range = [x + inc_amt for x in top_range]
-    if len(index_to_remove)>0:
-        for i in sorted(index_to_remove, reverse=True):
-
-            del top_range[i]
-            del bottom_range[i]
+#     if len(index_to_remove)>0:
+#         for i in sorted(index_to_remove, reverse=True):
+# 
+#             del top_range[i]
+#             del bottom_range[i]
     df = DataFrame([top_range, bottom_range]).transpose()
     df.columns = create_depth_headers([depth_header])
     return df
@@ -64,11 +64,15 @@ def resampled_by_inc_depths(df_x_sample:DataFrame,
     :param inc:
     '''
     index = find_index_by_increment_for_depths(df_x_sample.iloc[:, 0].values.tolist(), inc_amt)
-    index_to_remove=[index.index(i) for i in index if len(i)<=1]
-    index = [i for i in index if len(i)>1]
+#     print(index)
+#     index_to_remove=[index.index(i) for i in index if len(i)<1 or i[0]==0]
+#     index = [i for i in index if len(i)>1]
+#     print(index)
+#     print(index_to_remove)
 
             
-    df_depths = resampled_depths(df_x_sample, depth_header, inc_amt,index_to_remove)
+    df_depths = resampled_depths(df_x_sample, depth_header, inc_amt)
+#     df_depths = resampled_depths(df_x_sample, depth_header, inc_amt,index_to_remove)   
     df_stats = resampled_statistics_by_x(df_x_sample, index)
     return pandas.concat([df_depths, df_stats], axis=1)
 

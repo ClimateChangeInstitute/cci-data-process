@@ -371,7 +371,6 @@ def double_resample_by_depths(f1:str, f2:str, inc_amt:float):
                         #slope, intercept, r_value, p_value, std_err=linregress(x, y)
                         #append create_csv_file_with_sample1.label,sample2.label,slope, intercept, r_value, p_value, std_err
          
-    # if they have the same sample name, correlate them
     # separate the units from the sample name, and save the sample name Na
     # correlate the two files
     # plot the means by each other, medians, min, max
