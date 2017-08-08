@@ -164,7 +164,6 @@ class HeaderDictionary(object):
   
     def load_latest_header_dict(self) -> Mapping[str, Header]:
         
-        
         hdict:Mapping[str, Header] = {}
         if os.path.isfile(self.header_file_path):
             with open(self.header_file_path, 'r') as f:
@@ -172,7 +171,7 @@ class HeaderDictionary(object):
         else:  # Load default header file from package
             hdict = load_dict_by_package(self.header_file_name, obj_hook=to_headers)
             # Copy default header file to user data directory
-            self.save_dictionary()
+            save_dictionary(hdict, self.header_file_path, enc_cls=HeaderEncoder)
             
         return hdict
         
