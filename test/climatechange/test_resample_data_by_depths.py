@@ -87,8 +87,9 @@ class Test(unittest.TestCase):
         expected_result = DataFrame([[0.605,0.615],[0.615,0.625]],columns=['top_depth_we_(m)', 'bottom_depth_we_(m)'])
         input_test = load_csv(os.path.join('csv_files','input_depths.csv'))
         input_test = clean_data(input_test)
+        index_to_remove=[]
         df_x_sample=pandas.concat([input_test.loc[:,'depth (m we)'],input_test.loc[:,'Cond (+ALU-S/cm)']], axis=1)
-        result=resampled_depths(df_x_sample,test_depth_we_header,inc_amt)
+        result=resampled_depths(df_x_sample,test_depth_we_header,inc_amt,index_to_remove)
         assert_frame_equal(expected_result,result)
         
     def test_resampled_by_inc_depths(self):
@@ -108,6 +109,16 @@ class Test(unittest.TestCase):
             warnings.simplefilter("ignore", category=RuntimeWarning)   
             result = compile_stats_by_depth(input_test,test_depth_we_header, test_sample_header,0.01)
         assert_frame_equal(expected_result, result.df)
+        
+    def test_remove_index_if_less_than_one(self):
+        inc_amt=0.001
+        input_test = load_csv(os.path.join('csv_files','input_depth_index.csv'))
+        expected_result = load_csv(os.path.join('csv_files','output_depth_index.csv'))
+        input_test = clean_data(input_test)
+        df_x_sample=pandas.concat([input_test.loc[:,'depth (m abs)'],input_test.loc[:,'Cond (+ALU-S/cm)']], axis=1)
+        result=resampled_by_inc_depths(df_x_sample,test_depth_we_header,inc_amt)
+        assert_frame_equal(expected_result, result)
+        
         
 #     def test_append_compile_stats_by_depth(self):
 #         df = load_csv(os.path.join('csv_files','input_depths.csv'))

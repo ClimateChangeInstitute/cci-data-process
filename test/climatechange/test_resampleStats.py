@@ -82,14 +82,18 @@ class Test(unittest.TestCase):
             assert_almost_equal([3.0, 4.0, 3.0], findMedian(multipleRowArray))
     
     def testfindMax(self):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
             assert_almost_equal([], findMax(emptyArray))
             assert_almost_equal([5.0], findMax(singleRowArray))
+            self.assertTrue(isnan(findMax(nanArray)[0]))
             assert_almost_equal([5.0, 6.0, 5.0], findMax(multipleRowArray))
+
     
     def testfindMin(self): 
-            assert_almost_equal([], findMin(emptyArray))
-            assert_almost_equal([3.0], findMin(singleRowArray))
-            assert_almost_equal([1.0, 2.0, 1.0], findMin(multipleRowArray))
+        assert_almost_equal([], findMin(emptyArray))
+        assert_almost_equal([3.0], findMin(singleRowArray))
+        assert_almost_equal([1.0, 2.0, 1.0], findMin(multipleRowArray))
     
     def testfindStd(self):
         assert_almost_equal([], findStd(emptyArray))
