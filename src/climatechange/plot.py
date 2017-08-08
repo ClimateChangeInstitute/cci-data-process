@@ -162,37 +162,6 @@ def examplePDFPlot(file_name:str):
 def write_resampled_data_to_csv_files(df:DataFrame, file_path:str):
     df.to_csv(file_path,index=False)
 
-# def add_compile_stats_to_pdf(f:str,
-#                              df:DataFrame,
-#                              pdf,
-#                              x_name:str,
-#                              headers:Header,
-#                              inc_amt:float,
-#                              bar_header:str) -> str:
-#     '''
-#     
-#     :param f: input file path
-#     :param df: dataframe of input file
-#     :param pdf: pdf file
-#     :param x_name: name of year column
-#     :param headers: headers of input dataframe
-#     :param bar_header: header of statistic to plot
-#     
-#     :return: csv files with statistics resampled of bar_header, 
-#         pdf files of statistics with raw data
-#     '''
-#     
-#     sample_headers = [h.original_value for h in headers if h.htype == HeaderType.SAMPLE]
-#     for sample_name in sample_headers:
-#         if HeaderDictionary().parse_headers([x_name])[0].htype == HeaderType.YEARS:
-#             df_resampled_stats = compile_stats_by_year(df, headers, x_name, sample_name)
-#             label_name='Year'
-#         else:
-#             df_resampled_stats = compile_stats_by_depth(df,x_name, sample_name)
-#             label_name='Depth'
-#             
-#         df_name=df_resampled_stats.columns[0]
-#         write_resampled_data_to_csv_files(df_resampled_stats, f + ('_resampled_%s_%s.csv' % (x_name, sample_name.replace("/",""))))
 
 def add_compile_stats_to_pdf(f:str,
                              df:DataFrame,
@@ -224,52 +193,23 @@ def add_compile_stats_to_pdf(f:str,
                                            color='0.75',
                                            ax=tg,zorder=-1)
     vals = ax.get_xticks()
-    if label_name=='depth':
+    if label_name=='Depth':
         x_str='{:.%sf}' %str(inc_amt)[::-1].find('.')
         ax.set_xticklabels([x_str.format(x) for x in vals])
         plt.xlabel(x_header.label)
-        plt.title('Raw %s Data vs. Resampled %s inc. %s resolution %s Data' % (sample_header.hclass,inc_amt,label_name,stat_header))
+        plt.title('Raw %s Data vs. Resampled %s inc. %s Resolution %s' % (sample_header.hclass,inc_amt,label_name,stat_header))
         #add class name instead of sample_header name
     else:
         ax.set_xticklabels(['{:.0f}'.format(x) for x in vals])
         plt.xlabel(x_header.label)
-        plt.title('Raw %s Data vs. Resampled %s %s resolution %s Data' % (sample_header.hclass,inc_amt,label_name,stat_header))
+        plt.title('Raw %s Data vs. Resampled %s %s Resolution %s' % (sample_header.hclass,inc_amt,label_name,stat_header))
     
     plt.ylabel(sample_header.label)
-    plt.legend()    
+    plt.legend(['Resampled %s'%stat_header,'Raw %s Data'%sample_header.hclass])    
     #fix legend
     pdf.savefig(fig)
     plt.close()
-
-# def create_csv_pdf_resampled(f:str,
-#                              df:DataFrame,
-#                              x_header:str,
-#                              headers:Header,
-#                              inc_amt:float,
-#                              bar_header:str='Mean')->str:
-#     '''
-#     Create a pdf file with multiple plots based on the data frame.
-#     :param f: input file path
-#     :param df: dataframe of input file
-#     :param x_header: name of x column (year or depth)
-#     :param headers: headers of input dataframe
-#     :param bar_header: header of statistic to plot
-#     
-#     :return: pdf of compiled figures by year,
-#         csv file of statistics by sample_header and year
-#     '''
-#     file_name=f + ('_resampled_%s.pdf' % x_header)
-#     with PdfPages(file_name) as pdf:
-#         add_compile_stats_to_pdf(f, df, pdf, x_header, headers,inc_amt, bar_header)    
-#         plt.close()
-#                     # Meta data for the PdfPages
-# #         d = pdf.infodict()
-# #         d['Title'] = 'CCI Plot'
-# #         d['Author'] = u'Some author'
-# #         d['Subject'] = 'CCI Data Parser output'
-# #         d['Keywords'] = 'CCI UMaine'
-# #         d['CreationDate'] = datetime.datetime.today()
-# #         d['ModDate'] = datetime.datetime.utcnow() 
-# 
+ 
+ 
 # # if __name__ == '__main__':
 # #     examplePDFPlot('test.pdf')

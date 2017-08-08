@@ -62,7 +62,7 @@ def create_depth_headers(list_headers: List[Header]) -> List[str]:
 def resampled_years(df_year_sample, year_header, inc_amt:int=1):
     return DataFrame(create_range_by_inc(df_year_sample.iloc[:, 0].values.tolist(), inc_amt), columns=[year_header.label])
 
-def resampled_statistics_by_years(df_year_sample, index):
+def resampled_statistics_by_years(df_year_sample,sample_header, index):
     appended_data = []
     for i in index:
         appended_data.extend(compileStats(df_year_sample.iloc[i, [1]].transpose().values.tolist()))
@@ -83,6 +83,7 @@ def resampled_depths_by_years(index, depth_columns:DataFrame, depth_column_heade
     return DataFrame(append_depth, columns=create_depth_headers(depth_column_headers))
 
 def resampled_by_inc_years(df_year_sample:DataFrame,
+                    sample_header:Header,
                     year_header:Header,
                     depth_columns:DataFrame,
                     depth_column_headers:List[Header],
@@ -94,7 +95,7 @@ def resampled_by_inc_years(df_year_sample:DataFrame,
     index = find_index_by_increment(df_year_sample.iloc[:, 0].values.tolist(), inc_amt)
     df_years = resampled_years(df_year_sample, year_header, inc_amt)
     df_depth = resampled_depths_by_years(index, depth_columns, depth_column_headers)
-    df_stats = resampled_statistics_by_years(df_year_sample, index)
+    df_stats = resampled_statistics_by_years(df_year_sample,sample_header, index)
     return pandas.concat([df_years, df_depth, df_stats], axis=1)
     
 
@@ -184,6 +185,6 @@ def compile_stats_by_year(df:DataFrame, headers: Header, year_header:Header, sam
     depth_columns = DataFrame([df.loc[:, c].values.tolist() for c in df.columns if c in depth_column_headers_names]).transpose()
     
     df_year_sample = pandas.concat([year_column, sample_column], axis=1)
-    resampled_data = resampled_by_inc_years(df_year_sample, year_header, depth_columns, depth_column_headers, inc_amt)
+    resampled_data = resampled_by_inc_years(df_year_sample, sample_header,year_header, depth_columns, depth_column_headers, inc_amt)
     
     return CompiledStat(resampled_data,year_header,sample_header)
