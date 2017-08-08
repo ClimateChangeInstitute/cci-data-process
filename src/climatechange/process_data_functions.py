@@ -237,6 +237,15 @@ def resample_by_years(f:str, inc_amt:int=1):
 def get_compiled_stats_by_depth(inc_amt:float,
                                 df:DataFrame,
                                 headers:List[Header]) -> List[List[CompiledStat]]:
+    '''
+    Create statistics for every depth column vs every sample column, which 
+    results in a list of compiled statistics of each sample for every depth 
+    column. 
+    :param inc_amt: The amount to group the depths by
+    :param df: The original data
+    :param headers: The processed headers for the original data
+    :return: A list of statistics for each sample for every depth column
+    '''
     depth_headers = [h for h in headers if h.htype == HeaderType.DEPTH]
     sample_headers = [h for h in headers if h.htype == HeaderType.SAMPLE]
     compiled_stats = []
@@ -256,9 +265,11 @@ def load_and_clean_depth_data(f:str, inc_amt:float) -> Tuple[DataFrame,
                                                              List[Header]]:
     '''
     
-    :param f:
-    :param inc_amt:
-    :return: 
+    :param f: The file path of data to load and clean
+    :param inc_amt: The increment amount
+    :return: A 3-tuple containing the original data, a list of lists of 
+        compiled statistics, and the processed data headers from the original 
+        data file
     '''
     df = load_csv(f)
     headers = process_header_data(df)
@@ -344,19 +355,19 @@ def double_resample_by_depths(f1:str, f2:str, inc_amt:float):
     
     df1, compiled_stats1, headers1 = load_and_clean_depth_data(f1, inc_amt)
     df2, compiled_stats2, headers2 = load_and_clean_depth_data(f2, inc_amt)
-    #remove headers?
+
     #compiledstats:list[list[compiledstat]] by depth
     #topdepth,bottomdepth,mean,stdv,median,max,min,count
     
 #     for depth1 in compiled_stats1:
 #         for depth2 in compiled_stats2:
 #             if depth1.name==depth2.name:
-#             print(depth)
-
-                
-                #for sample1 in depth1:
-                    #for sample2 in depth2:
-                        #correlate
+#             print("Processing depth %s" % depth1.name)
+# 
+#                 for sample1 in depth1:
+#                     for sample2 in depth2:
+#                         # correlate
+#                         print("correlating %s and %s" % (sample1.))
                         #slope, intercept, r_value, p_value, std_err=linregress(x, y)
                         #append create_csv_file_with_sample1.label,sample2.label,slope, intercept, r_value, p_value, std_err
             #
