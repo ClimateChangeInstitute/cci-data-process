@@ -9,7 +9,7 @@ template=\
 '''
 ReadMeFile
 
-CCI-data-processor
+CCI-Data-Processor
 Authors: Mark Royer and Heather Clifford
 Date ran:{run_date}
 
@@ -23,7 +23,7 @@ Samples: {samples}
 Output Files:
 [{#csvfiles}] CSV files created
 
-Ex. Of name of csv file name: 
+Ex. Of CSV file name: 
 {f_base}_stats_{inc_amt}_inc_resolution_{x_name}_{sample_name}.csv
 
 For each {label_name} and sample, CSV files containing:
@@ -32,13 +32,13 @@ For each {label_name} and sample, CSV files containing:
 
 [{#PDFfiles}] PDF files created
 
-Ex. of name of pdf file name:
+Ex. of PDF filename:
 {f_base}_plots_{inc_amt}_{label_name}_resolution_{x_name}.pdf
 
-For each {label_name}, PDF files containing:
--plot for each sample with:
+For Each {label_name}, PDF files containing:
+-Plot for Each Sample with:
     Raw Sample Data vs. {label_name}
-    Resampled {stat_header} Data vs. {inc_amt} {label_name} resolution
+    Resampled {stat_header} Data vs. {inc_amt} {label_name} Resolution
 '''
 def write_readmefile_to_txtfile(readme:str,output_filename:str):
     with open(output_filename, "w") as text_file:

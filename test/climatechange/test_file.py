@@ -108,8 +108,9 @@ Years: {years}
 Depths: {depths}
 Samples: {samples}
 """
-        f=os.path.join('csv_files', 'small.csv')
-        df = load_csv(f)
+        file=os.path.join('csv_files', 'small.csv')
+        df = load_csv(file)
+        f='small.csv'
         headers = process_header_data(df)
         run_date='2017-08-03'
         inc_amt=1
@@ -124,7 +125,7 @@ Date ran:2017-08-03
   
 Process: Resample Input Data to 1 year Resolution
   
-Input filename: csv_files"""+ os.sep + """small.csv
+Input filename: small.csv
 Years: ['Dat210617', 'Dat011216V2']
 Depths: ['depth (m we) ', 'depth (m abs)']
 Samples: ['Cond (+ALU-S/cm)', 'Na (ppb)', 'Ca (ppb)', 'Dust (part/ml)', 'NH4 (ppb)', 'NO3 (ppb)']

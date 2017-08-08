@@ -166,7 +166,7 @@ class Test(unittest.TestCase):
     def test_resampled_by_inc_years(self): 
         expected_result = load_csv(os.path.join('csv_files','output_test_zeros_and_numbers.csv')) 
         df_year_sample=pd.concat([input_test_zeros_and_numbers.loc[:,test_year_header.name], input_test_zeros_and_numbers.loc[:,test_sample_header.name]], axis=1)
-        result=resampled_by_inc_years(df_year_sample,test_year_header,depth_columns,depth_column_headers,inc_amt)
+        result=resampled_by_inc_years(df_year_sample,test_sample_header,test_year_header,depth_columns,depth_column_headers,inc_amt)
         assert_frame_equal(expected_result, result)
         
         

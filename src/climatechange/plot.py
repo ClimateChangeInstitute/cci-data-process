@@ -177,7 +177,7 @@ def add_compile_stats_to_pdf(f:str,
     :param f: input file path
     :param df: dataframe of input file
     :param pdf: pdf file
-    :param x_header: name of year column
+    :param x_header: name of x (depth or year) column
     :param headers: headers of input dataframe
     :param stat_header: header of statistic to plot
     
