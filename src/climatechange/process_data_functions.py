@@ -359,20 +359,18 @@ def double_resample_by_depths(f1:str, f2:str, inc_amt:float):
     #compiledstats:list[list[compiledstat]] by depth
     #topdepth,bottomdepth,mean,stdv,median,max,min,count
     
-#     for depth1 in compiled_stats1:
-#         for depth2 in compiled_stats2:
-#             if depth1.name==depth2.name:
-#             print("Processing depth %s" % depth1.name)
-# 
-#                 for sample1 in depth1:
-#                     for sample2 in depth2:
-#                         # correlate
-#                         print("correlating %s and %s" % (sample1.))
+    for dlist1 in compiled_stats1:
+        for dlist2 in compiled_stats2:
+            for d1 in dlist1:
+                for d2 in dlist2:
+                    if d1.x_header.name == d2.x_header.name:
+                        print("Processing depth %s" % d1.x_header.name)
+ 
+                        # correlate
+                        print("correlating %s and %s" % (d1.sample_header.name, d2.sample_header.name))
                         #slope, intercept, r_value, p_value, std_err=linregress(x, y)
                         #append create_csv_file_with_sample1.label,sample2.label,slope, intercept, r_value, p_value, std_err
-            #
-    
-    
+         
     # if they have the same sample name, correlate them
     # separate the units from the sample name, and save the sample name Na
     # correlate the two files
