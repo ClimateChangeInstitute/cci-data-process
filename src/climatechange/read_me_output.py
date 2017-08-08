@@ -24,16 +24,16 @@ Output Files:
 [{#csvfiles}] CSV files created
 
 Ex. Of CSV file name: 
-{f_base}_stats_{inc_amt}_inc_resolution_{x_name}_{sample_name}.csv
+{f_base}_stats_Resampled_{inc_amt}_{x_name}_Resolution_for_{sample_name}.csv
 
-For each {label_name} and sample, CSV files containing:
+For each {label_name} and Sample, CSV files containing:
 {file_headers}
 
 
 [{#PDFfiles}] PDF files created
 
 Ex. of PDF filename:
-{f_base}_plots_{inc_amt}_{label_name}_resolution_{x_name}.pdf
+{f_base}_plots_Resampled_{inc_amt}_{x_name}_Resolution.pdf
 
 For Each {label_name}, PDF files containing:
 -Plot for Each Sample with:
@@ -46,13 +46,12 @@ def write_readmefile_to_txtfile(readme:str,output_filename:str):
         text_file.flush()
         
 
-def create_readme_output_file(template,f,headers,run_date,inc_amt,label_name,file_headers,num_csvfiles,stat_header):
+def create_readme_output_file(template,f,headers,run_date,inc_amt,label_name,x_headers,file_headers,num_csvfiles,stat_header):
     year_headers = [h.name for h in headers if h.htype == HeaderType.YEARS]
     depth_headers = [h.name for h in headers if h.htype == HeaderType.DEPTH]
     sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
     num_pdffiles=len(file_headers)
     f_base=os.path.basename(f)
-
     
 #     output_filename=os.path.join('00README')
     data = {'run_date': run_date,

@@ -10,6 +10,8 @@ from math import nan
 from matplotlib import pyplot
 from matplotlib.backends.backend_pdf import PdfPages
 import os
+import sys
+import textwrap
 import time
 from typing import List, Tuple
 
@@ -35,6 +37,29 @@ def process_header_data(df) -> List[Header]:
     hd = HeaderDictionary()
     
     parsedHeaders = hd.parse_headers(df.columns.tolist())
+    
+    unknown_headers = [h for h in parsedHeaders if h.htype == HeaderType.UNKNOWN ]
+    if unknown_headers:
+        print("The following unknown headers were found.")
+        for h in unknown_headers:
+            print(h.name)
+        print(textwrap.dedent("""
+        Please import the headers by using a CSV file containing rows of the 
+        following format:
+        
+        name1, type1, class1, unit1, label1
+        name2, type2, class2, unit2, label2
+        name3, type3, class3, unit3, label3
+        ...
+        
+        Run the program again using the -l flag to import the header information.
+        For example,
+        
+        PYTHONPATH=src python climatechange/process_data.py -l your_csv_file.csv
+        """))
+        
+        sys.exit(0)
+        
     
     return parsedHeaders
 
@@ -104,7 +129,7 @@ def round_values_to_sigfig(df:DataFrame):
 def round_depth_values_to_sigfig(df:DataFrame):
     depth_round_amt = 4
     sample_round_amt = 3
-    for col in range(0,1):
+    for col in range(0,2):
         df.iloc[:,col]=[np.round(i,depth_round_amt) for i in df.iloc[:,col]]
     for col in range(2,7):
         df.iloc[:,col]=[np.round(i,sample_round_amt) for i in df.iloc[:,col]]
@@ -149,6 +174,8 @@ def resample_by_years(f:str, inc_amt:int=1):
     f_base=os.path.splitext(f)[0]
     num_csvfiles=sum(len(c) for c in compiled_stats)
     stat_header='Mean'
+    file_headers=compiled_stats[0][0].df.columns.values.tolist()
+    print(file_headers)
     
 
     for cur_year in compiled_stats:
@@ -180,15 +207,15 @@ def resample_by_years(f:str, inc_amt:int=1):
                 
     run_date=str(datetime.date.today())
     output_path=os.path.dirname(f)
-    readme = create_readme_output_file(template,f,headers,run_date,inc_amt,'Year',year_headers,num_csvfiles,stat_header)
+    readme = create_readme_output_file(template,f,headers,run_date,inc_amt,'Year',year_headers,file_headers,num_csvfiles,stat_header)
     write_readmefile_to_txtfile(readme,os.path.join(output_path,'00README.txt'))
 
 
 def get_compiled_stats_by_depth(inc_amt:float,
                                 df:DataFrame,
                                 headers:List[Header]) -> List[List[CompiledStat]]:
-    depth_headers = [h.name for h in headers if h.htype == HeaderType.DEPTH]
-    sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
+    depth_headers = [h for h in headers if h.htype == HeaderType.DEPTH]
+    sample_headers = [h for h in headers if h.htype == HeaderType.SAMPLE]
     compiled_stats = []
     for depth_name in depth_headers:
         cur_depth = []
@@ -237,12 +264,15 @@ def resample_by_depths(f:str, inc_amt:float):
     df, compiled_stats, headers = load_and_clean_depth_data(f, inc_amt)
     stat_header='Mean'
     num_csvfiles=sum(len(c) for c in compiled_stats)
+    file_headers=compiled_stats[0][0].df.columns.values.tolist()
+    
+    
 
     for cur_depth in compiled_stats:
         for c in cur_depth:
-            csv_filename=f_base+'_stats_%s_inc_resolution_%s_%s.csv' % (inc_amt,
-                                                                        c.x_header.name,
-                                                                        c.sample_header.name.replace("/", ""))
+            csv_filename=f_base+'_stats_Resampled %s_inc_%s_Resolution_for_%s.csv' % (inc_amt,
+                                                                        c.x_header.label,
+                                                                        c.sample_header.label.replace("/", ""))
             to_csv_df=round_depth_values_to_sigfig(c.df[:])
             to_csv_df=add_units_to_stats(to_csv_df,c.sample_header)
             write_resampled_data_to_csv_files(to_csv_df,
@@ -250,7 +280,7 @@ def resample_by_depths(f:str, inc_amt:float):
 
     depth_headers = [h.name for h in headers if h.htype == HeaderType.DEPTH] 
     for i in range(len(depth_headers)):
-        file_name = (f_base+'_plots_%s_inc_resolution_%s.pdf' %(inc_amt,depth_headers[i]))
+        file_name = (f_base+'_plots_Resampled_%s_inc_%s_resolution.pdf' %(inc_amt,depth_headers[i]))
         with PdfPages(file_name) as pdf:
             for c in compiled_stats[i]:
                 add_compile_stats_to_pdf(f_base,
@@ -259,14 +289,14 @@ def resample_by_depths(f:str, inc_amt:float):
                                          pdf,
                                          c.x_header,
                                          c.sample_header,
-                                         headers,
                                          inc_amt,
-                                         'Depth')    
+                                         'Depth',
+                                         stat_header)    
                 pyplot.close()
             
     run_date=str(datetime.date.today())
     output_path=os.path.dirname(f)
-    readme=create_readme_output_file(template,f,headers,run_date,inc_amt,'Depth',depth_headers,num_csvfiles,stat_header)
+    readme=create_readme_output_file(template,f,headers,run_date,inc_amt,'Depth',depth_headers,file_headers,num_csvfiles,stat_header)
     write_readmefile_to_txtfile(readme,os.path.join(output_path,'00README.txt'))     
 
 #     for depth_name in depth_headers:
