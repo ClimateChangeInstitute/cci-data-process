@@ -49,7 +49,8 @@ def resampled_depths(df_x_sample:DataFrame, depth_header:Header, inc_amt):
     df.columns = create_depth_headers([depth_header])
     return df
 
-def resampled_statistics_by_x(df_x_sample, index):
+def resampled_statistics_by_x(df_x_sample,inc_amt):
+    index = find_index_by_increment_for_depths(df_x_sample.iloc[:, 0].values.tolist(), inc_amt)
     appended_data = []
     for i in index:
         appended_data.extend(compileStats(df_x_sample.iloc[i, [1]].transpose().values.tolist()))
@@ -63,7 +64,7 @@ def resampled_by_inc_depths(df_x_sample:DataFrame,
     :param df:
     :param inc:
     '''
-    index = find_index_by_increment_for_depths(df_x_sample.iloc[:, 0].values.tolist(), inc_amt)
+   
 #     print(index)
 #     index_to_remove=[index.index(i) for i in index if len(i)<1 or i[0]==0]
 #     index = [i for i in index if len(i)>1]
@@ -73,7 +74,7 @@ def resampled_by_inc_depths(df_x_sample:DataFrame,
             
     df_depths = resampled_depths(df_x_sample, depth_header, inc_amt)
 #     df_depths = resampled_depths(df_x_sample, depth_header, inc_amt,index_to_remove)   
-    df_stats = resampled_statistics_by_x(df_x_sample, index)
+    df_stats = resampled_statistics_by_x(df_x_sample, inc_amt)
     return pandas.concat([df_depths, df_stats], axis=1)
 
 def compile_stats_by_depth(df:DataFrame, depth_header:Header, sample_header:Header, inc_amt:float) -> CompiledStat:
@@ -94,3 +95,32 @@ def compile_stats_by_depth(df:DataFrame, depth_header:Header, sample_header:Head
     resampled_data = resampled_by_inc_depths(df_x_sample, depth_header, inc_amt)
     
     return CompiledStat(resampled_data, depth_header, sample_header)
+
+
+#for resample by depth intervals
+
+# def find_file__with_larger_depth_inc(df1:DataFrame,headers1:Header,df2:DataFrame,headers2:Header):
+#     depth_headers1 = [h.name for h in headers1 if h.htype == HeaderType.DEPTH] 
+#     depth_headers2 = [h.name for h in headers2 if h.htype == HeaderType.DEPTH]
+#     depth_large_inc=[]
+#     depth_small_inc=[]
+#     for i in depth_headers1:
+#         for j in depth_headers2:
+#             if i==j:
+#                 inc_amt1=(df1.loc[-1,depth_headers1[i]]-df1.loc[0,depth_headers1[i]])/len(df1.loc[:,depth_headers1[i]])
+#                 inc_amt2=(df2.loc[-1,depth_headers2[i]]-df1.loc[0,depth_headers2[i]])/len(df2.loc[:,depth_headers1[i]])
+#                 if inc_amt1>inc_amt2:
+#                     depth_large_inc.append(df1.loc[:,depth_headers1[i]])
+#                     depth_small_inc.append(df2.loc[:,depth_headers2[i]])
+#                 else:
+#                     depth_large_inc.append(df2.loc[:,depth_headers2[i]])
+#                     depth_small_inc.append(df1.loc[:,depth_headers1[i]])
+#     return depth_large_inc,depth_small_inc
+#         
+# def find_index_of_depth_intervals(depth_large_inc,depth_small_inc):    
+# 
+#     index=[find_indices(depth_small_inc, lambda e: e >= depth_large_inc[i] and e < depth_large_inc[i+1]) for i in range(0, len(depth_large_inc))] 
+#     return index
+# 
+
+

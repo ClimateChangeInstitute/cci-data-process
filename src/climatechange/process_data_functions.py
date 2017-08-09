@@ -28,7 +28,7 @@ from climatechange.read_me_output import create_readme_output_file, \
     write_readmefile_to_txtfile
 from climatechange.read_me_output import template
 from climatechange.resample_data_by_depths import compile_stats_by_depth
-from climatechange.resample_stats import compile_stats_by_year
+from climatechange.resample_stats import compile_stats_by_year, find_indices
 import numpy as np
 from scipy.stats._stats_mstats_common import linregress
 
@@ -385,14 +385,13 @@ def double_resample_by_depths(f1:str, f2:str, inc_amt:float):
 
     
 def correlate_samples(d1:CompiledStat,d2:CompiledStat,stat_header:str='Mean')->Tuple[float,float,float,float,float]:
-        d1_stat=d1.df.loc[:,stat_header]
-        d2_stat=d2.df.loc[:,stat_header]
-        slope, intercept, r_value, p_value, std_err=linregress(d1_stat, d2_stat)
-        return slope, intercept, r_value, p_value, std_err
+    d1_stat=d1.df.loc[:,stat_header]
+    d2_stat=d2.df.loc[:,stat_header]
+    slope, intercept, r_value, p_value, std_err=linregress(d1_stat, d2_stat)
+    return slope, intercept, r_value, p_value, std_err
 
-        
-        
-        
+
+
         
 def double_resample_by_depth_intervals(f1:str, f2:str):
     '''
@@ -412,6 +411,7 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     :param f1:
     :param f2:
     '''
+
     pass
 
 

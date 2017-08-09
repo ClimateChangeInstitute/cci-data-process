@@ -7,7 +7,8 @@ import unittest
 from pandas.core.frame import DataFrame
 from pandas.util.testing import assert_frame_equal
 from climatechange.file import load_csv
-from climatechange.process_data_functions import process_header_data, clean_data
+from climatechange.process_data_functions import process_header_data, clean_data,\
+    correlate_samples
 from climatechange.resample_data_by_depths import resampled_depths,create_range_for_depths,\
     find_index_by_increment_for_depths,resampled_by_inc_depths,compile_stats_by_depth
 import os
@@ -15,10 +16,16 @@ from climatechange.resample_stats import create_depth_headers
 from climatechange.headers import HeaderType, Header
 import pandas
 import warnings
+from climatechange.compiled_stat import CompiledStat
+
 
 test_sample_header=Header("Cond (+ALU-S/cm)", HeaderType.SAMPLE,"Conductivity","alu-s/cm","Cond_(+ALU-S/cm)")
 test_depth_we_header=Header("depth (m we)", HeaderType.DEPTH,"Depth","meters","depth_we_(m)")
 test_depth_abs_header=Header("depth (m abs) ", HeaderType.DEPTH,"Depth","meters","depth_abs_(m)")
+x=[1,2,3,4,5]
+y=[2,7,2,2,4]
+test_x_compiledstat=CompiledStat(DataFrame(x,columns=['Mean']),test_depth_we_header,test_sample_header)
+test_y_compiledstat=CompiledStat(DataFrame(y,columns=['Mean']),test_depth_we_header,test_sample_header)
 
 class Test(unittest.TestCase):
 
@@ -140,6 +147,22 @@ class Test(unittest.TestCase):
 #         print(len(compiled_stats))
 #         print(len(depth_headers))
 #         print(len(sample_headers))
+
+    def test_correlate_samples(self):
+        slope_r, intercept_r, r_value_r, p_value_r, std_err_r=correlate_samples(test_x_compiledstat,test_y_compiledstat)
+        slope=-0.1
+        r_value=-0.07216878364870323
+        p_value=0.908191677213
+        intercept=3.7
+        std_err=0.797913946906
+        self.assertAlmostEqual(slope_r, slope)
+        self.assertAlmostEqual(intercept_r, intercept)
+        self.assertAlmostEqual(r_value_r,r_value)
+        self.assertAlmostEqual(p_value_r, p_value)
+        self.assertAlmostEqual(std_err_r, std_err)
+        
+
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
