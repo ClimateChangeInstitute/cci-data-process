@@ -4,20 +4,22 @@ Created on Jul 31, 2017
 @author: Heather
 '''
 import unittest
-from pandas.core.frame import DataFrame
+from pandas import DataFrame
 from pandas.util.testing import assert_frame_equal
 from climatechange.file import load_csv
 from climatechange.process_data_functions import process_header_data, clean_data,\
-    correlate_samples
+    correlate_samples, remove_nan_from_datasets
 from climatechange.resample_data_by_depths import resampled_depths,create_range_for_depths,\
     find_index_by_increment_for_depths,resampled_by_inc_depths,compile_stats_by_depth
 import os
 from climatechange.resample_stats import create_depth_headers
 from climatechange.headers import HeaderType, Header
 import pandas
+from pandas import Series
 import warnings
 from climatechange.compiled_stat import CompiledStat
-
+import numpy as np
+from pandas.testing import assert_series_equal
 
 test_sample_header=Header("Cond (+ALU-S/cm)", HeaderType.SAMPLE,"Conductivity","alu-s/cm","Cond_(+ALU-S/cm)")
 test_depth_we_header=Header("depth (m we)", HeaderType.DEPTH,"Depth","meters","depth_we_(m)")
@@ -166,7 +168,35 @@ class Test(unittest.TestCase):
         self.assertAlmostEqual(sample1, d1)
         self.assertAlmostEqual(sample2, d2)
         self.assertAlmostEqual(depth1, depth)
-        
+    
+    def test_correlate_samples_opposite(self):
+        depth1,sample1,sample2,slope_r, intercept_r, r_value_r, p_value_r, std_err_r=correlate_samples(test_y_compiledstat,test_x_compiledstat)
+        slope=-0.0520833333333
+        d1='Cond (+ALU-S/cm)'
+        d2='Cond (+ALU-S/cm)'
+        depth='depth (m we)'
+        r_value=-0.07216878364870323
+        p_value=0.908191677213
+        intercept=3.17708333333
+        std_err=0.41558018068
+        self.assertAlmostEqual(slope_r, slope)
+        self.assertAlmostEqual(intercept_r, intercept)
+        self.assertAlmostEqual(r_value_r,r_value)
+        self.assertAlmostEqual(p_value_r, p_value)
+        self.assertAlmostEqual(std_err_r, std_err)
+        self.assertAlmostEqual(sample1, d1)
+        self.assertAlmostEqual(sample2, d2)
+        self.assertAlmostEqual(depth1, depth)
+    
+    
+    def test_remove_nan_from_datasets(self):
+        input1=Series([1,2,3,4,np.nan,6,7])
+        input2=Series([1,np.nan,3,4,5,6,np.nan])
+        expected_result=Series([1.0,3.0,4.0,6.0])
+        result1,result2=remove_nan_from_datasets(input1,input2)
+        assert_series_equal(expected_result,result1)
+        assert_series_equal(expected_result,result2)
+#         
 
 
 

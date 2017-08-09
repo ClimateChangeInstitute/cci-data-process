@@ -16,7 +16,7 @@ import time
 from typing import List, Tuple
 
 from numpy import float64
-from pandas.core.frame import DataFrame
+from pandas import DataFrame
 
 from climatechange.compiled_stat import CompiledStat
 from climatechange.file import load_csv
@@ -31,6 +31,8 @@ from climatechange.resample_data_by_depths import compile_stats_by_depth
 from climatechange.resample_stats import compile_stats_by_year, find_indices
 import numpy as np
 from scipy.stats._stats_mstats_common import linregress
+from pandas import Series
+from math import isnan
 
 
 def process_header_data(df) -> List[Header]:
@@ -339,13 +341,24 @@ def resample_by_depths(f:str, inc_amt:float):
 
 #     for depth_name in depth_headers:
 #         plot.create_csv_pdf_resampled(f, df, depth_name, headers,inc_amt)
-
-
+# 
+def remove_nan_from_datasets(d1_stat:Series,d2_stat:Series)->Tuple[Series,Series]:
+    d2_result=[]
+    d1_result=[]
+    for i in range(len(d1_stat)):
+        if not isnan(d1_stat[i]) and not isnan(d2_stat[i]):
+            d1_result.append(d1_stat[i])
+            d2_result.append(d2_stat[i])
+                     
+    return Series(d1_result),Series(d2_result)
+            
+#                 
+#                 
 def correlate_samples(d1:CompiledStat,d2:CompiledStat,stat_header:str='Mean')->Tuple[float,float,float,float,float]:
     d1_stat=d1.df.loc[:,stat_header]
     d2_stat=d2.df.loc[:,stat_header]
     
-    slope, intercept, r_value, p_value, std_err=linregress(d1_stat, d2_stat)
+    slope, intercept, r_value, p_value, std_err=linregress(remove_nan_from_datasets(d1_stat,d2_stat))
     return d1.x_header.name,d1.sample_header.name,d2.sample_header.name,slope, intercept, r_value, p_value, std_err
 
     
@@ -391,10 +404,6 @@ def double_resample_by_depths(f1:str, f2:str, inc_amt:float):
     df_corr_stats=DataFrame(corr_stats,columns=['depth','sample_1','sample_2','slope', 'intercept', 'r_value', 'p_value', 'std_err'])    
     
     write_resampled_data_to_csv_files(df_corr_stats,csv_filename)  
-
-    
-
-
 
         
 def double_resample_by_depth_intervals(f1:str, f2:str):
