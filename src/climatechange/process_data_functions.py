@@ -339,6 +339,15 @@ def resample_by_depths(f:str, inc_amt:float):
 
 #     for depth_name in depth_headers:
 #         plot.create_csv_pdf_resampled(f, df, depth_name, headers,inc_amt)
+
+
+def correlate_samples(d1:CompiledStat,d2:CompiledStat,stat_header:str='Mean')->Tuple[float,float,float,float,float]:
+    d1_stat=d1.df.loc[:,stat_header]
+    d2_stat=d2.df.loc[:,stat_header]
+    
+    slope, intercept, r_value, p_value, std_err=linregress(d1_stat, d2_stat)
+    return d1.x_header.name,d1.sample_header.name,d2.sample_header.name,slope, intercept, r_value, p_value, std_err
+
     
 def double_resample_by_depths(f1:str, f2:str, inc_amt:float):
     '''
@@ -379,16 +388,11 @@ def double_resample_by_depths(f1:str, f2:str, inc_amt:float):
                         # correlate
                         print("correlating %s and %s" % (d1.sample_header.name, d2.sample_header.name))
                         corr_stats.append(correlate_samples(d1, d2))
-    df_corr_stats=DataFrame(corr_stats,columns=['slope', 'intercept', 'r_value', 'p_value', 'std_err'])    
-    print(df_corr_stats)
+    df_corr_stats=DataFrame(corr_stats,columns=['depth','sample_1','sample_2','slope', 'intercept', 'r_value', 'p_value', 'std_err'])    
+    
     write_resampled_data_to_csv_files(df_corr_stats,csv_filename)  
 
     
-def correlate_samples(d1:CompiledStat,d2:CompiledStat,stat_header:str='Mean')->Tuple[float,float,float,float,float]:
-    d1_stat=d1.df.loc[:,stat_header]
-    d2_stat=d2.df.loc[:,stat_header]
-    slope, intercept, r_value, p_value, std_err=linregress(d1_stat, d2_stat)
-    return slope, intercept, r_value, p_value, std_err
 
 
 

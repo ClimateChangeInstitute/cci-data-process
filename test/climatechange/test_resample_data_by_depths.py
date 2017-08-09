@@ -149,8 +149,11 @@ class Test(unittest.TestCase):
 #         print(len(sample_headers))
 
     def test_correlate_samples(self):
-        slope_r, intercept_r, r_value_r, p_value_r, std_err_r=correlate_samples(test_x_compiledstat,test_y_compiledstat)
+        depth1,sample1,sample2,slope_r, intercept_r, r_value_r, p_value_r, std_err_r=correlate_samples(test_x_compiledstat,test_y_compiledstat)
         slope=-0.1
+        d1='Cond (+ALU-S/cm)'
+        d2='Cond (+ALU-S/cm)'
+        depth='depth (m we)'
         r_value=-0.07216878364870323
         p_value=0.908191677213
         intercept=3.7
@@ -160,6 +163,9 @@ class Test(unittest.TestCase):
         self.assertAlmostEqual(r_value_r,r_value)
         self.assertAlmostEqual(p_value_r, p_value)
         self.assertAlmostEqual(std_err_r, std_err)
+        self.assertAlmostEqual(sample1, d1)
+        self.assertAlmostEqual(sample2, d2)
+        self.assertAlmostEqual(depth1, depth)
         
 
 
