@@ -11,6 +11,7 @@ from typing import List, Tuple
 import numpy as np
 from climatechange.compiled_stat import CompiledStat
 from climatechange.headers import Header, HeaderType, process_header_data
+from pandas import Series
 
 
 def create_range_for_depths(list_to_inc:List[float], inc_amt: int=0.01) -> List[float]:
@@ -109,13 +110,16 @@ def compile_stats_by_depth(df:DataFrame, depth_header:Header, sample_header:Head
 
 
          
-def find_index_of_depth_intervals(depth_large_inc:List[float],depth_small_inc:List[float])->List[List[int]]:    
+def find_index_of_depth_intervals(depth_large:Series,depth_small:Series)->List[List[int]]:    
     '''
     
-    :param depth_large_inc:depth columns of dataset with larger increment
-    :param depth_small_inc:depth columns of dataset with smaller increment
+    :param depth_large:depth columns of larger dataset with smaller increment
+    :param depth_small:depth columns of smaller dataset with larger increment
     '''
-    index=[find_indices(depth_small_inc, lambda e: e >= depth_large_inc[i] and e < depth_large_inc[i+1]) for i in range(0, len(depth_large_inc)-1)] 
+    bottom_depth=[]
+    for i in range(depth_small.size-1):
+        bottom_depth.append(depth_small.loc[i+1])
+    index=[find_indices(depth_large, lambda e: e >= depth_small[i] and e < depth_small[i+1]) for i in range(0, len(depth_small)-1)] 
     return index
  
 def compiled_stats_by_dd_intervals(larger_df:DataFrame,smaller_df:DataFrame) -> List[List[CompiledStat]]:
@@ -138,16 +142,15 @@ def compiled_stats_by_dd_intervals(larger_df:DataFrame,smaller_df:DataFrame) -> 
     for depth_header_l in depth_headers_larger:
         for depth_header_s in depth_headers_smaller:
             if depth_header_l==depth_header_s:     
-                index=find_index_of_depth_intervals(depth_header_l.name,depth_header_s.name)
-                print(index)
+                index=find_index_of_depth_intervals(larger_df.loc[:,depth_header_s.name],smaller_df.loc[:,depth_header_l.name])
                 depth_df=create_top_bottom_depth_dataframe(smaller_df,depth_header_s)
                 depth_samples=[]
                 for sample_header in sample_headers_larger:
                     current_stats = []
                     for i in index:
-                        current_stats.append(compileStats([larger_df.loc[i,sample_header.name].tolist()]))
+                        current_stats.extend(compileStats([larger_df.loc[i,sample_header.name].tolist()]))
                     current_df = DataFrame(current_stats, columns=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
-                    comp_stat=CompiledStat(pandas.concat(depth_df,current_df,axis=1),depth_header_l,sample_header)
+                    comp_stat=CompiledStat(pandas.concat((depth_df,current_df),axis=1),depth_header_l,sample_header)
                     depth_samples.append(comp_stat)
             result_list.append(depth_samples)
     return result_list
