@@ -12,6 +12,9 @@ from typing import Mapping, List, Any, Sequence, IO
 from climatechange.file import load_dict_by_package, data_dir, load_dictionary,\
     save_dictionary
 import pandas
+import textwrap
+import sys
+import logging
 
 
 class HeaderType(Enum):
@@ -284,3 +287,58 @@ def load_headers(file_name:IO[str]) -> List[Header]:
         result.append(Header(r[0], HeaderType(r[1]), r[2], r[3], r[4]))
     
     return result
+
+def process_header_data(df) -> List[Header]:
+    
+    hd = HeaderDictionary()
+    
+    parsedHeaders = hd.parse_headers(df.columns.tolist())
+    
+    unknown_headers = [h for h in parsedHeaders if h.htype == HeaderType.UNKNOWN ]
+    if unknown_headers:
+        logging.error("The following unknown headers were found.")
+        for h in unknown_headers:
+            logging.error(h.name)
+        logging.error(textwrap.dedent("""
+        Please import the headers by using a CSV file containing rows of the 
+        following format:
+        
+        name1, type1, class1, unit1, label1
+        name2, type2, class2, unit2, label2
+        name3, type3, class3, unit3, label3
+        ...
+        
+        Run the program again using the -l flag to import the header information.
+        For example,
+        
+        PYTHONPATH=src python climatechange/process_data.py -l your_csv_file.csv
+        """))
+        
+        sys.exit(0)
+        
+    
+    unknown_headers = [h for h in parsedHeaders if h.htype == HeaderType.UNKNOWN ]
+    if unknown_headers:
+        print("The following unknown headers were found.")
+        for h in unknown_headers:
+            print(h.name)
+        print(textwrap.dedent("""
+        Please import the headers by using a CSV file containing rows of the 
+        following format:
+        
+        name1, type1, class1, unit1, label1
+        name2, type2, class2, unit2, label2
+        name3, type3, class3, unit3, label3
+        ...
+        
+        Run the program again using the -l flag to import the header information.
+        For example,
+        
+        PYTHONPATH=src python climatechange/process_data.py -l your_csv_file.csv
+        """))
+        
+        sys.exit(0)
+        
+    
+    return parsedHeaders
+

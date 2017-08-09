@@ -13,8 +13,8 @@ from pandas.core.frame import DataFrame
 from pandas.util.testing import assert_frame_equal
 
 from climatechange.file import load_csv
-from climatechange.headers import HeaderType, Header
-from climatechange.process_data_functions import clean_data, process_header_data
+from climatechange.headers import HeaderType, Header, process_header_data
+from climatechange.process_data_functions import clean_data
 from climatechange.resample_stats import compileStats, compile_stats_by_year, \
     resampled_by_inc_years, find_index_by_increment, resampled_depths_by_years, \
     create_range_by_inc, findMean, findMedian, findMax, findMin, findStd, \

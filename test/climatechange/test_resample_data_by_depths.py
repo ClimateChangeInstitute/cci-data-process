@@ -7,13 +7,14 @@ import unittest
 from pandas import DataFrame
 from pandas.util.testing import assert_frame_equal
 from climatechange.file import load_csv
-from climatechange.process_data_functions import process_header_data, clean_data,\
+from climatechange.process_data_functions import clean_data,\
     correlate_samples, remove_nan_from_datasets
 from climatechange.resample_data_by_depths import resampled_depths,create_range_for_depths,\
-    find_index_by_increment_for_depths,resampled_by_inc_depths,compile_stats_by_depth
+    find_index_by_increment_for_depths,resampled_by_inc_depths,compile_stats_by_depth,\
+    compiled_stats_by_dd_intervals
 import os
 from climatechange.resample_stats import create_depth_headers
-from climatechange.headers import HeaderType, Header
+from climatechange.headers import HeaderType, Header, process_header_data
 import pandas
 from pandas import Series
 import warnings
@@ -26,8 +27,10 @@ test_depth_we_header=Header("depth (m we)", HeaderType.DEPTH,"Depth","meters","d
 test_depth_abs_header=Header("depth (m abs) ", HeaderType.DEPTH,"Depth","meters","depth_abs_(m)")
 x=[1,2,3,4,5]
 y=[2,7,2,2,4]
+expected_result = load_csv(os.path.join('csv_files','test_output_dd.csv'))
 test_x_compiledstat=CompiledStat(DataFrame(x,columns=['Mean']),test_depth_we_header,test_sample_header)
 test_y_compiledstat=CompiledStat(DataFrame(y,columns=['Mean']),test_depth_we_header,test_sample_header)
+test_output_dd=[[CompiledStat(expected_result,test_depth_we_header,test_sample_header)]]
 
 class Test(unittest.TestCase):
 
@@ -197,14 +200,15 @@ class Test(unittest.TestCase):
         assert_series_equal(expected_result,result1)
         assert_series_equal(expected_result,result2)
         
-
 #     def test_compile_stats_by_dd_intervals(self):
-#         input_test1 = load_csv(os.path.join('csv_files','test_input_dd_1.csv'))
-#         input_test2 = load_csv(os.path.join('csv_files','test_input_dd_2.csv'))
-#         expected_result = load_csv(os.path.join('csv_files','test_output_dd.csv'))
-#         compiled_stat_small_inc=compile_stats_by_dd_intervals(input_test1,input_test2)
-#         
-#         
+#         larger_df = load_csv(os.path.join('csv_files','test_input_dd_2.csv'))
+#         print(larger_df)
+#         smaller_df = load_csv(os.path.join('csv_files','test_input_dd_1.csv'))   
+#         print(smaller_df)      
+#         compiled_stat_of_larger_df=compiled_stats_by_dd_intervals(larger_df,smaller_df)
+#         self.assertEqual(1, len(compiled_stat_of_larger_df))
+#         self.assertEqual(1, len(compiled_stat_of_larger_df[0]))
+#         assert_frame_equal(test_output_dd.df, compiled_stat_of_larger_df[0][0].df)
 #         
 
 

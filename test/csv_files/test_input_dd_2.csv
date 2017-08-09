@@ -1,4 +1,4 @@
-depth (m we),Ca (ppb)
+depth (m we),Cond (+ALU-S/cm)
 0.5,1
 1,2
 1.5,3
@@ -9,7 +9,3 @@ depth (m we),Ca (ppb)
 4,8
 4.5,9
 5,1
-5.5,1
-6,1
-6.5,1
-7,1

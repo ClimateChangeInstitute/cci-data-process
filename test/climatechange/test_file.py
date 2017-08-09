@@ -7,8 +7,7 @@ import os
 import unittest
 
 from climatechange.file import load_dictionary, load_csv, data_dir, save_dictionary
-from climatechange.headers import HeaderEncoder, to_headers, HeaderType, Header
-from climatechange.process_data_functions import process_header_data
+from climatechange.headers import HeaderEncoder, to_headers, HeaderType, Header,process_header_data
 from climatechange.read_me_output import create_readme_output_file
 
 

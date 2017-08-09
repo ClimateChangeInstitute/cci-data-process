@@ -24,7 +24,7 @@ def create_range_by_inc(list_to_inc:List[float], inc_amt: int=1) -> List[float]:
     y = max(list_to_inc)
     return [i for i in range(round(x), round(y), inc_amt)]
 
-def find_indices(list_to_inc, condition) -> List[float]:
+def find_indices(list_to_inc, condition) -> List[int]:
     '''
     
     :param list_to_inc:

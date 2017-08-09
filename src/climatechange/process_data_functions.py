@@ -21,7 +21,7 @@ from pandas import DataFrame
 from climatechange.compiled_stat import CompiledStat
 from climatechange.file import load_csv
 from climatechange.headers import HeaderDictionary, HeaderType, Header, \
-    load_headers
+    load_headers, process_header_data
 from climatechange.plot import write_resampled_data_to_csv_files, \
     add_compile_stats_to_pdf
 from climatechange.read_me_output import create_readme_output_file, \
@@ -36,60 +36,6 @@ from pandas import Series
 from math import isnan
 import logging
 
-
-def process_header_data(df) -> List[Header]:
-    
-    hd = HeaderDictionary()
-    
-    parsedHeaders = hd.parse_headers(df.columns.tolist())
-    
-    unknown_headers = [h for h in parsedHeaders if h.htype == HeaderType.UNKNOWN ]
-    if unknown_headers:
-        logging.error("The following unknown headers were found.")
-        for h in unknown_headers:
-            logging.error(h.name)
-        logging.error(textwrap.dedent("""
-        Please import the headers by using a CSV file containing rows of the 
-        following format:
-        
-        name1, type1, class1, unit1, label1
-        name2, type2, class2, unit2, label2
-        name3, type3, class3, unit3, label3
-        ...
-        
-        Run the program again using the -l flag to import the header information.
-        For example,
-        
-        PYTHONPATH=src python climatechange/process_data.py -l your_csv_file.csv
-        """))
-        
-        sys.exit(0)
-        
-    
-    unknown_headers = [h for h in parsedHeaders if h.htype == HeaderType.UNKNOWN ]
-    if unknown_headers:
-        print("The following unknown headers were found.")
-        for h in unknown_headers:
-            print(h.name)
-        print(textwrap.dedent("""
-        Please import the headers by using a CSV file containing rows of the 
-        following format:
-        
-        name1, type1, class1, unit1, label1
-        name2, type2, class2, unit2, label2
-        name3, type3, class3, unit3, label3
-        ...
-        
-        Run the program again using the -l flag to import the header information.
-        For example,
-        
-        PYTHONPATH=src python climatechange/process_data.py -l your_csv_file.csv
-        """))
-        
-        sys.exit(0)
-        
-    
-    return parsedHeaders
 
 def is_number(s):
     try:
