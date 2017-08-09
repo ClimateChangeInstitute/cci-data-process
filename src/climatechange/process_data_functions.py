@@ -31,6 +31,7 @@ from climatechange.resample_data_by_depths import compile_stats_by_depth
 from climatechange.resample_stats import compile_stats_by_year, find_indices
 import numpy as np
 from scipy.stats._stats_mstats_common import linregress
+import logging
 
 
 def process_header_data(df) -> List[Header]:
@@ -41,10 +42,10 @@ def process_header_data(df) -> List[Header]:
     
     unknown_headers = [h for h in parsedHeaders if h.htype == HeaderType.UNKNOWN ]
     if unknown_headers:
-        print("The following unknown headers were found.")
+        logging.error("The following unknown headers were found.")
         for h in unknown_headers:
-            print(h.name)
-        print(textwrap.dedent("""
+            logging.error(h.name)
+        logging.error(textwrap.dedent("""
         Please import the headers by using a CSV file containing rows of the 
         following format:
         
@@ -192,7 +193,7 @@ def resample_by_years(f:str, inc_amt:int=1):
     
     :param: f: This is a CSV file
     '''
-    print("Creating pdf for %s" % f)
+    logging.info("Creating pdf for %s" % f)
 
     df, compiled_stats, headers = load_and_clean_year_data(f, inc_amt)
     f_base=os.path.splitext(f)[0]
