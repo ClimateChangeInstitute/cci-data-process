@@ -33,6 +33,7 @@ import numpy as np
 from scipy.stats._stats_mstats_common import linregress
 from pandas import Series
 from math import isnan
+import logging
 
 
 def process_header_data(df) -> List[Header]:
