@@ -22,6 +22,8 @@ import sys
 
 from climatechange.process_data_functions import resample_by_years, \
     resample_by_depths, load_and_store_header_file, double_resample_by_depths
+import logging
+import textwrap
 
 
 __all__ = []
@@ -29,7 +31,6 @@ __version__ = 0.1
 __date__ = '2017-07-24'
 __updated__ = '2017-07-24'
 
-DEBUG = 1
 PROFILE = 1
 
 class CLIError(Exception):
@@ -42,7 +43,7 @@ class CLIError(Exception):
     def __unicode__(self):
         return self.msg
 
-def main(argv=None): # IGNORE:C0111
+def main(argv=None):  # IGNORE:C0111
     '''Command line options.'''
 
     if argv is None:
@@ -113,7 +114,9 @@ USAGE
                             "--verbose",
                             dest="verbose",
                             action="count",
-                            help="set verbosity level [default: %(default)s]")
+                            help=textwrap.dedent("""set verbosity level [default: %(default)s]\n
+                            Increasing the verbosity level increases what is logged.  For example,\n
+                            specifying -v outputs INFO level and -vv outputs DEBUG level messages."""))
         parser.add_argument('-V', '--version', action='version', version=program_version_message)
 
 #         parser.add_argument(dest="paths", default=".", help="paths to folder(s) with data file(s) [default: %(default)s]", metavar="path", nargs='+')
@@ -127,7 +130,18 @@ USAGE
         inc_amt = float(args.inc_amt)
         
         if verbose and verbose > 0:
-            print("Verbose mode on")
+            logger = logging.getLogger()
+            level = 'WARN'
+            if verbose == 1:
+                level = 'INFO'
+            elif verbose == 2:
+                level = 'DEBUG'
+            else:
+                logging.error('Unknown verbosity level %d. Exiting', verbose)
+                sys.exit(-1)
+            logger.setLevel(level)
+            
+            logging.info("Using verbosity of %s for logging.", level)
         
         if args.headers_file:
             load_and_store_header_file(args.headers_file)
@@ -163,7 +177,7 @@ USAGE
         ### handle keyboard interrupt ###
         return 0
     except Exception as e:
-        if DEBUG:
+        if logging.getLogger().getlevel() == 'DEBUG':
             raise(e)
         indent = len(program_name) * " "
         sys.stderr.write(program_name + ": " + repr(e) + "\n")
@@ -171,9 +185,5 @@ USAGE
         return 2
 
 if __name__ == "__main__":
-    if DEBUG:
-#         sys.argv.append("-h")
-        pass
-
     sys.exit(main())
     
