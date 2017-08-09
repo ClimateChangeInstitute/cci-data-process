@@ -98,31 +98,16 @@ def compile_stats_by_depth(df:DataFrame, depth_header:Header, sample_header:Head
 
 
 #for resample by depth intervals
-  
-def find_file__with_larger_depth_inc(df1:DataFrame,headers1:Header,df2:DataFrame,headers2:Header)->Tuple[List[float],List[float]]:
-    '''
-    
-    :param df1:DataFrame of raw dataset 1
-    :param headers1:header of raw dataset 1
-    :param df2:DataFrame of raw dataset 2
-    :param headers2:header of raw dataset 2
-    '''
-    depth_headers1 = [h.name for h in headers1 if h.htype == HeaderType.DEPTH] 
-    depth_headers2 = [h.name for h in headers2 if h.htype == HeaderType.DEPTH]
-    depth_large_inc=[]
-    depth_small_inc=[]
-    for i in depth_headers1:
-        for j in depth_headers2:
-            if i==j:
-                inc_amt1=(df1.loc[-1,depth_headers1[i]]-df1.loc[0,depth_headers1[i]])/len(df1.loc[:,depth_headers1[i]])
-                inc_amt2=(df2.loc[-1,depth_headers2[i]]-df1.loc[0,depth_headers2[i]])/len(df2.loc[:,depth_headers1[i]])
-                if inc_amt1>inc_amt2:
-                    depth_large_inc.append(df1.loc[:,depth_headers1[i]])
-                    depth_small_inc.append(df2.loc[:,depth_headers2[i]])
-                else:
-                    depth_large_inc.append(df2.loc[:,depth_headers2[i]])
-                    depth_small_inc.append(df1.loc[:,depth_headers1[i]])
-    return depth_large_inc,depth_small_inc
+#
+
+
+
+
+
+
+
+
+
          
 def find_index_of_depth_intervals(depth_large_inc:List[float],depth_small_inc:List[float])->List[float]:    
     '''
@@ -134,5 +119,20 @@ def find_index_of_depth_intervals(depth_large_inc:List[float],depth_small_inc:Li
     index=[find_indices(depth_small_inc, lambda e: e >= depth_large_inc[i] and e < depth_large_inc[i+1]) for i in range(0, len(depth_large_inc))] 
     return index
  
+def compiled_stats_by_dd_intervals(df1:DataFrame,df2:DataFrame ) -> List[List[CompiledStat]]:
+    '''
+    From the given data frame compile statistics (mean, median, min, max, etc) 
+    based on the parameters.
+    
+    :param df1:Larger Dataframe with smaller intervals to create a compiled stat
+    :param df2:Smaller Dataframe with larger intervals to create index of intervals
+    :return: A list of list of CompiledStat containing the resampled statistics for the 
+    specified sample and depth by the depth interval from df2.
+    '''
+    
+#     df_x_sample = pandas.concat([df.loc[:, depth_header.name], df.loc[:, sample_header.name]], axis=1)
+#     resampled_data = resampled_by_inc_depths(df_x_sample, depth_header)
+#     CompiledStat(resampled_data, depth_header, sample_header)
+    return [[]]
 
 

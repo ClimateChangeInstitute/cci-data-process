@@ -27,7 +27,8 @@ from climatechange.plot import write_resampled_data_to_csv_files, \
 from climatechange.read_me_output import create_readme_output_file, \
     write_readmefile_to_txtfile
 from climatechange.read_me_output import template
-from climatechange.resample_data_by_depths import compile_stats_by_depth
+from climatechange.resample_data_by_depths import compile_stats_by_depth, \
+    find_index_of_depth_intervals,compiled_stats_by_dd_intervals
 from climatechange.resample_stats import compile_stats_by_year, find_indices
 import numpy as np
 from scipy.stats._stats_mstats_common import linregress
@@ -406,7 +407,25 @@ def double_resample_by_depths(f1:str, f2:str, inc_amt:float):
     
     write_resampled_data_to_csv_files(df_corr_stats,csv_filename)  
 
-        
+
+def load_and_clean_dd_data(f:str) -> Tuple[DataFrame, List[Header]]:
+    '''
+    
+    :param f: The file path of data to load and clean
+    :return: A 2-tuple containing the cleaned original data,
+     and the processed data headers from the original data file
+    '''
+    df = load_csv(f)
+    headers = process_header_data(df)
+    df = clean_data(df)
+    return df, headers    
+# 
+def correlate_dd_samples(d1:CompiledStat,d2:Series,stat_header:str='Mean')->Tuple[float,float,float,float,float]:
+    d1_stat=d1.df.loc[:,stat_header]
+     
+    slope, intercept, r_value, p_value, std_err=linregress(remove_nan_from_datasets(d1_stat,d2))
+    return d1.x_header.name,d1.sample_header.name,d2.name,slope, intercept, r_value, p_value, std_err
+     
 def double_resample_by_depth_intervals(f1:str, f2:str):
     '''
     
@@ -426,8 +445,35 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     :param f2:
     '''
 
-    pass
+    df1, headers1 = load_and_clean_dd_data(f1)
+    df2, headers2 = load_and_clean_dd_data(f2)
+    f1_file_path=os.path.splitext(f1)[0]
+    f2_base=os.path.basename(f2).split('.')[0]
+    csv_filename=f1_file_path+'_vs_ %s__stat_correlation.csv' %(f2_base)
 
+    larger_df, smaller_df = df1, df2 if df1.shape()[0] > df2.shape()[0] else df2,df1
+    
+    
+    compiled_stats_of_larger_df=compiled_stats_by_dd_intervals(larger_df, smaller_df)
+    
+    headers = process_header_data(smaller_df)
+    sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
+
+    print(csv_filename)
+    corr_stats=[]
+    for dlist1 in compiled_stats_of_larger_df:
+        #list of compiled stat objects with depth and header names
+        for d1 in dlist1:
+            #compiled_stat_object with df, depth name, and sample name
+                    for sample_header in sample_headers:
+                        print("Processing depth %s" % d1.x_header.name)
+ 
+                        # correlate
+                        print("correlating %s and %s" % (d1.sample_header.name, sample_header))
+                        corr_stats.append(correlate_dd_samples(d1,smaller_df.loc[:,sample_header]))
+    df_corr_stats=DataFrame(corr_stats,columns=['depth','sample_1','sample_2','slope', 'intercept', 'r_value', 'p_value', 'std_err'])    
+    
+    write_resampled_data_to_csv_files(df_corr_stats,csv_filename)  
 
 def load_and_store_header_file(path:str):
     print("Adding headers from %s to header dictionary." % path) 

@@ -196,6 +196,15 @@ class Test(unittest.TestCase):
         result1,result2=remove_nan_from_datasets(input1,input2)
         assert_series_equal(expected_result,result1)
         assert_series_equal(expected_result,result2)
+        
+
+#     def test_compile_stats_by_dd_intervals(self):
+#         input_test1 = load_csv(os.path.join('csv_files','test_input_dd_1.csv'))
+#         input_test2 = load_csv(os.path.join('csv_files','test_input_dd_2.csv'))
+#         expected_result = load_csv(os.path.join('csv_files','test_output_dd.csv'))
+#         compiled_stat_small_inc=compile_stats_by_dd_intervals(input_test1,input_test2)
+#         
+#         
 #         
 
 
