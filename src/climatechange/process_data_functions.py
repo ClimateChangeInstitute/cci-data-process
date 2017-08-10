@@ -323,9 +323,6 @@ def double_resample_by_depths(f1:str, f2:str, inc_amt:float):
     :param f1:
     :param f2:
     '''
-    print(inc_amt)
-    print(f1)
-    print(f2)
     unused_df1, compiled_stats1, unused_headers1 = load_and_clean_depth_data(f1, inc_amt)
     unused_df2, compiled_stats2, unused_headers2 = load_and_clean_depth_data(f2, inc_amt)
     f1_file_path = os.path.splitext(f1)[0]
@@ -407,11 +404,9 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     
     
     compiled_stats_of_larger_df = compiled_stats_by_dd_intervals(larger_df, smaller_df)
-    
     headers = process_header_data(smaller_df)
     sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
 
-    print(csv_filename)
     corr_stats = []
     for dlist1 in compiled_stats_of_larger_df:
         # list of compiled stat objects with depth and header names

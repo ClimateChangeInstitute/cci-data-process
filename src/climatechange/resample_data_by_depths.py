@@ -141,7 +141,7 @@ def compiled_stats_by_dd_intervals(larger_df:DataFrame,smaller_df:DataFrame) -> 
     result_list = []
     for depth_header_l in depth_headers_larger:
         for depth_header_s in depth_headers_smaller:
-            if depth_header_l==depth_header_s:     
+            if depth_header_l==depth_header_s:    
                 index=find_index_of_depth_intervals(larger_df.loc[:,depth_header_s.name],smaller_df.loc[:,depth_header_l.name])
                 depth_df=create_top_bottom_depth_dataframe(smaller_df,depth_header_s)
                 depth_samples=[]
@@ -152,7 +152,7 @@ def compiled_stats_by_dd_intervals(larger_df:DataFrame,smaller_df:DataFrame) -> 
                     current_df = DataFrame(current_stats, columns=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
                     comp_stat=CompiledStat(pandas.concat((depth_df,current_df),axis=1),depth_header_l,sample_header)
                     depth_samples.append(comp_stat)
-            result_list.append(depth_samples)
+        result_list.append(depth_samples)
     return result_list
 
 def create_top_bottom_depth_dataframe(df:DataFrame,depth_header:Header)->DataFrame:
