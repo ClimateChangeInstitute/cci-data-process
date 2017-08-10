@@ -14,7 +14,7 @@ from climatechange.resample_data_by_depths import resampled_depths,create_range_
     compiled_stats_by_dd_intervals, find_index_of_depth_intervals
 import os
 from climatechange.resample_stats import create_depth_headers
-from climatechange.headers import HeaderType, Header, process_header_data
+from climatechange.headers import HeaderType, Header
 import pandas
 from pandas import Series
 import warnings
@@ -81,8 +81,6 @@ class Test(unittest.TestCase):
         expected_result=['top_depth_we_(m)','bottom_depth_we_(m)']
         input_test = load_csv(os.path.join('csv_files','input_depth_decimal.csv'))
         input_test = clean_data(input_test)
-        headers = process_header_data(input_test)
-        depth_headers = [h.name for h in headers if h.htype == HeaderType.DEPTH]
         result=create_depth_headers([test_depth_we_header])
         self.assertEqual(expected_result,result)
         
@@ -99,7 +97,6 @@ class Test(unittest.TestCase):
         expected_result = DataFrame([[0.605,0.615],[0.615,0.625]],columns=['top_depth_we_(m)', 'bottom_depth_we_(m)'])
         input_test = load_csv(os.path.join('csv_files','input_depths.csv'))
         input_test = clean_data(input_test)
-        index_to_remove=[]
         df_x_sample=pandas.concat([input_test.loc[:,'depth (m we)'],input_test.loc[:,'Cond (+ALU-S/cm)']], axis=1)
         result=resampled_depths(df_x_sample,test_depth_we_header,inc_amt)
         assert_frame_equal(expected_result,result)
