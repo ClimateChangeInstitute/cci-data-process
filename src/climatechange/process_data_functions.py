@@ -396,7 +396,7 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     f2_base = os.path.basename(f2).split('.')[0]
     csv_filename = f1_file_path + '_vs_ %s__stat_correlation.csv' % (f2_base)
 
-    larger_df, smaller_df = df1, df2 if df1.shape()[0] > df2.shape()[0] else df2, df1
+    larger_df, smaller_df = (df1, df2) if df1.shape[0] > df2.shape[0] else (df2, df1)
     
     
     compiled_stats_of_larger_df = compiled_stats_by_dd_intervals(larger_df, smaller_df)
