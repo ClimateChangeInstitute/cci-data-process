@@ -7,7 +7,6 @@ import datetime
 
 from matplotlib.backends.backend_pdf import PdfPages
 from pandas.core.frame import DataFrame
-from typing import List
 
 from climatechange.file import load_csv
 from climatechange.headers import Header
@@ -27,7 +26,7 @@ def examplePDFPlot(file_name:str):
          
         xaxisLabel = 'depth (m we) '
          
-        df_indexed:DataFrame = df.set_index(xaxisLabel)
+#         df_indexed:DataFrame = df.set_index(xaxisLabel)
                  
         for i in range(len(ys)):
             fig = plt.figure(figsize=(11, 8.5))
@@ -184,10 +183,10 @@ def add_compile_stats_to_pdf(f:str,
     :return: csv files with statistics resampled of stat_header, 
         pdf files of statistics with raw data
     '''
-    df_name=df_resampled_stats.columns[0]
+#     df_name=df_resampled_stats.columns[0]
     plt.figure(figsize=(11, 8.5))
     fig, tg = plt.subplots(1)
-    ax = df_resampled_stats[[df_name, stat_header]].plot(x=df_name, kind='line',color='r', ax=tg)
+#     ax = df_resampled_stats[[df_name, stat_header]].plot(x=df_name, kind='line',color='r', ax=tg)
     ax = df[[x_header.name, sample_header.name]].plot(x=x_header.name, kind='line',
                                            linestyle='-',
                                            color='0.75',

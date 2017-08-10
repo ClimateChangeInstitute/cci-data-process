@@ -7,7 +7,7 @@ Created on Jul 31, 2017
 from pandas.core.frame import DataFrame
 from climatechange.resample_stats import compileStats, find_indices, create_depth_headers
 import pandas
-from typing import List, Tuple
+from typing import List
 import numpy as np
 from climatechange.compiled_stat import CompiledStat
 from climatechange.headers import Header, HeaderType, process_header_data
