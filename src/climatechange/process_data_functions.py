@@ -355,7 +355,7 @@ def load_and_clean_dd_data(f:str) -> Tuple[DataFrame, List[Header]]:
     :return: A 2-tuple containing the cleaned original data,
      and the processed data headers from the original data file
     '''
-    df = load_csv(f)
+    df=load_csv(f)
     headers = process_header_data(df)
     df = clean_data(df.drop_duplicates())
     return df.reset_index(drop=True), headers    
@@ -419,8 +419,18 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
                         print("correlating %s and %s" % (d1.sample_header.name, sample_header))
                         corr_stats.append(correlate_dd_samples(d1, smaller_df.loc[:, sample_header]))
     df_corr_stats = DataFrame(corr_stats, columns=['depth', 'sample_1', 'sample_2', 'slope', 'intercept', 'r_value', 'p_value', 'std_err'])    
-    
+        
     write_resampled_data_to_csv_files(df_corr_stats, csv_filename)  
+
+
+def load_and_clean_LAICPMS_data(data_file:str,input_info_file:str)->DataFrame:
+#     df = load_csv(f)
+#     headers = process_header_data(df)
+#     df = clean_data(df.drop_duplicates())
+#     df=df.reset_index(drop=True)
+    pass
+
+    
 
 
 def load_and_store_header_file(path:str):
