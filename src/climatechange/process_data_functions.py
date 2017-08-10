@@ -117,12 +117,15 @@ def add_units_to_stats(df:DataFrame, sample_header:Header) -> DataFrame:
                        'Stdv':'stdev_%s' % sample_header.label,
                        'Count':'count_(#pts/inc)'}, inplace=True) 
     return df   
+
+
 def load_and_clean_year_data(f:str, inc_amt:int) -> Tuple[DataFrame, List[List[CompiledStat]], List[Header]]:
     df = load_csv(f)
     headers = process_header_data(df)
     df = clean_data(df)
     # round_values=find_round_values(df)
     return df, get_compiled_stats_by_year(inc_amt, df, headers), headers
+
 
 def resample_by_years(f:str, inc_amt:int=1):
     '''
@@ -181,6 +184,7 @@ def resample_by_years(f:str, inc_amt:int=1):
     output_path = os.path.dirname(f)
     readme = create_readme_output_file(template, f, headers, run_date, inc_amt, 'Year', year_headers, file_headers, num_csvfiles, stat_header)
     write_readmefile_to_txtfile(readme, os.path.join(output_path, '00README.txt'))
+
 
 
 def get_compiled_stats_by_depth(inc_amt:float,
@@ -285,9 +289,6 @@ def resample_by_depths(f:str, inc_amt:float):
     readme = create_readme_output_file(template, f, headers, run_date, inc_amt, 'Depth', depth_headers, file_headers, num_csvfiles, stat_header)
     write_readmefile_to_txtfile(readme, os.path.join(output_path, '00README.txt'))     
 
-#     for depth_name in depth_headers:
-#         plot.create_csv_pdf_resampled(f, df, depth_name, headers,inc_amt)
-# 
 def remove_nan_from_datasets(d1_stat:Series, d2_stat:Series) -> Tuple[Series, Series]:
     d2_result = []
     d1_result = []
@@ -297,9 +298,7 @@ def remove_nan_from_datasets(d1_stat:Series, d2_stat:Series) -> Tuple[Series, Se
             d2_result.append(d2_stat[i])
                      
     return Series(d1_result), Series(d2_result)
-            
-#                 
-#                 
+                   
 def correlate_samples(d1:CompiledStat, d2:CompiledStat, stat_header:str='Mean') -> Tuple[float, float, float, float, float]:
     d1_stat = d1.df.loc[:, stat_header]
     d2_stat = d2.df.loc[:, stat_header]
@@ -363,12 +362,14 @@ def load_and_clean_dd_data(f:str) -> Tuple[DataFrame, List[Header]]:
     headers = process_header_data(df)
     df = clean_data(df)
     return df, headers    
-# 
+ 
+
 def correlate_dd_samples(d1:CompiledStat, d2:Series, stat_header:str='Mean') -> Tuple[float, float, float, float, float]:
     d1_stat = d1.df.loc[:, stat_header]
      
     slope, intercept, r_value, p_value, std_err = linregress(remove_nan_from_datasets(d1_stat, d2))
     return d1.x_header.name, d1.sample_header.name, d2.name, slope, intercept, r_value, p_value, std_err
+
      
 def double_resample_by_depth_intervals(f1:str, f2:str):
     '''
@@ -418,6 +419,7 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     df_corr_stats = DataFrame(corr_stats, columns=['depth', 'sample_1', 'sample_2', 'slope', 'intercept', 'r_value', 'p_value', 'std_err'])    
     
     write_resampled_data_to_csv_files(df_corr_stats, csv_filename)  
+
 
 def load_and_store_header_file(path:str):
     print("Adding headers from %s to header dictionary." % path) 
