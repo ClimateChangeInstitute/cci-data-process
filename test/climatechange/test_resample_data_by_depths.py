@@ -212,7 +212,9 @@ class Test(unittest.TestCase):
         self.assertEqual(1, len(compiled_stat_of_larger_df[0]))
         assert_frame_equal(test_output_dd.df, compiled_stat_of_larger_df[0][0].df)
         self.assertEqual(test_output_dd.sample_header, compiled_stat_of_larger_df[0][0].sample_header)
-        self.assertEqual(test_output_dd.x_header, compiled_stat_of_larger_df[0][0].x_header) 
+        self.assertEqual(test_output_dd.x_header, compiled_stat_of_larger_df[0][0].x_header)
+        
+ 
 
 
 

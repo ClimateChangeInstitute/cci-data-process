@@ -14,7 +14,8 @@ from pandas.util.testing import assert_frame_equal
 
 from climatechange.file import load_csv
 from climatechange.headers import HeaderType, Header, process_header_data
-from climatechange.process_data_functions import clean_data
+from climatechange.process_data_functions import clean_data,\
+    load_and_clean_dd_data
 from climatechange.resample_stats import compileStats, compile_stats_by_year, \
     resampled_by_inc_years, find_index_by_increment, resampled_depths_by_years, \
     create_range_by_inc, findMean, findMedian, findMax, findMin, findStd, \
@@ -25,7 +26,7 @@ import pandas as pd
 
 # list of values by column, first index is column index, for each you get element of row 
 inc_amt=1
-emptyArray = []
+emptyArray = [[]]
 nanArray=[[np.NaN, np.nan, np.nan]]
 singleRowArray = [[5, 3, 4, 5, 3]]
 multipleRowArray = [[5.0, 4.0, 3.0, 2.0, 1.0],
@@ -68,7 +69,7 @@ class Test(unittest.TestCase):
     def testfindMean(self):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            assert_almost_equal([], findMean(emptyArray))
+            assert_almost_equal([np.nan], findMean(emptyArray))
             assert_almost_equal([4.0], findMean(singleRowArray))
             self.assertTrue(isnan(findMean(nanArray)[0]))
             assert_almost_equal([3.0, 4.0, 3.0], findMean(multipleRowArray))
@@ -77,36 +78,36 @@ class Test(unittest.TestCase):
             self.assertRaises(TypeError, findMean, str_input)
     
     def testfindMedian(self):     
-            assert_almost_equal([], findMedian(emptyArray))
+            assert_almost_equal([np.nan], findMedian(emptyArray))
             assert_almost_equal([4.0], findMedian(singleRowArray))
             assert_almost_equal([3.0, 4.0, 3.0], findMedian(multipleRowArray))
     
     def testfindMax(self):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            assert_almost_equal([], findMax(emptyArray))
+            assert_almost_equal([np.nan], findMax(emptyArray))
             assert_almost_equal([5.0], findMax(singleRowArray))
             self.assertTrue(isnan(findMax(nanArray)[0]))
             assert_almost_equal([5.0, 6.0, 5.0], findMax(multipleRowArray))
 
     
     def testfindMin(self): 
-        assert_almost_equal([], findMin(emptyArray))
+        assert_almost_equal([np.nan], findMin(emptyArray))
         assert_almost_equal([3.0], findMin(singleRowArray))
         assert_almost_equal([1.0, 2.0, 1.0], findMin(multipleRowArray))
     
     def testfindStd(self):
-        assert_almost_equal([], findStd(emptyArray))
+        assert_almost_equal([np.nan], findStd(emptyArray))
         assert_almost_equal([0.8944271], findStd(singleRowArray))
         assert_almost_equal([1.4142135, 1.4142135, 1.4142135], findStd(multipleRowArray))
 
     def testfindLen(self):
-        assert_almost_equal([], findLen(emptyArray))
+        assert_almost_equal([0], findLen(emptyArray))
         assert_almost_equal([5.0], findLen(singleRowArray))
         assert_almost_equal([5.0, 5.0, 5.0], findLen(multipleRowArray))
  
     def testcompileStats(self):        
-        assert_almost_equal([], compileStats(emptyArray))
+        assert_almost_equal([[]], compileStats(emptyArray))
         assert_almost_equal([[4, 0.8944271, 4, 5, 3, 5]], compileStats(singleRowArray))
         assert_almost_equal(test_output, compileStats(test_input))
         
@@ -145,10 +146,14 @@ class Test(unittest.TestCase):
         
         assert_frame_equal(expected_output, result)
     
+    def test_load_and_clean_data(self):
+        f=os.path.join('csv_files', 'test_load_and_clean_data.csv')
+        df,headers=load_and_clean_dd_data(f)
+        print(df)
+        output_df=DataFrame([[1.,2.,3.,4.],[3.,4.,5.,6.]],columns=['depth (m we)','depth (m abs)','Na (ppb)','Ca (ppb)'])
+        print(output_df)
+        assert_frame_equal(output_df,df)
 
-    
-    
-    
     def test_create_range_by_inc(self):
         expected_output=[2011]
         result=create_range_by_inc(input_test_zeros_and_numbers.loc[:,'Dat210617'].values.tolist(),inc_amt)
