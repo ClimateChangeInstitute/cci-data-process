@@ -423,15 +423,6 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     write_resampled_data_to_csv_files(df_corr_stats, csv_filename)  
 
 
-def load_and_clean_LAICPMS_data(data_file:str,input_info_file:str)->DataFrame:
-#     df = load_csv(f)
-#     headers = process_header_data(df)
-#     df = clean_data(df.drop_duplicates())
-#     df=df.reset_index(drop=True)
-    pass
-
-    
-
 
 def load_and_store_header_file(path:str):
     print("Adding headers from %s to header dictionary." % path) 
