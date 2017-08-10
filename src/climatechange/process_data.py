@@ -21,7 +21,8 @@ import os
 import sys
 
 from climatechange.process_data_functions import resample_by_years, \
-    resample_by_depths, load_and_store_header_file, double_resample_by_depths
+    resample_by_depths, load_and_store_header_file, double_resample_by_depths,\
+    double_resample_by_depth_intervals
 import logging
 import textwrap
 
@@ -86,10 +87,17 @@ USAGE
         
         parser.add_argument("-dd",
                             "--double-depth",
-                            dest="double_depth_files",
+                            dest="depth_files",
                             action="store",
                             nargs=2,
-                            help="resample %(dest)s by depth [default: %(default)s]")
+                            help="resample %(dest) by depth")
+        
+        parser.add_argument("-di",
+                            "--double-interval",
+                            dest="interval_files",
+                            action="store",
+                            nargs=2,
+                            help="resample %(dest) to the higher resolution of the two files")
         
         parser.add_argument("-i",
                             "--inc_amt",
@@ -147,10 +155,17 @@ USAGE
             load_and_store_header_file(args.headers_file)
             return
         
-        if args.double_depth_files: 
-            double_resample_by_depths(args.double_depth_files[0],
-                                      args.double_depth_files[1],
-                                      inc_amt)    
+        if args.depth_files: 
+            double_resample_by_depths(args.depth_files[0],
+                                      args.depth_files[1],
+                                      inc_amt)
+            
+        if args.interval_files:
+            if args.inc_amt:
+                logging.warn("Specified increment amount %d is not used "
+                             "when resampling by depth intervals.", inc_amt)
+            double_resample_by_depth_intervals(args.interval_files[0],
+                                      args.interval_files[1])    
         
         if args.year_file:
             
