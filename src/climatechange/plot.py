@@ -11,6 +11,9 @@ from pandas.core.frame import DataFrame
 from climatechange.file import load_csv
 from climatechange.headers import Header
 import matplotlib.pyplot as plt
+from climatechange.compiled_stat import CompiledStat
+from pandas.core.series import Series
+from scipy.stats._stats_mstats_common import linregress
 
 
 def examplePDFPlot(file_name:str):
@@ -209,6 +212,9 @@ def add_compile_stats_to_pdf(f:str,
     pdf.savefig(fig)
     plt.close()
  
+    
+
+
  
 # # if __name__ == '__main__':
 # #     examplePDFPlot('test.pdf')

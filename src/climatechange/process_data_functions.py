@@ -13,7 +13,7 @@ from matplotlib import pyplot
 import os
 import time
 from typing import List, Tuple
-
+import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from numpy import float64
 from pandas import DataFrame
@@ -323,12 +323,14 @@ def double_resample_by_depths(f1:str, f2:str, inc_amt:float):
     :param f1:
     :param f2:
     '''
+
     unused_df1, compiled_stats1, unused_headers1 = load_and_clean_depth_data(f1, inc_amt)
     unused_df2, compiled_stats2, unused_headers2 = load_and_clean_depth_data(f2, inc_amt)
     f1_file_path = os.path.splitext(f1)[0]
     f2_base = os.path.basename(f2).split('.')[0]
     
     csv_filename = f1_file_path + '_vs_ %s__stat_correlation.csv' % (f2_base)
+    
 
     print(csv_filename)
     corr_stats = []
@@ -367,7 +369,24 @@ def correlate_dd_samples(d1:CompiledStat, d2:Series, stat_header:str='Mean') -> 
     slope, intercept, r_value, p_value, std_err = linregress(remove_nan_from_datasets(d1_stat, d2))
     return d1.x_header.name, d1.sample_header.name, d2.name, slope, intercept, r_value, p_value, std_err
 
-     
+def plot_linregress_of_samples(d1:CompiledStat,
+                               d2:Series,
+                               stat_header,
+                               pdf):
+    d1_stat = d1.df.loc[:, stat_header]
+    d2=d2[:-1]
+    slope, intercept, r_value, p_value, std_err = linregress(remove_nan_from_datasets(d1_stat, d2))
+    plt.figure(figsize=(11, 8.5))
+    fig,ax=plt.subplots()
+    ax.scatter(d1_stat, d2,label='data')
+    ax.plot(d1_stat, intercept + slope*d1_stat, 'r',label='line-regression r={:.4f}'.format(r_value))
+    plt.xlabel(d1.sample_header.label)
+    plt.ylabel(d2.name)
+    plt.title('Correlation of %s and %s'% (d1.sample_header.hclass,d2.name))
+    plt.legend()
+    pdf.savefig(fig)
+    plt.close()
+
 def double_resample_by_depth_intervals(f1:str, f2:str):
     '''
     
@@ -393,12 +412,13 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     :param f1:
     :param f2:
     '''
-
+    stat_header='Mean'
     df1, unused_headers1 = load_and_clean_dd_data(f1)
     df2, unused_headers2 = load_and_clean_dd_data(f2)
     f1_file_path = os.path.splitext(f1)[0]
     f2_base = os.path.basename(f2).split('.')[0]
     csv_filename = f1_file_path + '_vs_ %s__stat_correlation.csv' % (f2_base)
+    pdf_filename = f1_file_path + '_vs_ %s__plot_correlation.pdf' % (f2_base)
 
     larger_df, smaller_df = (df1, df2) if df1.shape[0] > df2.shape[0] else (df2, df1)
     
@@ -408,22 +428,21 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
 
     corr_stats = []
-    for dlist1 in compiled_stats_of_larger_df:
-        # list of compiled stat objects with depth and header names
-        for d1 in dlist1:
-            # compiled_stat_object with df, depth name, and sample name
-                    for sample_header in sample_headers:
-                        print("Processing depth %s" % d1.x_header.name)
- 
-                        # correlate
-                        print("correlating %s and %s" % (d1.sample_header.name, sample_header))
-                        corr_stats.append(correlate_dd_samples(d1, smaller_df.loc[:, sample_header]))
+    with PdfPages(pdf_filename) as pdf:
+        for dlist1 in compiled_stats_of_larger_df:
+            # list of compiled stat objects with depth and header names
+            for d1 in dlist1:
+                # compiled_stat_object with df, depth name, and sample name
+                        for sample_header in sample_headers:
+                            print("Processing depth %s" % d1.x_header.name)
+                            # correlate
+                            print("correlating %s and %s" % (d1.sample_header.name, sample_header))
+                            corr_stats.append(correlate_dd_samples(d1, smaller_df.loc[:, sample_header]))
+                            plot_linregress_of_samples(d1,smaller_df.loc[:, sample_header],stat_header,pdf)
     df_corr_stats = DataFrame(corr_stats, columns=['depth', 'sample_1', 'sample_2', 'slope', 'intercept', 'r_value', 'p_value', 'std_err'])    
         
-    write_resampled_data_to_csv_files(df_corr_stats, csv_filename)  
-
-
-
+    write_resampled_data_to_csv_files(df_corr_stats, csv_filename)
+    
 def load_and_store_header_file(path:str):
     print("Adding headers from %s to header dictionary." % path) 
     new_headers = load_headers(path)
