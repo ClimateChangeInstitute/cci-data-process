@@ -33,6 +33,7 @@ from climatechange.resample_data_by_depths import compile_stats_by_depth, \
     compiled_stats_by_dd_intervals
 from climatechange.resample_stats import compile_stats_by_year
 import numpy as np
+from climatechange.data_filters import replace_outliers_with_nan
 
 
 def is_number(s):
@@ -371,6 +372,7 @@ def correlate_dd_samples(d1:CompiledStat, d2:Series, stat_header:str='Mean') -> 
 
 def plot_linregress_of_samples(d1:CompiledStat,
                                d2:Series,
+                               sample_header:Header,
                                stat_header,
                                pdf):
     d1_stat = d1.df.loc[:, stat_header]
@@ -381,12 +383,12 @@ def plot_linregress_of_samples(d1:CompiledStat,
     ax.scatter(d1_stat, d2,label='data')
     ax.plot(d1_stat, intercept + slope*d1_stat, 'r',label='line-regression r={:.4f}'.format(r_value))
     plt.xlabel(d1.sample_header.label)
-    plt.ylabel(d2.name)
-    plt.title('Correlation of %s and %s'% (d1.sample_header.hclass,d2.name))
+    plt.ylabel(sample_header.label)
+    plt.title('Correlation of %s and %s'% (d1.sample_header.hclass,sample_header.hclass))
     plt.legend()
     pdf.savefig(fig)
     plt.close()
-
+    
 def double_resample_by_depth_intervals(f1:str, f2:str):
     '''
     
@@ -417,15 +419,15 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     df2, unused_headers2 = load_and_clean_dd_data(f2)
     f1_file_path = os.path.splitext(f1)[0]
     f2_base = os.path.basename(f2).split('.')[0]
-    csv_filename = f1_file_path + '_vs_ %s__stat_correlation.csv' % (f2_base)
-    pdf_filename = f1_file_path + '_vs_ %s__plot_correlation.pdf' % (f2_base)
+    csv_filename = f1_file_path + '_vs_ %s__stat_correlation_removeoutliers.csv' % (f2_base)
+    pdf_filename = f1_file_path + '_vs_ %s__plot_correlation_removeoutliers.pdf' % (f2_base)
 
     larger_df, smaller_df = (df1, df2) if df1.shape[0] > df2.shape[0] else (df2, df1)
-    
+    larger_df=replace_outliers_with_nan(larger_df)
     
     compiled_stats_of_larger_df = compiled_stats_by_dd_intervals(larger_df, smaller_df)
     headers = process_header_data(smaller_df)
-    sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
+    sample_headers = [h for h in headers if h.htype == HeaderType.SAMPLE]
 
     corr_stats = []
     with PdfPages(pdf_filename) as pdf:
@@ -436,9 +438,9 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
                         for sample_header in sample_headers:
                             print("Processing depth %s" % d1.x_header.name)
                             # correlate
-                            print("correlating %s and %s" % (d1.sample_header.name, sample_header))
-                            corr_stats.append(correlate_dd_samples(d1, smaller_df.loc[:, sample_header]))
-                            plot_linregress_of_samples(d1,smaller_df.loc[:, sample_header],stat_header,pdf)
+                            print("correlating %s and %s" % (d1.sample_header.name, sample_header.name))
+                            corr_stats.append(correlate_dd_samples(d1, smaller_df.loc[:, sample_header.name]))
+                            plot_linregress_of_samples(d1,smaller_df.loc[:, sample_header.name],sample_header,stat_header,pdf)
     df_corr_stats = DataFrame(corr_stats, columns=['depth', 'sample_1', 'sample_2', 'slope', 'intercept', 'r_value', 'p_value', 'std_err'])    
         
     write_resampled_data_to_csv_files(df_corr_stats, csv_filename)

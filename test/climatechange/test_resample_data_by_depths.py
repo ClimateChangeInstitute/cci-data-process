@@ -21,6 +21,7 @@ import warnings
 from climatechange.compiled_stat import CompiledStat
 import numpy as np
 from pandas.testing import assert_series_equal
+from climatechange.data_filters import replace_outliers_with_nan
 
 test_sample_header=Header("Cond (+ALU-S/cm)", HeaderType.SAMPLE,"Conductivity","alu-s/cm","Cond_(+ALU-S/cm)")
 test_depth_we_header=Header("depth (m we)", HeaderType.DEPTH,"Depth","meters","depth_we_(m)")
@@ -214,19 +215,12 @@ class Test(unittest.TestCase):
         self.assertEqual(test_output_dd.sample_header, compiled_stat_of_larger_df[0][0].sample_header)
         self.assertEqual(test_output_dd.x_header, compiled_stat_of_larger_df[0][0].x_header)
         
-    def test_compile_stats_by_dd_intervals_two_depths(self):
-        larger_df = load_csv(os.path.join('csv_files','test_input_dd_2.csv'))
-        smaller_df = load_csv(os.path.join('csv_files','test_input_dd_1.csv'))  
-        compiled_stat_of_larger_df=compiled_stats_by_dd_intervals(larger_df,smaller_df)
-        print(compiled_stat_of_larger_df)
-        print(compiled_stat_of_larger_df[1])
-#         self.assertEqual(1, len(compiled_stat_of_larger_df))
-#         self.assertEqual(1, len(compiled_stat_of_larger_df[0]))
-#         assert_frame_equal(test_output_dd.df, compiled_stat_of_larger_df[0][0].df)
-#         self.assertEqual(test_output_dd.sample_header, compiled_stat_of_larger_df[0][0].sample_header)
-#         self.assertEqual(test_output_dd.x_header, compiled_stat_of_larger_df[0][0].x_header)
-
-
+    def test_replace_outliers_with_nans(self):
+        input_df=DataFrame([800000.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.],columns=['Ca (ppb)'])
+        output_result=DataFrame([np.nan,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.],columns=['Ca (ppb)'])
+        result=replace_outliers_with_nan(input_df)
+        assert_frame_equal(output_result,result)
+        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
