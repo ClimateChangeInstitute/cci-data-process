@@ -134,7 +134,7 @@ class Test(unittest.TestCase):
         with open(os.path.join('csv_files','header_input.csv'), 'r') as f:
             headers = load_headers(f)
             self.assertEqual(h1, headers[0], "First header is Strontium")
-            self.assertEquals(h_last, headers[len(headers)-1], "Last header is Potasium")
+            self.assertEqual(h_last, headers[len(headers)-1], "Last header is Potasium")
         
 
 if __name__ == "__main__":
