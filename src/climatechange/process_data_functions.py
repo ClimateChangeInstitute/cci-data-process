@@ -389,6 +389,24 @@ def plot_linregress_of_samples(d1:CompiledStat,
     pdf.savefig(fig)
     plt.close()
     
+# def plot_2_samples_vs_depth(d1:CompiledStat,
+#                                d2:Series,
+#                                sample_header:Header,
+#                                stat_header,
+#                                pdf):
+#     d1_stat = d1.df.loc[:, stat_header]
+#     d2=d2[:-1]
+#     plt.figure(figsize=(11, 8.5))
+#     fig,ax=plt.subplots()
+#     ax.plot(d1.df.loc[:, d1.x_header.name],d1_stat,label='d1')
+#     ax.plot(d1.df.loc[:, d1.x_header.name],d2,label='d2'))
+#     plt.xlabel(d1.x_header.label)
+#     plt.title('Plot of %s and %s'% (d1.sample_header.hclass,sample_header.hclass))
+#     plt.legend()
+#     pdf.savefig(fig)
+#     plt.close()
+    
+    
 def double_resample_by_depth_intervals(f1:str, f2:str):
     '''
     
@@ -414,13 +432,14 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     :param f1:
     :param f2:
     '''
-    stat_header='Mean'
+
+    stat_header='Median'
     df1, unused_headers1 = load_and_clean_dd_data(f1)
     df2, unused_headers2 = load_and_clean_dd_data(f2)
     f1_file_path = os.path.splitext(f1)[0]
     f2_base = os.path.basename(f2).split('.')[0]
-    csv_filename = f1_file_path + '_vs_ %s__stat_correlation_removeoutliers.csv' % (f2_base)
-    pdf_filename = f1_file_path + '_vs_ %s__plot_correlation_removeoutliers.pdf' % (f2_base)
+    csv_filename = f1_file_path + '_vs_ %s__stat_correlation_removeoutliers_median.csv' % (f2_base)
+    pdf_filename = f1_file_path + '_vs_ %s__plot_correlation_removeoutliers_median.pdf' % (f2_base)
 
     larger_df, smaller_df = (df1, df2) if df1.shape[0] > df2.shape[0] else (df2, df1)
     larger_df=replace_outliers_with_nan(larger_df)
@@ -439,8 +458,9 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
                             print("Processing depth %s" % d1.x_header.name)
                             # correlate
                             print("correlating %s and %s" % (d1.sample_header.name, sample_header.name))
-                            corr_stats.append(correlate_dd_samples(d1, smaller_df.loc[:, sample_header.name]))
+                            corr_stats.append(correlate_dd_samples(d1, smaller_df.loc[:, sample_header.name],stat_header))
                             plot_linregress_of_samples(d1,smaller_df.loc[:, sample_header.name],sample_header,stat_header,pdf)
+#                             plot_2_samples_by_depth(d1,smaller_df.loc[:, sample_header.name],sample_header,stat_header,pdf)
     df_corr_stats = DataFrame(corr_stats, columns=['depth', 'sample_1', 'sample_2', 'slope', 'intercept', 'r_value', 'p_value', 'std_err'])    
         
     write_resampled_data_to_csv_files(df_corr_stats, csv_filename)

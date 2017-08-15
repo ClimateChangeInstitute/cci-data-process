@@ -1,0 +1,4 @@
+name,type,class,unit,label
+Cl (ug/L),Sample,Cl,ug/L,Cl_(ug/L)
+NO3 (ug/L),Sample,NO3,ug/L,NO3_(ug/L)
+SO4 (ug/L),Sample,SO4,ug/L,SO4_(ug/L)
