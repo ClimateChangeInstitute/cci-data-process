@@ -3,11 +3,13 @@ Created on Aug 11, 2017
 
 @author: Heather
 '''
-from pandas.core.frame import DataFrame
+
 from pandas import Series
-from climatechange.headers import process_header_data, HeaderType
+from climatechange.headers import process_header_data, HeaderType, Header
 import numpy as np
 from scipy.interpolate import UnivariateSpline
+from scipy.signal import savgol_filter
+from pandas import DataFrame
 
 def replace(sample_series:Series, stds:int)->Series:
     sample_series[np.abs(sample_series - sample_series.mean()) > stds * sample_series.std()] = np.nan
@@ -20,5 +22,12 @@ def replace_outliers_with_nan(df:DataFrame)->DataFrame:
         df.loc[:,sample_header] = df.loc[:,sample_header].transform(lambda g: replace(g, 3))
     return df
 
+def savgol_smooth_filter(df_filter:DataFrame,sample_header:Header,x_header:Header):
 
+
+    window_length=df_filter.shape[0]
+
+    y_savgol = savgol_filter(df_filter.loc[:,sample_header.name], window_length, 3)
+
+    return y_savgol
 

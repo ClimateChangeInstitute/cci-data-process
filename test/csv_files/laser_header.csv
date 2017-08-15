@@ -1,0 +1,12 @@
+name,type,class,unit,label
+Al27,Sample,Al,cps,Al_(cps)
+Si28,Sample,Si,cps,Si_(cps)
+Ca44,Sample,Ca,cps,Ca_(cps)
+Fe56,Sample,Fe,cps,Fe_(cps)
+S32,Sample,S,cps,S_(cps)
+Na23,Sample,Na,cps,Na_(cps)
+Mg25,Sample,Mg,cps,Mg_(cps)
+Cu63,Sample,Cu,cps,Cu_(cps)
+Pb208,Sample,Pb,cps,Pb_(cps)
+Sn118,Sample,Sn,cps,Sn_(cps)
+year,Years,Year,CE,Year_CE

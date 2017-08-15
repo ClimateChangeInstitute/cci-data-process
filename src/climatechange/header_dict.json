@@ -142,7 +142,7 @@
 	{
 		"name": "U (pg/L)",
 		"type": "Sample",
-		"class": "U (pg/L)",
+		"class": "U",
 		"unit": "pg/L",
 		"label": "U_(pg/L)"
 	},
@@ -247,7 +247,7 @@
 	{
 		"name": "Si (u/g/L)",
 		"type": "Sample",
-		"class": "Si (u/g/L)",
+		"class": "Si",
 		"unit": "u/g/L",
 		"label": "Si_(u/g/L)"
 	},
@@ -257,5 +257,82 @@
 		"class": "K",
 		"unit": "ug/L",
 		"label": "K_(ug/L)"
+	},
+	{
+		"name": "Al27",
+		"type": "Sample",
+		"class": "Al",
+		"unit": "cps",
+		"label": "Al_(cps)"
+	},
+	{
+		"name": "Si28",
+		"type": "Sample",
+		"class": "Si",
+		"unit": "cps",
+		"label": "Si_(cps)"
+	},
+	{
+		"name": "Ca44",
+		"type": "Sample",
+		"class": "Ca",
+		"unit": "cps",
+		"label": "Ca_(cps)"
+	},
+	{
+		"name": "Fe56",
+		"type": "Sample",
+		"class": "Fe",
+		"unit": "cps",
+		"label": "Fe_(cps)"
+	},
+	{
+		"name": "S32",
+		"type": "Sample",
+		"class": "S",
+		"unit": "cps",
+		"label": "S_(cps)"
+	},
+	{
+		"name": "Na23",
+		"type": "Sample",
+		"class": "Na",
+		"unit": "cps",
+		"label": "Na_(cps)"
+	},
+	{
+		"name": "Mg25",
+		"type": "Sample",
+		"class": "Mg",
+		"unit": "cps",
+		"label": "Mg_(cps)"
+	},
+	{
+		"name": "Cu63",
+		"type": "Sample",
+		"class": "Cu",
+		"unit": "cps",
+		"label": "Cu_(cps)"
+	},
+	{
+		"name": "Pb208",
+		"type": "Sample",
+		"class": "Pb",
+		"unit": "cps",
+		"label": "Pb_(cps)"
+	},
+	{
+		"name": "Sn118",
+		"type": "Sample",
+		"class": "Sn",
+		"unit": "cps",
+		"label": "Sn_(cps)"
+	},
+	{
+		"name": "year",
+		"type": "Years",
+		"class": "Year",
+		"unit": "CE",
+		"label": "Year_CE"
 	}
 ]

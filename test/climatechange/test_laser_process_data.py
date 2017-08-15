@@ -62,8 +62,10 @@ class Test(unittest.TestCase):
         df=load_and_clean_LAICPMS_data(laser_file,depth_age_file,os.path.join('csv_files','ignore_files'))
         self.assertEqual(df.columns[0],'depth (m abs)')
         
-    def test_process_laser_data_by_run(self):
-        df_original,df_filter=process_laser_data_by_run(laser_file,depth_age_file,os.path.join('csv_files','ignore_files'))
+#     def test_process_laser_data_by_run(self):
+#         df_original,df_filter=process_laser_data_by_run(laser_file,depth_age_file,os.path.join('csv_files','ignore_files'))
+#         
+#         
         
     def test_add_year_column(self):
         df=load_and_clean_LAICPMS_data(laser_file,depth_age_file,os.path.join('csv_files','ignore_files'))

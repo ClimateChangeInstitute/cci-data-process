@@ -16,7 +16,8 @@ from pandas.core.series import Series
 from climatechange.resample_data_by_depths import create_top_bottom_depth_dataframe
 from climatechange.compiled_stat import CompiledStat
 from climatechange.resample_stats import compileStats
-from climatechange.data_filters import replace_outliers_with_nan
+from climatechange.data_filters import replace_outliers_with_nan,\
+    savgol_smooth_filter
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 from scipy import signal
@@ -40,7 +41,6 @@ class LaserFile:
         return self.__str__()
         
 
-        
 def readFile(file_name, laser_time, start_depth, end_depth, washin_time, washout_time)->LaserFile: #reads information from inputfile
                  
     return LaserFile(file_name, laser_time, start_depth, end_depth, washin_time, washout_time)
@@ -81,10 +81,10 @@ def process_laser_data_by_run(f:LaserFile,depth_age_file:str,path:str)->DataFram
     :return: csv:original data, csv:filtered data, pdf: og data vs. filtered by depth
         list of list of stats 
     '''
-    pdf_filename = os.path.join(path,os.path.splitext(f.file_name)[0]+'original_vs._filtered_laser_data.pdf')
+    pdf_filename = os.path.join(path,os.path.splitext(f.file_name)[0]+'_original_vs._filtered_laser_data.pdf')
 
     laser_run_df=load_and_clean_LAICPMS_data(f,depth_age_file,path)
-    df_filter=filter_LAICPMS_data(laser_run_df)
+#     df_filter=filter_LAICPMS_data(laser_run_df)
     headers=process_header_data(laser_run_df)
     sample_headers=[h for h in headers if h.htype == HeaderType.SAMPLE]
     depth_headers=[h for h in headers if h.htype == HeaderType.DEPTH]
@@ -92,9 +92,9 @@ def process_laser_data_by_run(f:LaserFile,depth_age_file:str,path:str)->DataFram
     with PdfPages(pdf_filename) as pdf:
         for depth_header in depth_headers:
             for sample_header in sample_headers:
-                plot_laser_filter_data(laser_run_df,df_filter,depth_header,sample_header,pdf)
+                filter_and_plot_laser_data_by_segment(laser_run_df,depth_header,sample_header,pdf)
             
-    return laser_run_df,df_filter
+    return laser_run_df
 # 
 
 # def combine_laser_data(directory:str):
@@ -110,18 +110,15 @@ def combine_laser_data_by_inputfile(input_file:str,depth_age_file:str)->DataFram
         df1,df2=process_laser_data_by_run(f,depth_age_file,os.path.dirname(input_file))
         df_original.append(df1)
         df_filter.append(df2)
-    return df_original,df_filter
+    return df_original
 
-def plot_laser_filter_data(df_original:DataFrame,
-                           df_filter:DataFrame,
+def filter_and_plot_laser_data_by_segment(df_original:DataFrame,
                            depth_header:Header,
                            sample_header:Header,
                            pdf):
-    
-
     fig=plt.figure(figsize=(11, 8.5))
     plt.plot(df_original.loc[:, depth_header.name],df_original.loc[:, sample_header.name],label='original data')
-    plt.plot(df_filter.loc[:, depth_header.name],df_filter.loc[:, sample_header.name],label='filtered data')
+#     plt.plot(df_filter.loc[:, depth_header.name],df_filter.loc[:, sample_header.name],label='filtered data')
     plt.xlabel(depth_header.label)
     plt.ylabel(sample_header.label)
     plt.title('Comparison of original and filtered data of %s'% (sample_header.hclass))
@@ -140,13 +137,12 @@ def load_and_clean_LAICPMS_data(f:LaserFile,depth_age_file:str,path:str)->DataFr
     df=df.drop('Time',1)
     return df
 
-def filter_LAICPMS_data(df:DataFrame)->DataFrame:
-    df_filter=df[:]
-    print(df_filter)
-    
-    df_filter=replace_outliers_with_nan(df_filter)
-    
-    return df_filter
+# def filter_LAICPMS_data(df:DataFrame)->DataFrame:
+#     df_filter=df[:]
+#     
+#     df_filter=replace_outliers_with_nan(df_filter)
+#     
+#     return df_filter
 
 def add_depth_column(df:DataFrame,start_depth:float,end_depth:float)->DataFrame:
     """
