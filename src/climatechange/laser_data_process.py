@@ -77,7 +77,9 @@ def load_laser_txt_file(file_path:str)->DataFrame:
                 rows.append(line.split())
     return DataFrame(rows,columns=header)
 
-def process_laser_data_by_run(f:LaserFile,depth_age_file:str,path:str)->DataFrame:
+
+
+def process_laser_data_by_run(f:LaserFile)->DataFrame:
     '''
     
     :param f:
@@ -87,35 +89,34 @@ def process_laser_data_by_run(f:LaserFile,depth_age_file:str,path:str)->DataFram
     :return: csv:original data, csv:filtered data, pdf: og data vs. filtered by depth
         list of list of stats 
     '''
-    pdf_filename = os.path.join(path,os.path.splitext(f.file_path)[0]+'_original_vs._filtered_laser_data.pdf')
+    pdf_filename ='_original_vs._filtered_laser_data.pdf'
 
-    laser_run_df=clean_LAICPMS_data(f,depth_age_file,path)
 #     df_filter=filter_LAICPMS_data(laser_run_df)
-    headers=process_header_data(laser_run_df)
+    headers=process_header_data(f.processed_data)
     sample_headers=[h for h in headers if h.htype == HeaderType.SAMPLE]
     depth_headers=[h for h in headers if h.htype == HeaderType.DEPTH]
     
     with PdfPages(pdf_filename) as pdf:
         for depth_header in depth_headers:
             for sample_header in sample_headers:
-                filter_and_plot_laser_data_by_segment(laser_run_df,depth_header,sample_header,pdf)
-            
-    return laser_run_df
+                filter_and_plot_laser_data_by_segment(f.processed_data,depth_header,sample_header,pdf)
 # 
 
 # def combine_laser_data(directory:str):
 #     
 #     df_original, df_filter=combine_laser_data_by_inputfile(input_file, depth_age_file)
 
-def combine_laser_data_by_inputfile(input_file:str,depth_age_file:str)->DataFrame:
+def combine_laser_data_by_input_file(input_file:str,depth_age_file:str)->DataFrame:
       
-    laser_files=load_input_file(input_file)
-    df_original=DataFrame()
-#     df_filter=DataFrame()
+    laser_files=load_input_file(input_file,depth_age_file)
+    df=DataFrame()
+    
     for f in laser_files:
-        df1=process_laser_data_by_run(f,depth_age_file,os.path.dirname(input_file))
-        df_original.append(df1)
-    return df_original
+        process_laser_data_by_run(f)
+        df=df.append(f.processed_data,ignore_index=True)
+    return df
+
+
 
 def filter_and_plot_laser_data_by_segment(df_original:DataFrame,
                            depth_header:Header,

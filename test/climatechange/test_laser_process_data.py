@@ -6,7 +6,7 @@ Created on Aug 11, 2017
 import unittest
 import os
 from climatechange.laser_data_process import load_input_file,\
-    load_laser_txt_file, readFile,process_laser_data_by_run, combine_laser_data_by_inputfile,\
+    load_laser_txt_file, readFile,process_laser_data_by_run, combine_laser_data_by_input_file,\
     clean_LAICPMS_data
 from pandas.util.testing import assert_frame_equal
 from pandas.core.frame import DataFrame
@@ -14,8 +14,8 @@ from climatechange.file import load_csv
 from climatechange.headers import Header, HeaderType
 from climatechange.compiled_stat import CompiledStat
 
-depth_age_file='depthAge7617.txt'
-laser_file=readFile(os.path.join('csv_files','1.TXT'), 955 , 6008.500 , 6012.500 , 12 , 23,os.path.join('csv_files',depth_age_file))
+depth_age_file=os.path.join('csv_files','depthAge7617.txt')
+laser_file=readFile(os.path.join('csv_files','1.TXT'), 955 , 6008.500 , 6012.500 , 12 , 23,os.path.join('csv_files','depthAge7617.txt'))
 test_sample_header=Header("Cond (+ALU-S/cm)", HeaderType.SAMPLE,"Conductivity","alu-s/cm","Cond_(+ALU-S/cm)")
 test_depth_we_header=Header("depth (m we)", HeaderType.DEPTH,"Depth","meters","depth_we_(m)")
 test_depth_abs_header=Header("depth (m abs) ", HeaderType.DEPTH,"Depth","meters","depth_abs_(m)")
@@ -44,8 +44,7 @@ class Test(unittest.TestCase):
 
     
     def test_load_input_file(self):
-        result= load_input_file(os.path.join('csv_files','InputFile_1.TXT'),
-                                os.path.join('csv_files',depth_age_file))
+        result= load_input_file(os.path.join('csv_files','InputFile_1.TXT'),depth_age_file)
         self.assertEqual(laser_file.file_path, result[0].file_path)
         self.assertEqual(laser_file.laser_time, result[0].laser_time)
         self.assertEqual(laser_file.start_depth, result[0].start_depth)
@@ -53,20 +52,14 @@ class Test(unittest.TestCase):
         self.assertEqual(laser_file.washin_time, result[0].washin_time)
         self.assertEqual(laser_file.washout_time, result[0].washout_time)
         
-#     def test_combine_laser_data_by_inputfile(self):
-#         input_file=os.path.join('csv_files\\ignore_files','InputFile_1.TXT')
-#         df_original,df_filter=combine_laser_data_by_inputfile(input_file,depth_age_file)
-#         print(df_original)
-#         print(df_filter)
+    def test_combine_laser_data_by_input_file(self):
+        input_file=os.path.join('csv_files','Input_File_test.TXT')
+        df=combine_laser_data_by_input_file(input_file,depth_age_file)
+        print(df)
         
     def test_load_and_clean_LAICPMS_data(self):
         df=clean_LAICPMS_data(laser_file)
-        self.assertEqual(df.columns[0],'depth (m abs)')
-        
-#     def test_process_laser_data_by_run(self):
-#         df_original,df_filter=process_laser_data_by_run(laser_file,depth_age_file,os.path.join('csv_files','ignore_files'))
-#         
-#         
+        self.assertEqual(df.columns[0],'depth (m abs)') 
         
     def test_add_year_column(self):
         df=clean_LAICPMS_data(laser_file)
