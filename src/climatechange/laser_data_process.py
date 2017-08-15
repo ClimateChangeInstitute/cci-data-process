@@ -13,54 +13,60 @@ import os
 from climatechange.process_data_functions import clean_data
 import numpy as np
 from pandas.core.series import Series
-from climatechange.resample_data_by_depths import create_top_bottom_depth_dataframe
-from climatechange.compiled_stat import CompiledStat
-from climatechange.resample_stats import compileStats
 from climatechange.data_filters import replace_outliers_with_nan,\
     savgol_smooth_filter
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
-from scipy import signal
-from scipy.signal import spline
 
 class LaserFile:
-    def __init__(self, file_name, laser_time, start_depth, end_depth, washin_time, washout_time):
-        self.file_name = file_name
+    def __init__(self, file_path, laser_time, start_depth, end_depth, washin_time, washout_time,depth_age_file):
+        self.file_path = file_path
         self.laser_time = laser_time
         self.start_depth = start_depth
         self.end_depth = end_depth
         self.washin_time = washin_time
         self.washout_time = washout_time
-#         self.header = header 
-#         self.rows = rows
+        self.depth_age_file=depth_age_file
+        self.raw_data=load_laser_txt_file(file_path)
+        self.processed_data=clean_LAICPMS_data(self)
+
 
     def __str__(self):
-        return self.file_name
+        return self.file_path
     
     def __repr__(self):
         return self.__str__()
-        
+    
 
-def readFile(file_name, laser_time, start_depth, end_depth, washin_time, washout_time)->LaserFile: #reads information from inputfile
+
+
+def readFile(file_path, laser_time, start_depth, end_depth, washin_time, washout_time,depth_age_file)->LaserFile: #reads information from inputfile
                  
-    return LaserFile(file_name, laser_time, start_depth, end_depth, washin_time, washout_time)
+    return LaserFile(file_path, laser_time, start_depth, end_depth, washin_time, washout_time,depth_age_file)
 
 
-def load_input_file(input_file:'str')->List[LaserFile]: #gets information from input file
+def load_input_file(input_file:str,depth_age_file:str)->List[LaserFile]: #gets information from input file
     """
     """
     result = []
+    input_folder=os.path.dirname(input_file)
     for line in open(input_file,'rU') :
         if not line.startswith(("#",'"')):
             columns = line.split()
-            result.append(readFile(columns[0], float(columns[1]), float(columns[2]), float(columns[3]), float(columns[4]), float(columns[5])))
+            result.append(readFile(os.path.join(input_folder,columns[0]),
+                                   float(columns[1]),
+                                   float(columns[2]),
+                                   float(columns[3]),
+                                   float(columns[4]),
+                                   float(columns[5]),
+                                   depth_age_file))
     return result
 
     
-def load_laser_txt_file(f:str)->DataFrame:
+def load_laser_txt_file(file_path:str)->DataFrame:
     
     rows=[]
-    with open(f) as f:
+    with open(file_path) as f:
         for i,line in enumerate(f):
             if i ==0:
                 header = line.split("\t")
@@ -81,9 +87,9 @@ def process_laser_data_by_run(f:LaserFile,depth_age_file:str,path:str)->DataFram
     :return: csv:original data, csv:filtered data, pdf: og data vs. filtered by depth
         list of list of stats 
     '''
-    pdf_filename = os.path.join(path,os.path.splitext(f.file_name)[0]+'_original_vs._filtered_laser_data.pdf')
+    pdf_filename = os.path.join(path,os.path.splitext(f.file_path)[0]+'_original_vs._filtered_laser_data.pdf')
 
-    laser_run_df=load_and_clean_LAICPMS_data(f,depth_age_file,path)
+    laser_run_df=clean_LAICPMS_data(f,depth_age_file,path)
 #     df_filter=filter_LAICPMS_data(laser_run_df)
     headers=process_header_data(laser_run_df)
     sample_headers=[h for h in headers if h.htype == HeaderType.SAMPLE]
@@ -105,11 +111,10 @@ def combine_laser_data_by_inputfile(input_file:str,depth_age_file:str)->DataFram
       
     laser_files=load_input_file(input_file)
     df_original=DataFrame()
-    df_filter=DataFrame()
+#     df_filter=DataFrame()
     for f in laser_files:
-        df1,df2=process_laser_data_by_run(f,depth_age_file,os.path.dirname(input_file))
+        df1=process_laser_data_by_run(f,depth_age_file,os.path.dirname(input_file))
         df_original.append(df1)
-        df_filter.append(df2)
     return df_original
 
 def filter_and_plot_laser_data_by_segment(df_original:DataFrame,
@@ -127,13 +132,14 @@ def filter_and_plot_laser_data_by_segment(df_original:DataFrame,
     plt.close()
     
     
-def load_and_clean_LAICPMS_data(f:LaserFile,depth_age_file:str,path:str)->DataFrame:
-    df=load_laser_txt_file(os.path.join(path,f.file_name))
-    df = clean_data(df)
+    
+
+def clean_LAICPMS_data(f:LaserFile)->DataFrame:  
+    df = clean_data(f.raw_data)
     df = df[(df['Time'] >f.washin_time) & (df['Time']< f.laser_time-f.washout_time)]
     df=df.reset_index(drop=True)
     df=add_depth_column(df,f.start_depth,f.end_depth)
-    df=add_year_column(df,(os.path.join(path,depth_age_file)))
+    df=add_year_column(df,f.depth_age_file)
     df=df.drop('Time',1)
     return df
 
