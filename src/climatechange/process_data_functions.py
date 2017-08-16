@@ -377,7 +377,7 @@ def plot_linregress_of_samples(d1:CompiledStat,
                                pdf):
     d1_stat = d1.df.loc[:, stat_header]
     d2=d2[:-1]
-    slope, intercept, r_value, p_value, std_err = linregress(remove_nan_from_datasets(d1_stat, d2))
+    slope, intercept, r_value, unused_p_value, unused_std_err = linregress(remove_nan_from_datasets(d1_stat, d2))
     plt.figure(figsize=(11, 8.5))
     fig,ax=plt.subplots()
     ax.scatter(d1_stat, d2,label='data')

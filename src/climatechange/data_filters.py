@@ -4,12 +4,13 @@ Created on Aug 11, 2017
 @author: Heather
 '''
 
+from pandas import DataFrame
 from pandas import Series
+from scipy.signal import savgol_filter
+
 from climatechange.headers import process_header_data, HeaderType, Header
 import numpy as np
-from scipy.interpolate import UnivariateSpline
-from scipy.signal import savgol_filter
-from pandas import DataFrame
+
 
 def replace(sample_series:Series, stds:int)->Series:
     sample_series[np.abs(sample_series - sample_series.mean()) > stds * sample_series.std()] = np.nan
