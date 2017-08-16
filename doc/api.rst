@@ -1,6 +1,22 @@
 climatechange package
 =====================
 
+climatechange\.compiled_stat module
+-----------------------------------
+
+.. automodule:: climatechange.compiled_stat
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+climatechange\.data_filters module
+-----------------------------------
+
+.. automodule:: climatechange.data_filters
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 climatechange\.file module
 --------------------------
 
@@ -17,6 +33,15 @@ climatechange\.headers module
     :undoc-members:
     :show-inheritance:
 
+climatechange\.laser_data_process module
+----------------------------------------
+
+.. automodule:: climatechange.laser_data_process
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 climatechange\.plot module
 --------------------------
 
@@ -25,6 +50,15 @@ climatechange\.plot module
     :undoc-members:
     :show-inheritance:
 
+climatechange\.process_data_functions module
+--------------------------------------------
+
+.. automodule:: climatechange.process_data_functions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 climatechange\.process_data module
 ----------------------------------
 
@@ -32,6 +66,24 @@ climatechange\.process_data module
     :members:
     :undoc-members:
     :show-inheritance:
+
+climatechange\.readme_output module
+-----------------------------------
+
+.. automodule:: climatechange.readme_output
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+climatechange\.resample_data_by_depths module
+---------------------------------------------
+
+.. automodule:: climatechange.resample_data_by_depths
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 
 climatechange\.resample\_stats module
 -------------------------------------
@@ -42,7 +94,7 @@ climatechange\.resample\_stats module
     :show-inheritance:
 
 climatechange\.server module
------------------------------------
+----------------------------
 
 .. automodule:: climatechange.server
     :members:

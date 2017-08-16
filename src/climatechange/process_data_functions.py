@@ -419,9 +419,9 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     
     c. correlates only the depth intervals that correspond with both datasets
     ex: correlation between CompiledStat.df['Mean']=[2.5 4.5 6.5 8.5 1] and
-        CompiledStat.df['top depth']=[1,2,3,4,5],CompiledStat.df['bottom depth']=[2,3,4,5,6] 
-        smaller_df[sample]=[1,2,3,4,5,6], smaller_df[depth]=[1,2,3,4,5,6] will only account 
-        for the depth of 1-5 and not 6.
+    CompiledStat.df['top depth']=[1,2,3,4,5],CompiledStat.df['bottom depth']=[2,3,4,5,6] 
+    smaller_df[sample]=[1,2,3,4,5,6], smaller_df[depth]=[1,2,3,4,5,6] will only account 
+    for the depth of 1-5 and not 6.
     
 
     i. Pdf of correlation between same samples

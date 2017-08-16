@@ -252,7 +252,7 @@ class HeaderDictionary(object):
         Unknown type.
         :param h: The new header to add
         :return: None or the previous value if a header with the same name 
-            already existed
+        already existed
         '''
         if h.htype is HeaderType.UNKNOWN:
             raise ValueError("Unwilling to add unknown header type")
