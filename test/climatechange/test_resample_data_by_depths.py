@@ -33,6 +33,7 @@ test_x_compiledstat=CompiledStat(DataFrame(x,columns=['Mean']),test_depth_we_hea
 test_y_compiledstat=CompiledStat(DataFrame(y,columns=['Mean']),test_depth_we_header,test_sample_header)
 test_output_dd=CompiledStat(expected_result,test_depth_we_header,test_sample_header)
 
+
 class Test(unittest.TestCase):
 
     def setUp(self):

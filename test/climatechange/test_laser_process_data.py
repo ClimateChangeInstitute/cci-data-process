@@ -7,7 +7,7 @@ import unittest
 import os
 from climatechange.laser_data_process import load_input_file,\
     load_laser_txt_file, readFile, combine_laser_data_by_input_file,\
-    clean_LAICPMS_data
+    clean_LAICPMS_data, combine_laser_data_by_directory
 from pandas.util.testing import assert_frame_equal
 from pandas.core.frame import DataFrame
 from climatechange.headers import Header, HeaderType
@@ -35,7 +35,9 @@ class Test(unittest.TestCase):
     
     def test_load_laser_txt_file(self):
         df=load_laser_txt_file(os.path.join('csv_files','1_test.TXT',))
-        rows=[['1.240000009536743', '2920.818115234375', '3386072.', '516.6666870117188', '1025.583374023438', '35386.66796875'], ['2.477999925613403', '2952.583251953125', '3232104.25', '491.75', '967.3333129882813', '43863.5'], ['3.717000007629395', '2986.', '3338235.75', '458.4166564941406', '842.0833129882813', '45258.16796875']]
+        rows=[['13.1', '2920.818115', '3386072', '516.666687', '1025.583374', '35386.66797'],
+              ['14.1', '2952.583252', '3232104.25', '491.75', '967.333313', '43863.5'],
+              ['15.1', '2986', '3338235.75', '458.4166565', '842.083313', '45258.16797']]
         headers=['Time', 'Al27', 'Si28', 'Ca44', 'Fe56', 'S32']
         df_output=DataFrame(rows,columns=headers)
         assert_frame_equal(df_output,df)
@@ -64,6 +66,14 @@ class Test(unittest.TestCase):
     def test_add_year_column(self):
         df=clean_LAICPMS_data(laser_file)
         self.assertEqual(df.columns[1],'year')
+        
+    def test_combine_laser_data_by_directory(self):
+        directory=os.path.join('csv_files','test_directory')
+        prefix='KCC'
+        df1,df2=combine_laser_data_by_directory(directory,prefix,depth_age_file)
+        self.assertEqual(2972, df1.shape[0])
+        self.assertEqual(7, df1.shape[1])
+        self.assertEqual(0, df2.shape[0])
 
         
 #     def test_store_background_information(self):

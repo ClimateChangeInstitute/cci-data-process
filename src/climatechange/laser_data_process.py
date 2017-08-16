@@ -17,6 +17,7 @@ from climatechange.headers import process_header_data, HeaderType, Header
 from climatechange.process_data_functions import clean_data
 import matplotlib.pyplot as plt
 import numpy as np
+from climatechange.resample_stats import compileStats
 
 
 class LaserFile:
@@ -31,6 +32,8 @@ class LaserFile:
         self.depth_age_file = depth_age_file
         self.raw_data = load_laser_txt_file(file_path)
         self.processed_data = clean_LAICPMS_data(self)
+        self.background_info=compileStats(self.raw_data.iloc[0:11,1:].transpose().values.tolist())
+        self.stats=compileStats(self.processed_data.iloc[:,2:].transpose().values.tolist())
 
     def __str__(self):
         return self.file_path
@@ -110,8 +113,41 @@ def combine_laser_data_by_input_file(input_file:str, depth_age_file:str) -> Data
     for f in laser_files:
         process_laser_data_by_run(f)
         df = df.append(f.processed_data, ignore_index=True)
+        
     return df
 
+def combine_laser_data_by_directory(directory:str,prefix:str,depth_age_file:str):
+    '''
+    
+    :param directory:
+    :param prefix:
+    :param depth_age_file:
+    
+    - folders in directory should be named accordingly 
+        that a dictionary sort will put them in correct order of appending
+    - will lexicographical sort folders in directory
+    '''
+    input_1='InputFile_1'
+    input_2='InputFile_2'
+    df1=DataFrame()
+    df2=DataFrame()
+    for folder in sorted(os.listdir(directory)):
+        if folder.startswith(prefix):
+            for file in sorted(os.listdir(os.path.join(directory,folder))):
+                if file.startswith(input_1):
+                    df1=df1.append(combine_laser_data_by_input_file(os.path.join(directory,folder,file),
+                                                                    depth_age_file), ignore_index=True)
+                elif file.startswith(input_2):
+                    df2=df2.append(combine_laser_data_by_input_file(os.path.join(directory,folder,file),
+                                                                    depth_age_file), ignore_index=True)
+                    
+    return df1,df2
+                    
+    #plot each sample by depth
+    #create csv file for each dataframe
+                    
+    
+    
 
 
 def filter_and_plot_laser_data_by_segment(df_original:DataFrame,
@@ -129,8 +165,6 @@ def filter_and_plot_laser_data_by_segment(df_original:DataFrame,
     plt.close()
     
     
-    
-
 def clean_LAICPMS_data(f:LaserFile) -> DataFrame:  
     df = clean_data(f.raw_data)
     df = df[(df['Time'] > f.washin_time) & (df['Time'] < f.laser_time - f.washout_time)]

@@ -22,6 +22,7 @@ from climatechange.resample_stats import compileStats, compile_stats_by_year, \
     findLen, create_depth_headers
 import numpy as np
 import pandas as pd
+from climatechange.laser_data_process import clean_LAICPMS_data, readFile
 
 
 # list of values by column, first index is column index, for each you get element of row 
@@ -52,6 +53,10 @@ depth_columns=DataFrame([input_test_zeros_and_numbers.loc[:,c].values.tolist() f
 input_test_zeros = load_csv(os.path.join('csv_files','input_test_zeros.csv'))
 input_test_zeros = clean_data(input_test_zeros)
 headers_zeros = process_header_data(input_test_zeros)
+
+laser_file=readFile(os.path.join('csv_files','1_test.TXT'), 955 , 6008.500 , 6012.500 , 12 , 23,os.path.join('csv_files','depthAge7617.txt'))
+laser_file_df=clean_LAICPMS_data(laser_file)
+
 
 class Test(unittest.TestCase):
 
@@ -207,6 +212,15 @@ class Test(unittest.TestCase):
         expected_result = load_csv(os.path.join('csv_files','output_test_zeros_and_numbers.csv'))   
         result = compile_stats_by_year(input_test_zeros_and_numbers, headers, test_year_header, test_sample_header)
         assert_frame_equal(expected_result.columns, result.columns) 
+    
+    def test_compiledStats_with_laser_file(self):
+        expected_mean=[2953.133789,3318804,488.9444478,945,41502.778646666673]
+        expected_count=3
+        result=compileStats(laser_file_df.iloc[:,2:].transpose().values.tolist())
+        self.assertAlmostEqual(expected_mean[0],result[0][0])
+        self.assertAlmostEqual(expected_count,result[0][5])
+        self.assertAlmostEqual(expected_mean[4],result[4][0])
+        
         
 #     def test_find_round_values(self):
 #         expected_result=    
