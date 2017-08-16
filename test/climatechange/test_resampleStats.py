@@ -54,7 +54,7 @@ input_test_zeros = load_csv(os.path.join('csv_files','input_test_zeros.csv'))
 input_test_zeros = clean_data(input_test_zeros)
 headers_zeros = process_header_data(input_test_zeros)
 
-laser_file=readFile(os.path.join('csv_files','1_test.TXT'), 955 , 6008.500 , 6012.500 , 12 , 23,os.path.join('csv_files','depthAge7617.txt'))
+laser_file=readFile(os.path.join('csv_files','1_test.txt'), 955 , 6008.500 , 6012.500 , 12 , 23,os.path.join('csv_files','depthAge7617.txt'))
 laser_file_df=clean_LAICPMS_data(laser_file)
 
 

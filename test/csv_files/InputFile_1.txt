@@ -4,4 +4,4 @@
 # Commented lines start with a # sign.					
 #					
 # FileName 	LaserTime	StartDepth	EndDepth	WashinTime	WashoutTime
-1.TXT	955	6008.500	6012.500	12	23
+1.txt	955	6008.500	6012.500	12	23
