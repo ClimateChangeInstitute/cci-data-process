@@ -25,7 +25,6 @@ def replace_outliers_with_nan(df:DataFrame)->DataFrame:
 
 def savgol_smooth_filter(df_filter:DataFrame,sample_header:Header,x_header:Header):
 
-
     window_length=df_filter.shape[0]
 
     y_savgol = savgol_filter(df_filter.loc[:,sample_header.name], window_length, 3)

@@ -97,18 +97,6 @@ def compile_stats_by_depth(df:DataFrame, depth_header:Header, sample_header:Head
     
     return CompiledStat(resampled_data, depth_header, sample_header)
 
-
-#for resample by depth intervals
-#
-
-
-
-
-
-
-
-
-
          
 def find_index_of_depth_intervals(depth_large:Series,depth_small:Series)->List[List[int]]:    
     '''

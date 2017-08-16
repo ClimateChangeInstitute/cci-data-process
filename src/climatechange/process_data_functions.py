@@ -124,7 +124,6 @@ def load_and_clean_year_data(f:str, inc_amt:int) -> Tuple[DataFrame, List[List[C
     df = load_csv(f)
     headers = process_header_data(df)
     df = clean_data(df)
-    # round_values=find_round_values(df)
     return df, get_compiled_stats_by_year(inc_amt, df, headers), headers
 
 
@@ -257,8 +256,6 @@ def resample_by_depths(f:str, inc_amt:float):
     file_headers = compiled_stats[0][0].df.columns.values.tolist()
     f_base = os.path.splitext(f)[0]
     
-    
-
     for cur_depth in compiled_stats:
         for c in cur_depth:
             csv_filename = f_base + '_stats_Resampled %s_inc_%s_Resolution_for_%s.csv' % (inc_amt,

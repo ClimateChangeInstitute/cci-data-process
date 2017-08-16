@@ -32,7 +32,6 @@ class LaserFile:
         self.raw_data = load_laser_txt_file(file_path)
         self.processed_data = clean_LAICPMS_data(self)
 
-
     def __str__(self):
         return self.file_path
     
@@ -40,10 +39,8 @@ class LaserFile:
         return self.__str__()
     
 
-
-
 def readFile(file_path, laser_time, start_depth, end_depth, washin_time, 
-             washout_time, depth_age_file) -> LaserFile:  # reads information from inputfile
+             washout_time, depth_age_file) -> LaserFile:
                  
     return LaserFile(file_path, laser_time, start_depth, end_depth, washin_time, washout_time, depth_age_file)
 
@@ -103,11 +100,7 @@ def process_laser_data_by_run(f:LaserFile) -> DataFrame:
         for depth_header in depth_headers:
             for sample_header in sample_headers:
                 filter_and_plot_laser_data_by_segment(f.processed_data, depth_header, sample_header, pdf)
-# 
-    
-# def combine_laser_data(directory:str):
-#     
-#     df_original, df_filter=combine_laser_data_by_inputfile(input_file, depth_age_file)
+
 
 def combine_laser_data_by_input_file(input_file:str, depth_age_file:str) -> DataFrame:
       
