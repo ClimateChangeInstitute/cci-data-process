@@ -18,11 +18,11 @@ def replace(sample_series:Series, stds:int)->Series:
     sample_series[np.abs(sample_series - sample_series.mean()) > stds * sample_series.std()] = np.nan
     return sample_series
 
-def replace_outliers_with_nan(df:DataFrame)->DataFrame:
+def replace_outliers_with_nan(df:DataFrame,num_std:int)->DataFrame:
     headers=process_header_data(df)
     sample_headers=[h.name for h in headers if h.htype == HeaderType.SAMPLE]
     for sample_header in sample_headers:
-        df.loc[:,sample_header] = df.loc[:,sample_header].transform(lambda g: replace(g, 2))
+        df.loc[:,sample_header] = df.loc[:,sample_header].transform(lambda g: replace(g, num_std))
     return df
 
 def savgol_smooth_filter(df_filter:DataFrame,sample_header:Header,x_header:Header):

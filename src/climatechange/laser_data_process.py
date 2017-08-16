@@ -82,7 +82,7 @@ def load_laser_txt_file(file_path:str) -> DataFrame:
 
 
 
-def process_laser_data_by_run(f:LaserFile) -> DataFrame:
+def process_laser_data_by_run(f:LaserFile,create_PDF=False) -> DataFrame:
     '''
     
     :param f:
@@ -92,31 +92,40 @@ def process_laser_data_by_run(f:LaserFile) -> DataFrame:
     :return: csv:original data, csv:filtered data, pdf: og data vs. filtered by depth
         list of list of stats 
     '''
-    pdf_filename = '_original_vs._filtered_laser_data.pdf'
+#     pdf_folder=''
+#     if not os.path.exists(directory):
+#         os.makedirs(directory)
+        
+    dir_name=os.path.dirname(f.file_path)
+    pdf_filename = dir_name+'_original_vs._filtered_laser_data.pdf'
 
 #     df_filter=filter_LAICPMS_data(laser_run_df)
     headers = process_header_data(f.processed_data)
     sample_headers = [h for h in headers if h.htype == HeaderType.SAMPLE]
     depth_headers = [h for h in headers if h.htype == HeaderType.DEPTH]
     
-    with PdfPages(pdf_filename) as pdf:
-        for depth_header in depth_headers:
-            for sample_header in sample_headers:
-                filter_and_plot_laser_data_by_segment(f.processed_data, depth_header, sample_header, pdf)
+    if create_PDF:
+        with PdfPages(pdf_filename) as pdf:
+            for depth_header in depth_headers:
+                for sample_header in sample_headers:
+                    filter_and_plot_laser_data_by_segment(f.processed_data, depth_header, sample_header, pdf)
 
 
-def combine_laser_data_by_input_file(input_file:str, depth_age_file:str) -> DataFrame:
+def combine_laser_data_by_input_file(input_file:str, depth_age_file:str,create_PDF=False) -> DataFrame:
       
     laser_files = load_input_file(input_file, depth_age_file)
     df = DataFrame()
     
     for f in laser_files:
-        process_laser_data_by_run(f)
         df = df.append(f.processed_data, ignore_index=True)
+        process_laser_data_by_run(f,create_PDF)
+        
         
     return df
 
-def combine_laser_data_by_directory(directory:str,prefix:str,depth_age_file:str):
+
+
+def combine_laser_data_by_directory(directory:str,prefix:str,depth_age_file:str,create_PDF=False):
     '''
     
     :param directory:
@@ -131,15 +140,16 @@ def combine_laser_data_by_directory(directory:str,prefix:str,depth_age_file:str)
     input_2='InputFile_2'
     df1=DataFrame()
     df2=DataFrame()
+
     for folder in sorted(os.listdir(directory)):
         if folder.startswith(prefix):
             for file in sorted(os.listdir(os.path.join(directory,folder))):
                 if file.startswith(input_1):
                     df1=df1.append(combine_laser_data_by_input_file(os.path.join(directory,folder,file),
-                                                                    depth_age_file), ignore_index=True)
+                                                                    depth_age_file,create_PDF), ignore_index=True)
                 elif file.startswith(input_2):
                     df2=df2.append(combine_laser_data_by_input_file(os.path.join(directory,folder,file),
-                                                                    depth_age_file), ignore_index=True)
+                                                                    depth_age_file,create_PDF), ignore_index=True)
                     
     return df1,df2
                     
