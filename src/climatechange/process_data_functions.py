@@ -13,7 +13,7 @@ from matplotlib import pyplot
 import os
 import time
 from typing import List, Tuple
-import matplotlib.pyplot as plt
+
 from matplotlib.backends.backend_pdf import PdfPages
 from numpy import float64
 from pandas import DataFrame
@@ -21,19 +21,19 @@ from pandas import Series
 from scipy.stats._stats_mstats_common import linregress
 
 from climatechange.compiled_stat import CompiledStat
+from climatechange.data_filters import replace_outliers_with_nan
 from climatechange.file import load_csv
 from climatechange.headers import HeaderDictionary, HeaderType, Header, \
     load_headers, process_header_data
 from climatechange.plot import write_resampled_data_to_csv_files, \
     add_compile_stats_to_pdf
-from climatechange.read_me_output import create_readme_output_file, \
-    write_readmefile_to_txtfile
-from climatechange.read_me_output import template
+from climatechange.readme_output import create_readme_output_file, \
+    write_readmefile_to_txtfile, template
 from climatechange.resample_data_by_depths import compile_stats_by_depth, \
     compiled_stats_by_dd_intervals
 from climatechange.resample_stats import compile_stats_by_year
+import matplotlib.pyplot as plt
 import numpy as np
-from climatechange.data_filters import replace_outliers_with_nan
 
 
 def is_number(s):
