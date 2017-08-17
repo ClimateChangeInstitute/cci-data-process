@@ -87,48 +87,6 @@ class Test(unittest.TestCase):
         self.assertEqual('depth (m abs)',df.iloc[:,:2].columns[0])
         self.assertEqual('year',df.iloc[:,:2].columns[1])
         
-
-        
-#     def test_store_background_information(self):
-#         input_df=DataFrame([[1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3]],columns=['one','two','three'])
-#         expected_result=DataFrame([[1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3],
-#                       [1,2,3]],columns=['one','two','three'])
-#         result=store_background_information(input_df)
-#         assert_frame_equal(expected_result,result)
-        
-#     def test_compile_statistics_for_LAICPMS_data(self):
-#         input_df = load_csv(os.path.join('csv_files','test_input_laser_stats.csv'))
-#         output_df=DataFrame([[1,6,3.5,1.707825,3.5,6,1,6]], columns=['top_depth_we_(m)','bottom_depth_we_(m)','Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
-#         expected_result=[CompiledStat(output_df,test_depth_we_header,test_sample_header)]
-#         result=compile_statistics_for_LAICPMS_data(input_df)
-#         assert_frame_equal(expected_result[0].df,result[0].df)
-#         self.assertAlmostEqual(expected_result.sample_header.name,result.sample_header.name)
-#         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

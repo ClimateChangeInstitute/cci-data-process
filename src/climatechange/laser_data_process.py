@@ -18,6 +18,8 @@ from climatechange.process_data_functions import clean_data
 import matplotlib.pyplot as plt
 import numpy as np
 from climatechange.resample_stats import compileStats
+from climatechange.data_filters import replace_outliers_with_nan,\
+    normalize_min_max_scaler
 
 
 class LaserFile:
@@ -34,6 +36,8 @@ class LaserFile:
         self.processed_data = clean_LAICPMS_data(self)
         self.background_info=compileStats(self.raw_data.iloc[0:11,1:].transpose().values.tolist())
         self.stats=compileStats(self.processed_data.iloc[:,2:].transpose().values.tolist())
+        self.filtered_data=filtered_laser_data(self.processed_data)
+        self.normalized_data=normalize_min_max_scaler(self.processed_data)
 
     def __str__(self):
         return self.file_path
@@ -53,7 +57,7 @@ def load_input_file(input_file:str, depth_age_file:str) -> List[LaserFile]:  # g
     """
     result = []
     input_folder = os.path.dirname(input_file)
-    for line in open(input_file, 'rU') :
+    for line in open(input_file, 'r') :
         if not line.startswith(("#", '"')):
             columns = line.split()
             result.append(readFile(os.path.join(input_folder, columns[0]),
@@ -82,7 +86,7 @@ def load_laser_txt_file(file_path:str) -> DataFrame:
 
 
 
-def process_laser_data_by_run(f:LaserFile,create_PDF=False) -> DataFrame:
+def process_laser_data_by_run(f:LaserFile,pdf_folder:str) -> DataFrame:
     '''
     
     :param f:
@@ -92,23 +96,19 @@ def process_laser_data_by_run(f:LaserFile,create_PDF=False) -> DataFrame:
     :return: csv:original data, csv:filtered data, pdf: og data vs. filtered by depth
         list of list of stats 
     '''
-#     pdf_folder=''
-#     if not os.path.exists(directory):
-#         os.makedirs(directory)
-        
-    dir_name=os.path.dirname(f.file_path)
-    pdf_filename = dir_name+'_original_vs._filtered_laser_data.pdf'
+
+    dir_name=os.path.basename(f.file_path)
+    pdf_filename = pdf_folder+dir_name+'_original_vs._filtered_laser_data.pdf'
 
 #     df_filter=filter_LAICPMS_data(laser_run_df)
     headers = process_header_data(f.processed_data)
     sample_headers = [h for h in headers if h.htype == HeaderType.SAMPLE]
     depth_headers = [h for h in headers if h.htype == HeaderType.DEPTH]
     
-    if create_PDF:
-        with PdfPages(pdf_filename) as pdf:
-            for depth_header in depth_headers:
-                for sample_header in sample_headers:
-                    filter_and_plot_laser_data_by_segment(f.processed_data, depth_header, sample_header, pdf)
+    with PdfPages(pdf_filename) as pdf:
+        for depth_header in depth_headers:
+            for sample_header in sample_headers:
+                filter_and_plot_laser_data(f.processed_data, depth_header, sample_header, pdf)
 
 
 def combine_laser_data_by_input_file(input_file:str, depth_age_file:str,create_PDF=False) -> DataFrame:
@@ -116,9 +116,16 @@ def combine_laser_data_by_input_file(input_file:str, depth_age_file:str,create_P
     laser_files = load_input_file(input_file, depth_age_file)
     df = DataFrame()
     
+    if create_PDF:
+        pdf_folder=os.path.dirname(input_file)+'PDF_plots'
+        if not os.path.exists(pdf_folder):
+            os.makedirs(pdf_folder)
+        
+    
     for f in laser_files:
         df = df.append(f.processed_data, ignore_index=True)
-        process_laser_data_by_run(f,create_PDF)
+        if create_PDF:
+            process_laser_data_by_run(f,pdf_folder)
         
         
     return df
@@ -140,6 +147,12 @@ def combine_laser_data_by_directory(directory:str,prefix:str,depth_age_file:str,
     input_2='InputFile_2'
     df1=DataFrame()
     df2=DataFrame()
+    
+    if create_PDF:
+        pdf_folder=os.path.join(directory,'PDF_plots')
+        
+    if not os.path.exists(pdf_folder):
+        os.makedirs(pdf_folder)
 
     for folder in sorted(os.listdir(directory)):
         if folder.startswith(prefix):
@@ -154,18 +167,33 @@ def combine_laser_data_by_directory(directory:str,prefix:str,depth_age_file:str,
     return df1,df2
                     
     #plot each sample by depth
-    #create csv file for each dataframe
                     
     
+def process_laser_data_by_directory(df:DataFrame,pdf_folder,create_PDF=False):
+
+
+    pdf_filename = os.path.join(pdf_folder,'all_original_vs._filtered_laser_data.pdf')
+    if os.path.exists(pdf_filename):
+        pdf_filename = os.path.join(pdf_folder,'all_original_vs._filtered_laser_data_2.pdf')
+        
+#     df_filter=filter_LAICPMS_data(laser_run_df)
+    headers = process_header_data(df)
+    sample_headers = [h for h in headers if h.htype == HeaderType.SAMPLE]
+    depth_headers = [h for h in headers if h.htype == HeaderType.DEPTH]
     
+    with PdfPages(pdf_filename) as pdf:
+        for depth_header in depth_headers:
+            for sample_header in sample_headers:
+                filter_and_plot_laser_data(df, depth_header, sample_header, pdf)
 
 
-def filter_and_plot_laser_data_by_segment(df_original:DataFrame,
+
+def filter_and_plot_laser_data(df:DataFrame,
                            depth_header:Header,
                            sample_header:Header,
                            pdf):
     fig = plt.figure(figsize=(11, 8.5))
-    plt.plot(df_original.loc[:, depth_header.name], df_original.loc[:, sample_header.name], label='original data')
+    plt.plot(df.loc[:, depth_header.name], df.loc[:, sample_header.name], label='original data')
 #     plt.plot(df_filter.loc[:, depth_header.name],df_filter.loc[:, sample_header.name],label='filtered data')
     plt.xlabel(depth_header.label)
     plt.ylabel(sample_header.label)
@@ -184,12 +212,12 @@ def clean_LAICPMS_data(f:LaserFile) -> DataFrame:
     df = df.drop('Time', 1)
     return df
 
-# def filter_LAICPMS_data(df:DataFrame)->DataFrame:
-#     df_filter=df[:]
-#     
-#     df_filter=replace_outliers_with_nan(df_filter)
-#     
-#     return df_filter
+def filtered_laser_data(df:DataFrame)->DataFrame:
+    df_filter=df[:]
+     
+    df_filter=replace_outliers_with_nan(df_filter)
+     
+    return df_filter
 
 def add_depth_column(df:DataFrame, start_depth:float, end_depth:float) -> DataFrame:
     """
@@ -207,35 +235,7 @@ def add_year_column(df:DataFrame, depth_age_file:str) -> DataFrame:
     df.insert(1, 'year', year_series)
     return df
 
-# def store_background_information(f:LaserFile,df:DataFrame)->DataFrame:
-#     background_df=df.copy()
-#     background_df=background_df.loc[0:11,:]
-#     #somehow label the background df with f
-#     return background_df
-# 
-# def statistics_of_background_information(bg_info:DataFrame):
-#     pass
 
-# def compile_statistics_for_LAICPMS_data(df:DataFrame)->List[CompiledStat]:
-#     '''
-#     From the given data frame compile statistics (mean, median, min, max, etc) 
-#     based on the parameters.
-# 
-#     '''
-#     headers=process_header_data(df)
-#     depth_headers=[h for h in headers if h.htype == HeaderType.DEPTH]
-#     sample_headers=[h for h in headers if h.htype == HeaderType.SAMPLE]
-#      
-#     result_list = []
-#     for depth_header in depth_headers:    
-#         depth_df=DataFrame([[np.min(df.loc[:,depth_header.name]),np.max(df.loc[:,depth_header.name])]])
-#         for sample_header in sample_headers:
-#             current_stats = []
-#             current_stats.extend(compileStats([df.loc[:,sample_header.name].tolist()]))
-#             current_df = DataFrame(current_stats, columns=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
-#             comp_stat=CompiledStat(pandas.concat((depth_df,current_df),axis=1),depth_header,sample_header)
-#         result_list.append(comp_stat)
-#     return result_list
 
 #     
 
