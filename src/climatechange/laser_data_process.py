@@ -21,6 +21,7 @@ from climatechange.resample_stats import compileStats
 from climatechange.data_filters import replace_outliers_with_nan,\
     normalize_min_max_scaler
 import time
+from climatechange.plot import write_data_to_csv_files
 
 
 class LaserFile:
@@ -114,7 +115,7 @@ def plot_laser_data_by_run(f:LaserFile,pdf_folder:str) -> DataFrame:
                 plot_laser_data(f.processed_data, depth_header, sample_header, pdf)
 
 
-def combine_laser_data_by_input_file(input_file:str, depth_age_file:str,filtered_data=False,create_PDF=False) -> DataFrame:
+def combine_laser_data_by_input_file(input_file:str, depth_age_file:str,create_PDF=False,filtered_data=False) -> DataFrame:
       
     laser_files = load_input_file(input_file, depth_age_file)
     df = DataFrame()
@@ -134,32 +135,13 @@ def combine_laser_data_by_input_file(input_file:str, depth_age_file:str,filtered
         
     return df
 
-def combine_normalized_laser_data_by_input_file(input_file:str, depth_age_file:str,create_PDF=False) -> DataFrame:
-      
-    laser_files = load_input_file(input_file, depth_age_file)
-    df = DataFrame()
-
-    for f in laser_files:
-        df = df.append(f.normalized_data, ignore_index=True)
-
-    return df
-
-def combine_filtered_laser_data_by_input_file(input_file:str, depth_age_file:str,create_PDF=False) -> DataFrame:
-      
-    laser_files = load_input_file(input_file, depth_age_file)
-    df = DataFrame()
-
-    for f in laser_files:
-        df = df.append(f.filtered_data, ignore_index=True)
-
-    return df
-
 
 
 def combine_laser_data_by_directory(directory:str,
                                     depth_age_file:str,
                                     create_PDF=False,
                                     filtered_data=False,
+                                    create_CSV=False,
                                     prefix:str='KCC'):
     '''
     
@@ -176,39 +158,62 @@ def combine_laser_data_by_directory(directory:str,
     df1=DataFrame()
     df2=DataFrame()
 
-    if create_PDF:
-        pdf_folder=os.path.join(directory,'PDF_plots')
-        if not os.path.exists(pdf_folder):
-            os.makedirs(pdf_folder)
+
+
 
     for folder in sorted(os.listdir(directory)):
         if folder.startswith(prefix):
             for file in sorted(os.listdir(os.path.join(directory,folder))):
                 if file.startswith(input_1):
                     df1=df1.append(combine_laser_data_by_input_file(os.path.join(directory,folder,file),
-                                                                    depth_age_file,filtered_data,create_PDF), ignore_index=True)
+                                                                    depth_age_file,create_PDF,filtered_data,), ignore_index=True)
                 elif file.startswith(input_2):
                     df2=df2.append(combine_laser_data_by_input_file(os.path.join(directory,folder,file),
-                                                                    depth_age_file,filtered_data,create_PDF), ignore_index=True)
+                                                                    depth_age_file,create_PDF,filtered_data), ignore_index=True)
     
     if create_PDF:
-        plot_laser_data_by_directory(df1,pdf_folder,filtered_data)
-        plot_laser_data_by_directory(df2,pdf_folder,filtered_data)           
+        pdf_folder=os.path.join(directory,'PDF_plots')
+        if not os.path.exists(pdf_folder):
+            os.makedirs(pdf_folder)
+        if filtered_data:    
+            plot_filtered_laser_data_by_directory(df1,pdf_folder)
+            plot_filtered_laser_data_by_directory(df2,pdf_folder)
+        else:
+            plot_laser_data_by_directory(df1, pdf_folder)
+            plot_laser_data_by_directory(df2, pdf_folder)
+    
+    if create_CSV:
+        csv_folder=os.path.join(directory,'CSV_files')
+        if not os.path.exists(csv_folder):
+            os.makedirs(csv_folder)
+        write_data_to_csv_files(df1,os.path.join(csv_folder,'filename'))
+        write_data_to_csv_files(df2, os.path.join(csv_folder,'filename2'))           
 
     return df1,df2
     #plot each sample by depth
                     
     
-def plot_laser_data_by_directory(df:DataFrame,pdf_folder,filtered_data=False):
-    if filtered_data:
-        pdf_filename = os.path.join(pdf_folder,'all_filtered_data.pdf')
-        if os.path.exists(pdf_filename):
-            pdf_filename = os.path.join(pdf_folder,'all_filtered_data_2.pdf')
-    else:
-        pdf_filename = os.path.join(pdf_folder,'all_data.pdf')
-        if os.path.exists(pdf_filename):
-            pdf_filename = os.path.join(pdf_folder,'all_original_data_2.pdf')
+def plot_laser_data_by_directory(df:DataFrame,pdf_folder):
+
+    pdf_filename = os.path.join(pdf_folder,'all_original_data_1.pdf')
+    if os.path.exists(pdf_filename):
+        pdf_filename = os.path.join(pdf_folder,'all_original_data_2.pdf')
         
+    headers = process_header_data(df)
+    sample_headers = [h for h in headers if h.htype == HeaderType.SAMPLE]
+    depth_headers = [h for h in headers if h.htype == HeaderType.DEPTH]
+    
+    with PdfPages(pdf_filename) as pdf:
+        for depth_header in depth_headers:
+            for sample_header in sample_headers:
+                plot_laser_data(df, depth_header, sample_header, pdf)
+                
+def plot_filtered_laser_data_by_directory(df:DataFrame,pdf_folder):
+
+    pdf_filename = os.path.join(pdf_folder,'all_filtered_data_1.pdf')
+    if os.path.exists(pdf_filename):
+        pdf_filename = os.path.join(pdf_folder,'all_filtered_data_2.pdf')
+            
     headers = process_header_data(df)
     sample_headers = [h for h in headers if h.htype == HeaderType.SAMPLE]
     depth_headers = [h for h in headers if h.htype == HeaderType.DEPTH]
@@ -243,11 +248,11 @@ def clean_LAICPMS_data(f:LaserFile) -> DataFrame:
     return df
 
 def filtered_laser_data(df:DataFrame)->DataFrame:
-    df_filter=df[:]
+
      
-    df_filter=replace_outliers_with_nan(df_filter)
+    df=replace_outliers_with_nan(df)
      
-    return df_filter
+    return df
 
 def add_depth_column(df:DataFrame, start_depth:float, end_depth:float) -> DataFrame:
     """

@@ -80,6 +80,7 @@ USAGE
                             nargs=4,
                             metavar=('directory', 'folder_prefix', 'depth_age_file', 'create_pdf'),
                             help="process and combine laser files: %(metavar)s")
+        
         parser.add_argument("-cl",
                             "--combine-laserdata",
                             dest="laser_directory",
@@ -187,7 +188,7 @@ USAGE
                 
             create_PDF=True
             combine_laser_data_by_directory(args.laser_directory[0],
-                                            args.laser_directory[1],filtered_data,create_PDF)
+                                            args.laser_directory[1],create_PDF,filtered_data)
 
         
         if args.headers_file:

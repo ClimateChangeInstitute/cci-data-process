@@ -23,7 +23,7 @@ import pandas
 
 def replace(s:Series):
     mean, std = s.mean(), s.std()
-    outliers = (s - mean).abs() > 3*std
+    outliers = (s - mean).abs() > 2*std
     s[outliers] = np.nan
     return s
 

@@ -158,7 +158,7 @@ def examplePDFPlot(file_name:str):
 #     d['ModDate'] = datetime.datetime.utcnow()
 
 
-def write_resampled_data_to_csv_files(df:DataFrame, file_path:str):
+def write_data_to_csv_files(df:DataFrame, file_path:str):
     df.to_csv(file_path,index=False)
 
 

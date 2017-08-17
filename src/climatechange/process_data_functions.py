@@ -25,7 +25,7 @@ from climatechange.data_filters import replace_outliers_with_nan
 from climatechange.file import load_csv
 from climatechange.headers import HeaderDictionary, HeaderType, Header, \
     load_headers, process_header_data
-from climatechange.plot import write_resampled_data_to_csv_files, \
+from climatechange.plot import write_data_to_csv_files, \
     add_compile_stats_to_pdf
 from climatechange.readme_output import create_readme_output_file, \
     write_readmefile_to_txtfile, template
@@ -160,7 +160,7 @@ def resample_by_years(f:str, inc_amt:int=1):
                                                                          c.sample_header.hclass.replace("/", ""))
             to_csv_df = round_values_to_sigfig(c.df[:])
             to_csv_df = add_units_to_stats(to_csv_df, c.sample_header)
-            write_resampled_data_to_csv_files(to_csv_df,
+            write_data_to_csv_files(to_csv_df,
                                               csv_filename)
 
     year_headers = [h.label for h in headers if h.htype == HeaderType.YEARS]
@@ -263,7 +263,7 @@ def resample_by_depths(f:str, inc_amt:float):
                                                                         c.sample_header.label.replace("/", ""))
             to_csv_df = round_depth_values_to_sigfig(c.df[:])
             to_csv_df = add_units_to_stats(to_csv_df, c.sample_header)
-            write_resampled_data_to_csv_files(to_csv_df,
+            write_data_to_csv_files(to_csv_df,
                                               csv_filename)      
 
     depth_headers = [h.name for h in headers if h.htype == HeaderType.DEPTH] 
@@ -345,7 +345,7 @@ def double_resample_by_depths(f1:str, f2:str, inc_amt:float):
                         corr_stats.append(correlate_samples(d1, d2))
     df_corr_stats = DataFrame(corr_stats, columns=['depth', 'sample_1', 'sample_2', 'slope', 'intercept', 'r_value', 'p_value', 'std_err'])    
     
-    write_resampled_data_to_csv_files(df_corr_stats, csv_filename)  
+    write_data_to_csv_files(df_corr_stats, csv_filename)  
 
 
 def load_and_clean_dd_data(f:str) -> Tuple[DataFrame, List[Header]]:
@@ -460,7 +460,7 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
 #                             plot_2_samples_by_depth(d1,smaller_df.loc[:, sample_header.name],sample_header,stat_header,pdf)
     df_corr_stats = DataFrame(corr_stats, columns=['depth', 'sample_1', 'sample_2', 'slope', 'intercept', 'r_value', 'p_value', 'std_err'])    
         
-    write_resampled_data_to_csv_files(df_corr_stats, csv_filename)
+    write_data_to_csv_files(df_corr_stats, csv_filename)
     
 def load_and_store_header_file(path:str):
     print("Adding headers from %s to header dictionary." % path) 
