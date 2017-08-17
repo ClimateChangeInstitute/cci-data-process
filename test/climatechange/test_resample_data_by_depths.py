@@ -32,6 +32,14 @@ expected_result = load_csv(os.path.join('csv_files','test_output_dd.csv'))
 test_x_compiledstat=CompiledStat(DataFrame(x,columns=['Mean']),test_depth_we_header,test_sample_header)
 test_y_compiledstat=CompiledStat(DataFrame(y,columns=['Mean']),test_depth_we_header,test_sample_header)
 test_output_dd=CompiledStat(expected_result,test_depth_we_header,test_sample_header)
+column_names=['depth (m we)','Ca (ppb)']
+input_df=DataFrame([[800000.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.],
+                       [800000.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.]]).transpose()
+output_result=DataFrame([[800000.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.],
+                            [np.nan,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.]]).transpose()
+input_df.columns=column_names
+output_result.columns=column_names
+        
 
 
 class Test(unittest.TestCase):
@@ -201,11 +209,9 @@ class Test(unittest.TestCase):
         self.assertEqual(test_output_dd.x_header, compiled_stat_of_larger_df[0][0].x_header)
         
     def test_replace_outliers_with_nans(self):
-        input_df=DataFrame([800000.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.],columns=['Ca (ppb)'])
-        output_result=DataFrame([np.nan,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.],columns=['Ca (ppb)'])
-        result=replace_outliers_with_nan(input_df,2)
+        result=replace_outliers_with_nan(input_df)
         assert_frame_equal(output_result,result)
-        
+         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

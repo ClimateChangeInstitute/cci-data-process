@@ -14,26 +14,32 @@ import numpy as np
 import pandas
 
 
-def replace(sample_series:Series, stds:int)->Series:
-    sample_series[np.abs(sample_series - sample_series.mean()) > stds * sample_series.std()] = np.nan
-    return sample_series
+# def replace(s:Series, stds:int)->Series:
+#     s[np.abs(s - np.nanmean(s)) > stds * np.nanstd(s)] = np.nan
+#     print(s[np.abs(s - np.nanmean(s)) > stds * np.nanstd(s)])
+#     return s
 
-def replace_outliers_with_nan(df:DataFrame,num_std:int)->DataFrame:
+
+
+def replace(s:Series):
+    mean, std = s.mean(), s.std()
+    outliers = (s - mean).abs() > 3*std
+    s[outliers] = np.nan
+    return s
+
+def replace_outliers_with_nan(df:DataFrame)->DataFrame:
     headers=process_header_data(df)
     sample_headers=[h.name for h in headers if h.htype == HeaderType.SAMPLE]
-    for sample_header in sample_headers:
-        df.loc[:,sample_header] = df.loc[:,sample_header].transform(lambda g: replace(g, num_std))
+    df[sample_headers]=df[sample_headers].transform(replace)
     return df
 
 def savgol_smooth_filter(df:DataFrame,sample_header:Header,x_header:Header):
     headers=process_header_data(df)
     window_length=df.shape[0]
     sample_headers=[h.name for h in headers if h.htype == HeaderType.SAMPLE]
-    for sample_header in sample_headers:
-        df.loc[:,sample_header.name] = savgol_filter(df.loc[:,sample_header.name], window_length, 3)
+    df[sample_headers]=df[sample_headers].transform(lambda x: savgol_filter(x, window_length, 3))
 
     return df
-
 
 def normalize_min_max_scaler(df:DataFrame)->DataFrame:
     x = df.iloc[:,2:].values 
