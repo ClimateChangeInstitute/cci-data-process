@@ -80,6 +80,19 @@ USAGE
                             nargs=4,
                             metavar=('directory', 'folder_prefix', 'depth_age_file', 'create_pdf'),
                             help="process and combine laser files: %(metavar)s")
+        parser.add_argument("-cl",
+                            "--combine-laserdata",
+                            dest="laser_directory",
+                            action="store",
+                            nargs=2,
+                            help="combines processed laser data from %(dest)")
+        
+        parser.add_argument("-f",
+                            "--filter-laserdata",
+                            dest="filter",
+                            action="store",
+                            help="combines filtered laser data from %(dest)")
+
                
         parser.add_argument("-d",
                             "--depth",
@@ -165,6 +178,17 @@ USAGE
             # 'directory', 'folder_prefix', 'depth_age_file', 'create_pdf
             directory, folder_prefix, depth_age_file, create_pdf = args.combine_laser
             combine_laser_data_by_directory(directory, folder_prefix, depth_age_file, bool(create_pdf))
+            
+        if args.laser_directory:
+            if args.filter:
+                filtered_data=True
+            else:
+                filtered_data=False
+                
+            create_PDF=True
+            combine_laser_data_by_directory(args.laser_directory[0],
+                                            args.laser_directory[1],filtered_data,create_PDF)
+
         
         if args.headers_file:
             load_and_store_header_file(args.headers_file)
