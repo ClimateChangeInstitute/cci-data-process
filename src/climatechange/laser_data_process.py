@@ -150,9 +150,8 @@ def combine_laser_data_by_directory(directory:str,prefix:str,depth_age_file:str,
     
     if create_PDF:
         pdf_folder=os.path.join(directory,'PDF_plots')
-        
-    if not os.path.exists(pdf_folder):
-        os.makedirs(pdf_folder)
+        if not os.path.exists(pdf_folder):
+            os.makedirs(pdf_folder)
 
     for folder in sorted(os.listdir(directory)):
         if folder.startswith(prefix):
@@ -215,7 +214,7 @@ def clean_LAICPMS_data(f:LaserFile) -> DataFrame:
 def filtered_laser_data(df:DataFrame)->DataFrame:
     df_filter=df[:]
      
-    df_filter=replace_outliers_with_nan(df_filter)
+    df_filter=replace_outliers_with_nan(df_filter,2)
      
     return df_filter
 
