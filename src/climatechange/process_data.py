@@ -25,6 +25,7 @@ from climatechange.process_data_functions import resample_by_years, \
     double_resample_by_depth_intervals
 import logging
 import textwrap
+from climatechange.laser_data_process import combine_laser_data_by_directory
 
 
 __all__ = []
@@ -72,52 +73,54 @@ USAGE
         # Setup argument parser
         parser = ArgumentParser(description=program_license, formatter_class=RawDescriptionHelpFormatter)
         
-        
-        parser.add_argument("-y",
-                            "--year",
-                            dest="year_file",
+        parser.add_argument("-c",
+                            "--combine-laser",
+                            dest="combine_laser",
                             action="store",
-                            help="resample %(dest)s by years and depth [default: %(default)s]")
-
+                            nargs=4,
+                            metavar=('directory', 'folder_prefix', 'depth_age_file', 'create_pdf'),
+                            help="process and combine laser files: %(metavar)s")
+               
         parser.add_argument("-d",
                             "--depth",
                             dest="depth_file",
                             action="store",
                             help="resample %(dest)s by depth [default: %(default)s]")
-        
+          
         parser.add_argument("-dd",
                             "--double-depth",
                             dest="depth_files",
                             action="store",
                             nargs=2,
-                            help="resample %(dest) by depth")
-        
+                            help="resample %(dest)s by depth")
+          
         parser.add_argument("-di",
                             "--double-interval",
                             dest="interval_files",
                             action="store",
                             nargs=2,
-                            help="resample %(dest) to the higher resolution of the two files")
-        
+                            help="resample %(dest)s to the higher resolution of the two files")
+         
         parser.add_argument("-i",
                             "--inc_amt",
                             dest="inc_amt",
                             action="store",
                             default=1,
                             help="the size of the resampling increment [default: %(default)s]")
-        
+         
         parser.add_argument("-l",
                             "--load",
                             dest="headers_file",
                             action="store",
                             help="load the headers of the CSV and store them in the header dictionary.  "
                                  "This file should contain rows of (name, type, class, unit, label)")
-        
+         
         parser.add_argument("-r",
                             "--recursive",
                             dest="recurse",
                             action="store_true",
                             help="recurse into subfolders [default: %(default)s]")
+ 
         parser.add_argument("-v",
                             "--verbose",
                             dest="verbose",
@@ -125,8 +128,15 @@ USAGE
                             help=textwrap.dedent("""set verbosity level [default: %(default)s]\n
                             Increasing the verbosity level increases what is logged.  For example,\n
                             specifying -v outputs INFO level and -vv outputs DEBUG level messages."""))
+         
         parser.add_argument('-V', '--version', action='version', version=program_version_message)
-
+ 
+        parser.add_argument("-y",
+                            "--year",
+                            dest="year_file",
+                            action="store",
+                            help="resample %(dest)s by years and depth [default: %(default)s]")
+        
 #         parser.add_argument(dest="paths", default=".", help="paths to folder(s) with data file(s) [default: %(default)s]", metavar="path", nargs='+')
 
         # Process arguments
@@ -150,6 +160,11 @@ USAGE
             logger.setLevel(level)
             
             logging.info("Using verbosity of %s for logging.", level)
+        
+        if args.combine_laser:
+            # 'directory', 'folder_prefix', 'depth_age_file', 'create_pdf
+            directory, folder_prefix, depth_age_file, create_pdf = args.combine_laser
+            combine_laser_data_by_directory(directory, folder_prefix, depth_age_file, bool(create_pdf))
         
         if args.headers_file:
             load_and_store_header_file(args.headers_file)
@@ -192,11 +207,12 @@ USAGE
         ### handle keyboard interrupt ###
         return 0
     except Exception as e:
-        if logging.getLogger().getlevel() == 'DEBUG':
+        raise(e)
+        if logging.getLogger().level == 'DEBUG':
             raise(e)
         indent = len(program_name) * " "
         sys.stderr.write(program_name + ": " + repr(e) + "\n")
-        sys.stderr.write(indent + "  for help use --help")
+        sys.stderr.write(indent + "  for help use --help\n")
         return 2
 
 if __name__ == "__main__":
