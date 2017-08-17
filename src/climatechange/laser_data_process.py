@@ -20,6 +20,7 @@ import numpy as np
 from climatechange.resample_stats import compileStats
 from climatechange.data_filters import replace_outliers_with_nan,\
     normalize_min_max_scaler
+import time
 
 
 class LaserFile:
@@ -37,7 +38,7 @@ class LaserFile:
         self.background_info=compileStats(self.raw_data.iloc[0:11,1:].transpose().values.tolist())
         self.stats=compileStats(self.processed_data.iloc[:,2:].transpose().values.tolist())
         self.filtered_data=filtered_laser_data(self.processed_data)
-        self.normalized_data=normalize_min_max_scaler(self.processed_data)
+#         self.normalized_data=normalize_min_max_scaler(self.processed_data)
 
     def __str__(self):
         return self.file_path
@@ -86,7 +87,7 @@ def load_laser_txt_file(file_path:str) -> DataFrame:
 
 
 
-def process_laser_data_by_run(f:LaserFile,pdf_folder:str) -> DataFrame:
+def plot_laser_data_by_run(f:LaserFile,pdf_folder:str) -> DataFrame:
     '''
     
     :param f:
@@ -97,8 +98,10 @@ def process_laser_data_by_run(f:LaserFile,pdf_folder:str) -> DataFrame:
         list of list of stats 
     '''
 
-    dir_name=os.path.basename(f.file_path)
-    pdf_filename = pdf_folder+dir_name+'_original_vs._filtered_laser_data.pdf'
+    file_name=os.path.basename(f.file_path).split('.')[0]
+    folder_name=os.path.basename(os.path.dirname(f.file_path))
+    
+    pdf_filename = os.path.join(pdf_folder,'%s-%s_original_vs._filtered_laser_data.pdf' % (folder_name,file_name))
 
 #     df_filter=filter_LAICPMS_data(laser_run_df)
     headers = process_header_data(f.processed_data)
@@ -108,35 +111,60 @@ def process_laser_data_by_run(f:LaserFile,pdf_folder:str) -> DataFrame:
     with PdfPages(pdf_filename) as pdf:
         for depth_header in depth_headers:
             for sample_header in sample_headers:
-                filter_and_plot_laser_data(f.processed_data, depth_header, sample_header, pdf)
+                plot_laser_data(f.processed_data, depth_header, sample_header, pdf)
 
 
-def combine_laser_data_by_input_file(input_file:str, depth_age_file:str,create_PDF=False) -> DataFrame:
+def combine_laser_data_by_input_file(input_file:str, depth_age_file:str,filtered_data=False,create_PDF=False) -> DataFrame:
       
     laser_files = load_input_file(input_file, depth_age_file)
     df = DataFrame()
     
-    if create_PDF:
-        pdf_folder=os.path.dirname(input_file)+'PDF_plots'
-        if not os.path.exists(pdf_folder):
-            os.makedirs(pdf_folder)
+#     if create_PDF:
+#         pdf_folder=os.path.join(os.path.dirname(os.path.dirname(input_file)),'PDF_plots')
+#         if not os.path.exists(pdf_folder):
+#             os.makedirs(pdf_folder)
         
-    
     for f in laser_files:
-        df = df.append(f.processed_data, ignore_index=True)
-        if create_PDF:
-            process_laser_data_by_run(f,pdf_folder)
+        if filtered_data:
+            df = df.append(f.filtered_data, ignore_index=True)
+        else:
+            df = df.append(f.processed_data, ignore_index=True)
+#         if create_PDF:
+#             plot_laser_data_by_run(f,pdf_folder)
         
-        
+    return df
+
+def combine_normalized_laser_data_by_input_file(input_file:str, depth_age_file:str,create_PDF=False) -> DataFrame:
+      
+    laser_files = load_input_file(input_file, depth_age_file)
+    df = DataFrame()
+
+    for f in laser_files:
+        df = df.append(f.normalized_data, ignore_index=True)
+
+    return df
+
+def combine_filtered_laser_data_by_input_file(input_file:str, depth_age_file:str,create_PDF=False) -> DataFrame:
+      
+    laser_files = load_input_file(input_file, depth_age_file)
+    df = DataFrame()
+
+    for f in laser_files:
+        df = df.append(f.filtered_data, ignore_index=True)
+
     return df
 
 
 
-def combine_laser_data_by_directory(directory:str,prefix:str,depth_age_file:str,create_PDF=False):
+def combine_laser_data_by_directory(directory:str,
+                                    depth_age_file:str,
+                                    create_PDF=False,
+                                    filtered_data=False,
+                                    prefix:str='KCC'):
     '''
     
     :param directory:
-    :param prefix:
+    :param prefix:KCC
     :param depth_age_file:
     
     - folders in directory should be named accordingly 
@@ -147,7 +175,7 @@ def combine_laser_data_by_directory(directory:str,prefix:str,depth_age_file:str,
     input_2='InputFile_2'
     df1=DataFrame()
     df2=DataFrame()
-    
+
     if create_PDF:
         pdf_folder=os.path.join(directory,'PDF_plots')
         if not os.path.exists(pdf_folder):
@@ -158,24 +186,29 @@ def combine_laser_data_by_directory(directory:str,prefix:str,depth_age_file:str,
             for file in sorted(os.listdir(os.path.join(directory,folder))):
                 if file.startswith(input_1):
                     df1=df1.append(combine_laser_data_by_input_file(os.path.join(directory,folder,file),
-                                                                    depth_age_file,create_PDF), ignore_index=True)
+                                                                    depth_age_file,filtered_data,create_PDF), ignore_index=True)
                 elif file.startswith(input_2):
                     df2=df2.append(combine_laser_data_by_input_file(os.path.join(directory,folder,file),
-                                                                    depth_age_file,create_PDF), ignore_index=True)
-                    
+                                                                    depth_age_file,filtered_data,create_PDF), ignore_index=True)
+    
+    if create_PDF:
+        plot_laser_data_by_directory(df1,pdf_folder,filtered_data)
+        plot_laser_data_by_directory(df2,pdf_folder,filtered_data)           
+
     return df1,df2
-                    
     #plot each sample by depth
                     
     
-def process_laser_data_by_directory(df:DataFrame,pdf_folder,create_PDF=False):
-
-
-    pdf_filename = os.path.join(pdf_folder,'all_original_vs._filtered_laser_data.pdf')
-    if os.path.exists(pdf_filename):
-        pdf_filename = os.path.join(pdf_folder,'all_original_vs._filtered_laser_data_2.pdf')
+def plot_laser_data_by_directory(df:DataFrame,pdf_folder,filtered_data=False):
+    if filtered_data:
+        pdf_filename = os.path.join(pdf_folder,'all_filtered_data.pdf')
+        if os.path.exists(pdf_filename):
+            pdf_filename = os.path.join(pdf_folder,'all_filtered_data_2.pdf')
+    else:
+        pdf_filename = os.path.join(pdf_folder,'all_data.pdf')
+        if os.path.exists(pdf_filename):
+            pdf_filename = os.path.join(pdf_folder,'all_original_data_2.pdf')
         
-#     df_filter=filter_LAICPMS_data(laser_run_df)
     headers = process_header_data(df)
     sample_headers = [h for h in headers if h.htype == HeaderType.SAMPLE]
     depth_headers = [h for h in headers if h.htype == HeaderType.DEPTH]
@@ -183,21 +216,19 @@ def process_laser_data_by_directory(df:DataFrame,pdf_folder,create_PDF=False):
     with PdfPages(pdf_filename) as pdf:
         for depth_header in depth_headers:
             for sample_header in sample_headers:
-                filter_and_plot_laser_data(df, depth_header, sample_header, pdf)
+                plot_laser_data(df, depth_header, sample_header, pdf)
 
 
 
-def filter_and_plot_laser_data(df:DataFrame,
+def plot_laser_data(df:DataFrame,
                            depth_header:Header,
                            sample_header:Header,
                            pdf):
     fig = plt.figure(figsize=(11, 8.5))
-    plt.plot(df.loc[:, depth_header.name], df.loc[:, sample_header.name], label='original data')
-#     plt.plot(df_filter.loc[:, depth_header.name],df_filter.loc[:, sample_header.name],label='filtered data')
+    plt.plot(df.loc[:, depth_header.name], df.loc[:, sample_header.name])
     plt.xlabel(depth_header.label)
     plt.ylabel(sample_header.label)
-    plt.title('Comparison of original and filtered data of %s' % (sample_header.hclass))
-    plt.legend()
+    plt.title('LA-ICP-MS-%s' % (sample_header.hclass))
     pdf.savefig(fig)
     plt.close()
     
@@ -236,5 +267,4 @@ def add_year_column(df:DataFrame, depth_age_file:str) -> DataFrame:
 
 
 
-#     
 

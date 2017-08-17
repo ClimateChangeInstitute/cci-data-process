@@ -25,13 +25,14 @@ def replace_outliers_with_nan(df:DataFrame,num_std:int)->DataFrame:
         df.loc[:,sample_header] = df.loc[:,sample_header].transform(lambda g: replace(g, num_std))
     return df
 
-def savgol_smooth_filter(df_filter:DataFrame,sample_header:Header,x_header:Header):
+def savgol_smooth_filter(df:DataFrame,sample_header:Header,x_header:Header):
+    headers=process_header_data(df)
+    window_length=df.shape[0]
+    sample_headers=[h.name for h in headers if h.htype == HeaderType.SAMPLE]
+    for sample_header in sample_headers:
+        df.loc[:,sample_header.name] = savgol_filter(df.loc[:,sample_header.name], window_length, 3)
 
-    window_length=df_filter.shape[0]
-
-    y_savgol = savgol_filter(df_filter.loc[:,sample_header.name], window_length, 3)
-
-    return y_savgol
+    return df
 
 
 def normalize_min_max_scaler(df:DataFrame)->DataFrame:

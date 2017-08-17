@@ -488,11 +488,11 @@ def load_and_store_header_file(path:str):
                                                             len(all_replaced)))
             
     
-def main(files):
-    start_time = time.time()
-    for f in files:
-        resample_by_years(f, 10)
-#         resample_by_depths(f, 0.04)
-    print('done')
-    print(" %s seconds to run" % (time.time() - start_time))
-    
+# def main(files):
+#     start_time = time.time()
+#     for f in files:
+#         resample_by_years(f, 10)
+# #         resample_by_depths(f, 0.04)
+#     print('done')
+#     print(" %s seconds to run" % (time.time() - start_time))
+#     
