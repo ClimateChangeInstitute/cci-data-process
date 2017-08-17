@@ -101,20 +101,6 @@ USAGE
                             nargs=2,
                             help="resample %(dest)s to the higher resolution of the two files")
          
-        parser.add_argument("-cl",
-                            "--combine-laserdata",
-                            dest="laser_directory",
-                            action="store",
-                            nargs=2,
-                            help="combines processed laser data from %(dest)")
-        
-        parser.add_argument("-f",
-                            "--filter-laserdata",
-                            dest="filter",
-                            action="store",
-                            help="combines filtered laser data from %(dest)")
-        
-        
         parser.add_argument("-i",
                             "--inc_amt",
                             dest="inc_amt",
@@ -128,13 +114,13 @@ USAGE
                             action="store",
                             help="load the headers of the CSV and store them in the header dictionary.  "
                                  "This file should contain rows of (name, type, class, unit, label)")
-        
+         
         parser.add_argument("-r",
                             "--recursive",
                             dest="recurse",
                             action="store_true",
                             help="recurse into subfolders [default: %(default)s]")
-        
+ 
         parser.add_argument("-v",
                             "--verbose",
                             dest="verbose",
@@ -142,7 +128,7 @@ USAGE
                             help=textwrap.dedent("""set verbosity level [default: %(default)s]\n
                             Increasing the verbosity level increases what is logged.  For example,\n
                             specifying -v outputs INFO level and -vv outputs DEBUG level messages."""))
-        
+         
         parser.add_argument('-V', '--version', action='version', version=program_version_message)
  
         parser.add_argument("-y",
@@ -196,17 +182,6 @@ USAGE
             double_resample_by_depth_intervals(args.interval_files[0],
                                       args.interval_files[1])    
         
-        if args.laser_directory:
-            if args.filter:
-                filtered_data=True
-            else:
-                filtered_data=False
-                
-            create_PDF=True
-            combine_laser_data_by_directory(args.laser_directory[0],
-                                            args.laser_directory[1],filtered_data,create_PDF)
-            
-            
         if args.year_file:
             
             year_file = args.year_file
