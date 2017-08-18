@@ -71,10 +71,10 @@ class Test(unittest.TestCase):
         
     def test_combine_laser_data_by_directory(self):
         directory=os.path.join('csv_files','test_directory')
-        df1,df2=combine_laser_data_by_directory(directory,depth_age_file)
-        self.assertEqual(2972, df1.shape[0])
-        self.assertEqual(7, df1.shape[1])
-        self.assertEqual(0, df2.shape[0])
+        df_list=combine_laser_data_by_directory(directory,depth_age_file)
+        self.assertEqual(2972, df_list[0].shape[0])
+        self.assertEqual(7, df_list[0].shape[1])
+        self.assertEqual(0, df_list[1].shape[0])
     
     def test_normalize_min_max_scaler(self):
         df=clean_LAICPMS_data(laser_file)
