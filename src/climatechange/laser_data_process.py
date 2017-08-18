@@ -250,7 +250,7 @@ def clean_LAICPMS_data(f:LaserFile) -> DataFrame:
 def filtered_laser_data(df:DataFrame)->DataFrame:
 
      
-    df=replace_outliers_with_nan(df)
+    df=replace_outliers_with_nan(df, 2)
      
     return df
 
