@@ -21,7 +21,7 @@ import warnings
 from climatechange.compiled_stat import CompiledStat
 import numpy as np
 from pandas.testing import assert_series_equal
-from climatechange.data_filters import replace_outliers_with_nan
+from climatechange.data_filters import replace_outliers
 
 test_sample_header=Header("Cond (+ALU-S/cm)", HeaderType.SAMPLE,"Conductivity","alu-s/cm","Cond_(+ALU-S/cm)")
 test_depth_we_header=Header("depth (m we)", HeaderType.DEPTH,"Depth","meters","depth_we_(m)")
@@ -209,7 +209,7 @@ class Test(unittest.TestCase):
         self.assertEqual(test_output_dd.x_header, compiled_stat_of_larger_df[0][0].x_header)
         
     def test_replace_outliers_with_nans(self):
-        result=replace_outliers_with_nan(input_df, 2)
+        result=replace_outliers(input_df)
         assert_frame_equal(output_result,result)
          
 if __name__ == "__main__":

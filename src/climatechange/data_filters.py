@@ -5,6 +5,7 @@ A collection of functions for filtering data.
 :author: Mark Royer
 '''
 
+from numpy import float64
 from pandas import DataFrame
 from pandas import Series
 import pandas
@@ -15,23 +16,32 @@ from climatechange.headers import process_header_data, HeaderType
 import numpy as np
 
 
-def replace(s:Series, num_std:float) -> Series:
+def replace(s:Series, val:float64=np.nan, num_std:float=2) -> Series:
     '''
     Replace any values greater than or less than the number of specified 
     standard deviations with :py:data:`np.nan`.  Modifications occur in-place.
     
     :param s: A series that will have outliers removed
+    :param val: The new value for outliers
     :param num_std: The number of standard deviations to use as a threshold
     :return: The modified series with :py:data:`np.nan` replacing outliers
     '''
     mean, std = s.mean(), s.std()
     outliers = (s - mean).abs() > num_std * std
-    s[outliers] = np.nan
+    s[outliers] = val
     return s
  
-def replace_outliers_with_nan(df:DataFrame, num_std:float) -> DataFrame:
+def replace_outliers(df:DataFrame, val:float64=np.nan, num_std:float=2) -> DataFrame:
+    '''
+    Replace the outliers in the data on a column based calculation.  The mean 
+    and standard deviation for each column is calculated to use.
+    
+    :param df: The data to replace outliers in
+    :param val: The new value to use (the default is :data:`np.nan`)
+    :param num_std: The number of standard deviations to use as a threshold
+    '''
     sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
-    df[sample_header_names] = df[sample_header_names].transform(lambda s: replace(s, num_std))
+    df[sample_header_names] = df[sample_header_names].transform(lambda s: replace(s, val, num_std))
     return df
 
 def savgol_smooth_filter(df:DataFrame):

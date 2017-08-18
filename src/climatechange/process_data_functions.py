@@ -21,7 +21,7 @@ from pandas import Series
 from scipy.stats._stats_mstats_common import linregress
 
 from climatechange.compiled_stat import CompiledStat
-from climatechange.data_filters import replace_outliers_with_nan
+from climatechange.data_filters import replace_outliers
 from climatechange.file import load_csv
 from climatechange.headers import HeaderDictionary, HeaderType, Header, \
     load_headers, process_header_data
@@ -452,7 +452,7 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     pdf_filename = f1_file_path + '_vs_ %s__plot_correlation_removeoutliers_median.pdf' % (f2_base)
 
     larger_df, smaller_df = (df1, df2) if df1.shape[0] > df2.shape[0] else (df2, df1)
-    larger_df=replace_outliers_with_nan(larger_df, 2)
+    larger_df=replace_outliers(larger_df)
     
     compiled_stats_of_larger_df = compiled_stats_by_dd_intervals(larger_df, smaller_df)
     smaller_df_sample_headers = process_header_data(smaller_df, HeaderType.SAMPLE)

@@ -13,7 +13,7 @@ import pandas
 from pandas.core.frame import DataFrame
 from pandas.core.series import Series
 
-from climatechange.data_filters import replace_outliers_with_nan
+from climatechange.data_filters import replace_outliers
 from climatechange.headers import process_header_data, HeaderType, Header
 from climatechange.plot import write_data_to_csv_files
 from climatechange.process_data_functions import clean_data
@@ -250,12 +250,13 @@ def clean_LAICPMS_data(f:LaserFile) -> DataFrame:
 def filtered_laser_data(df:DataFrame) -> DataFrame:
     '''
     Filter the given data by removing data points that are outside of 2 
-    standard deviations of the mean. Modification occur in-place.
+    standard deviations of the mean and replacing them with :data:`np.nan`. 
+    Modification occur in-place.
     
     :param df: The data to be processed.
     :return: The modified data
     '''
-    return replace_outliers_with_nan(df, 2)
+    return replace_outliers(df)
 
 def add_depth_column(df:DataFrame, start_depth:float, end_depth:float) -> DataFrame:
     """
