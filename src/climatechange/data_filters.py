@@ -28,15 +28,13 @@ def replace(s:Series, num_std:float) -> Series:
     return s
  
 def replace_outliers_with_nan(df:DataFrame, num_std:float) -> DataFrame:
-    headers = process_header_data(df)
-    sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
-    df[sample_headers] = df[sample_headers].transform(lambda s: replace(s, num_std))
+    sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
+    df[sample_header_names] = df[sample_header_names].transform(lambda s: replace(s, num_std))
     return df
 
-def savgol_smooth_filter(df:DataFrame, sample_header:Header, x_header:Header):
-    headers = process_header_data(df)
+def savgol_smooth_filter(df:DataFrame):
     window_length = df.shape[0]
-    sample_header_names = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
+    sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
     savgol_func = lambda x: savgol_filter(x, window_length, 3)
     df[sample_header_names] = df[sample_header_names].transform(savgol_func)
 
