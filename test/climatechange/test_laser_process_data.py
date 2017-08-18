@@ -3,16 +3,17 @@ Created on Aug 11, 2017
 
 @author: Heather
 '''
-import unittest
 import os
-from climatechange.laser_data_process import load_input_file,\
-    load_laser_txt_file, readFile, combine_laser_data_by_input_file,\
-    clean_LAICPMS_data, combine_laser_data_by_directory
-from pandas.util.testing import assert_frame_equal
+import unittest
+
 from pandas.core.frame import DataFrame
+from pandas.util.testing import assert_frame_equal
+
 from climatechange.headers import Header, HeaderType
-from climatechange.data_filters import normalize_min_max_scaler
-import numpy
+from climatechange.laser_data_process import load_input_file, \
+    load_laser_txt_file, readFile, combine_laser_data_by_input_file, \
+    clean_LAICPMS_data, combine_laser_data_by_directory
+
 
 depth_age_file=os.path.join('csv_files','depthAge7617.txt')
 laser_file=readFile(os.path.join('csv_files','1.txt'), 955 , 6008.500 , 6012.500 , 12 , 23,os.path.join('csv_files','depthAge7617.txt'))

@@ -21,7 +21,6 @@ import warnings
 from climatechange.compiled_stat import CompiledStat
 import numpy as np
 from pandas.testing import assert_series_equal
-from climatechange.data_filters import replace_outliers
 
 test_sample_header=Header("Cond (+ALU-S/cm)", HeaderType.SAMPLE,"Conductivity","alu-s/cm","Cond_(+ALU-S/cm)")
 test_depth_we_header=Header("depth (m we)", HeaderType.DEPTH,"Depth","meters","depth_we_(m)")
