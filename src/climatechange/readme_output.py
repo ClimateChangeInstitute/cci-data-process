@@ -3,9 +3,12 @@ Created on Aug 2, 2017
 
 @author: Heather
 '''
-from climatechange.headers import HeaderType
 import os
-template=\
+
+from climatechange.headers import HeaderType
+
+
+template = \
 '''
 ReadMeFile
 
@@ -40,18 +43,18 @@ For Each {label_name}, PDF files containing:
     Raw Sample Data vs. {label_name}
     Resampled {stat_header} Data vs. {inc_amt} {label_name} Resolution
 '''
-def write_readmefile_to_txtfile(readme:str,output_filename:str):
+def write_readmefile_to_txtfile(readme:str, output_filename:str):
     with open(output_filename, "w") as text_file:
         text_file.write(readme)
         text_file.flush()
         
 
-def create_readme_output_file(template,f,headers,run_date,inc_amt,label_name,x_headers,file_headers,num_csvfiles,stat_header):
+def create_readme_output_file(template, f, headers, run_date, inc_amt, label_name, x_headers, file_headers, num_csvfiles, stat_header):
     year_headers = [h.name for h in headers if h.htype == HeaderType.YEARS]
     depth_headers = [h.name for h in headers if h.htype == HeaderType.DEPTH]
     sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
-    num_pdffiles=len(file_headers)
-    f_base=os.path.basename(f)
+    num_pdffiles = len(file_headers)
+    f_base = os.path.basename(f)
     
 #     output_filename=os.path.join('00README')
     data = {'run_date': run_date,

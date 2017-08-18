@@ -6,7 +6,7 @@ Created on Jul 17, 2017
 import datetime
 
 from matplotlib.backends.backend_pdf import PdfPages
-from pandas.core.frame import DataFrame
+from pandas import DataFrame
 
 from climatechange.file import load_csv
 from climatechange.headers import Header

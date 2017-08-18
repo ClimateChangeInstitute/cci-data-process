@@ -10,7 +10,7 @@ import os
 import unittest
 
 import numpy
-from pandas.core.frame import DataFrame
+from pandas import DataFrame
 
 from climatechange.file import load_dict_by_package
 from climatechange.headers import HeaderDictionary, HeaderType, Header, to_headers, \
@@ -51,7 +51,7 @@ class Test(unittest.TestCase):
         
     def testHeaderEncoder(self):
         
-        objstr = json.dumps([ h for (_,h) in self.abcDict.items()], cls=HeaderEncoder)
+        objstr = json.dumps([ h for (_, h) in self.abcDict.items()], cls=HeaderEncoder)
         expstr = ''.join(['[{"name": "a", "type": "Years", "class": "aclass", "unit": "aunit", "label": "alabel"},',
                           ' {"name": "a", "type": "Years", "class": "aclass", "unit": "aunit", "label": "alabel"},',
                           ' {"name": "c", "type": "Sample", "class": "cclass", "unit": "cunit", "label": "clabel"},',
@@ -160,20 +160,20 @@ class Test(unittest.TestCase):
         
     def testLoadHeaders(self):
         
-        h1 = Header("Sr (ng/L)",HeaderType.SAMPLE,"Sr","ng/L","Sr_(ng/L)")
-        h_last = Header("K (ug/L)",HeaderType.SAMPLE,"K", "ug/L","K_(ug/L)")
+        h1 = Header("Sr (ng/L)", HeaderType.SAMPLE, "Sr", "ng/L", "Sr_(ng/L)")
+        h_last = Header("K (ug/L)", HeaderType.SAMPLE, "K", "ug/L", "K_(ug/L)")
         
-        with open(os.path.join('csv_files','header_input.csv'), 'r') as f:
+        with open(os.path.join('csv_files', 'header_input.csv'), 'r') as f:
             headers = load_headers(f)
             self.assertEqual(h1, headers[0], "First header is Strontium")
-            self.assertEqual(h_last, headers[len(headers)-1], "Last header is Potasium")
+            self.assertEqual(h_last, headers[len(headers) - 1], "Last header is Potasium")
         
 
     def testProcessHeaderData(self):
         
         unknown_headers = ['test_sample (ppb)', 'test2 Not in (ppb)']
         
-        df = DataFrame(numpy.random.randn(10,2), columns=unknown_headers)
+        df = DataFrame(numpy.random.randn(10, 2), columns=unknown_headers)
         
         logging.disable(logging.CRITICAL)
         headers = process_header_data(df)
@@ -186,7 +186,7 @@ class Test(unittest.TestCase):
         self.assertEqual(2, len(unknown_parsed_headers))
         
         mixed_headers = ["Dat011216V2", "depth (m we) ", "Sr (ng/L)"]
-        df = DataFrame(numpy.random.randn(10,3), columns=mixed_headers)
+        df = DataFrame(numpy.random.randn(10, 3), columns=mixed_headers)
         
         year_h = process_header_data(df, HeaderType.YEARS)
         depth_h = process_header_data(df, HeaderType.DEPTH)

@@ -15,7 +15,7 @@ import pandas
 
 from climatechange.file import load_dict_by_package, data_dir, load_dictionary, \
     save_dictionary
-from pandas.core.frame import DataFrame
+from pandas import DataFrame
 
 
 class HeaderType(Enum):

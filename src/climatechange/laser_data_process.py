@@ -9,9 +9,8 @@ import re
 from typing import List
 
 from matplotlib.backends.backend_pdf import PdfPages
+from pandas import DataFrame, Series
 import pandas
-from pandas.core.frame import DataFrame
-from pandas.core.series import Series
 
 from climatechange.data_filters import replace_outliers
 from climatechange.headers import process_header_data, HeaderType, Header

@@ -4,14 +4,15 @@ Created on Jul 31, 2017
 @author: Heather
 '''
 
-from pandas.core.frame import DataFrame
-from climatechange.resample_stats import compileStats, find_indices, create_depth_headers
-import pandas
 from typing import List
-import numpy as np
+
+from pandas import DataFrame, Series
+import pandas
+
 from climatechange.compiled_stat import CompiledStat
 from climatechange.headers import Header, HeaderType, process_header_data
-from pandas import Series
+from climatechange.resample_stats import compileStats, find_indices, create_depth_headers
+import numpy as np
 
 
 def create_range_for_depths(list_to_inc:List[float], inc_amt: int=0.01) -> List[float]:

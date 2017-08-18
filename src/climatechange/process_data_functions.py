@@ -16,8 +16,7 @@ from typing import List, Tuple
 from matplotlib import pyplot
 from matplotlib.backends.backend_pdf import PdfPages
 from numpy import float64
-from pandas import DataFrame
-from pandas import Series
+from pandas import DataFrame, Series
 from scipy.stats._stats_mstats_common import linregress
 
 from climatechange.compiled_stat import CompiledStat
@@ -368,7 +367,7 @@ def load_and_clean_dd_data(f:str) -> Tuple[DataFrame, List[Header]]:
     :return: A 2-tuple containing the cleaned original data,
      and the processed data headers from the original data file
     '''
-    df=load_csv(f)
+    df = load_csv(f)
     headers = process_header_data(df)
     df = clean_data(df.drop_duplicates())
     return df.reset_index(drop=True), headers    
@@ -386,15 +385,15 @@ def plot_linregress_of_samples(d1:CompiledStat,
                                stat_header,
                                pdf):
     d1_stat = d1.df.loc[:, stat_header]
-    d2=d2[:-1]
+    d2 = d2[:-1]
     slope, intercept, r_value, unused_p_value, unused_std_err = linregress(remove_nan_from_datasets(d1_stat, d2))
     plt.figure(figsize=(11, 8.5))
-    fig,ax=plt.subplots()
-    ax.scatter(d1_stat, d2,label='data')
-    ax.plot(d1_stat, intercept + slope*d1_stat, 'r',label='line-regression r={:.4f}'.format(r_value))
+    fig, ax = plt.subplots()
+    ax.scatter(d1_stat, d2, label='data')
+    ax.plot(d1_stat, intercept + slope * d1_stat, 'r', label='line-regression r={:.4f}'.format(r_value))
     plt.xlabel(d1.sample_header.label)
     plt.ylabel(sample_header.label)
-    plt.title('Correlation of %s and %s'% (d1.sample_header.hclass,sample_header.hclass))
+    plt.title('Correlation of %s and %s' % (d1.sample_header.hclass, sample_header.hclass))
     plt.legend()
     pdf.savefig(fig)
     plt.close()
@@ -443,7 +442,7 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     :param f2:
     '''
 
-    stat_header='Median'
+    stat_header = 'Median'
     df1, unused_headers1 = load_and_clean_dd_data(f1)
     df2, unused_headers2 = load_and_clean_dd_data(f2)
     f1_file_path = os.path.splitext(f1)[0]
@@ -452,7 +451,7 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     pdf_filename = f1_file_path + '_vs_ %s__plot_correlation_removeoutliers_median.pdf' % (f2_base)
 
     larger_df, smaller_df = (df1, df2) if df1.shape[0] > df2.shape[0] else (df2, df1)
-    larger_df=replace_outliers(larger_df)
+    larger_df = replace_outliers(larger_df)
     
     compiled_stats_of_larger_df = compiled_stats_by_dd_intervals(larger_df, smaller_df)
     smaller_df_sample_headers = process_header_data(smaller_df, HeaderType.SAMPLE)
@@ -467,8 +466,8 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
                             print("Processing depth %s" % d1.x_header.name)
                             # correlate
                             print("correlating %s and %s" % (d1.sample_header.name, sample_header.name))
-                            corr_stats.append(correlate_dd_samples(d1, smaller_df.loc[:, sample_header.name],stat_header))
-                            plot_linregress_of_samples(d1,smaller_df.loc[:, sample_header.name],sample_header,stat_header,pdf)
+                            corr_stats.append(correlate_dd_samples(d1, smaller_df.loc[:, sample_header.name], stat_header))
+                            plot_linregress_of_samples(d1, smaller_df.loc[:, sample_header.name], sample_header, stat_header, pdf)
 #                             plot_2_samples_by_depth(d1,smaller_df.loc[:, sample_header.name],sample_header,stat_header,pdf)
     df_corr_stats = DataFrame(corr_stats, columns=['depth', 'sample_1', 'sample_2', 'slope', 'intercept', 'r_value', 'p_value', 'std_err'])    
         

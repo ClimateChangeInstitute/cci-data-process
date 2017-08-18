@@ -8,7 +8,7 @@ import os
 import unittest
 
 import numpy
-from pandas.core.frame import DataFrame
+from pandas import DataFrame
 from pandas.util.testing import assert_frame_equal
 
 from climatechange.data_filters import normalize_min_max_scaler, \
