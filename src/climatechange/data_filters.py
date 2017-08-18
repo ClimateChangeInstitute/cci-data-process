@@ -45,7 +45,18 @@ def replace_outliers(df:DataFrame, val:float64=np.nan, num_std:float=2) -> DataF
     return df
 
 def savgol_smooth_filter(df:DataFrame):
+    '''
+    Apply the  Savitzky-Golay filter to the columns of the supplied data.  
+    The filter is only applied to columns that appear as samples in the default 
+    header dictionary. Modifications occur in-place.
+    
+    :param df: The data to filter
+    :return: The resampled data
+    '''
     window_length = df.shape[0]
+    if window_length % 2 == 0: # window_length must be odd
+        window_length = window_length - 1
+    
     sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
     savgol_func = lambda x: savgol_filter(x, window_length, 3)
     df[sample_header_names] = df[sample_header_names].transform(savgol_func)

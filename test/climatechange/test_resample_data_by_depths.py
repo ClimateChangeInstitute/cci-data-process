@@ -207,10 +207,6 @@ class Test(unittest.TestCase):
         assert_frame_equal(test_output_dd.df, compiled_stat_of_larger_df[0][0].df)
         self.assertEqual(test_output_dd.sample_header, compiled_stat_of_larger_df[0][0].sample_header)
         self.assertEqual(test_output_dd.x_header, compiled_stat_of_larger_df[0][0].x_header)
-        
-    def test_replace_outliers_with_nans(self):
-        result=replace_outliers(input_df)
-        assert_frame_equal(output_result,result)
          
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

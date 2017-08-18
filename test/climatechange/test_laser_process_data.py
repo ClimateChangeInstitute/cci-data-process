@@ -75,16 +75,6 @@ class Test(unittest.TestCase):
         self.assertEqual(2972, df_list[0].shape[0])
         self.assertEqual(7, df_list[0].shape[1])
         self.assertEqual(0, df_list[1].shape[0])
-    
-    def test_normalize_min_max_scaler(self):
-        df=clean_LAICPMS_data(laser_file)
-        min_Al_index=numpy.argmin(df.loc[:,'Al27'].values.tolist())
-        min_S_index=numpy.argmin(df.loc[:,'S32'].values.tolist())
-        df=normalize_min_max_scaler(df)
-        self.assertEqual([min_Al_index],df[df['Al27'] == 0].index.tolist())
-        self.assertEqual([min_S_index],df[df['S32'] == 0].index.tolist())
-        self.assertEqual('depth (m abs)',df.iloc[:,:2].columns[0])
-        self.assertEqual('year',df.iloc[:,:2].columns[1])
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
