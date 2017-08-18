@@ -50,7 +50,7 @@ def resampled_depths(df_x_sample:DataFrame, depth_header:Header, inc_amt):
     df.columns = create_depth_headers([depth_header])
     return df
 
-def resampled_statistics_by_x(df_x_sample,inc_amt):
+def resampled_statistics_by_x(df_x_sample, inc_amt):
     index = find_index_by_increment_for_depths(df_x_sample.iloc[:, 0].values.tolist(), inc_amt)
     appended_data = []
     for i in index:
@@ -100,19 +100,19 @@ def compile_stats_by_depth(df:DataFrame,
     return CompiledStat(resampled_data, depth_header, sample_header)
 
 
-def find_index_of_depth_intervals(depth_large:Series,depth_small:Series)->List[List[int]]:
+def find_index_of_depth_intervals(depth_large:Series, depth_small:Series) -> List[List[int]]:
     '''
 
     :param depth_large:depth columns of larger dataset with smaller increment
     :param depth_small:depth columns of smaller dataset with larger increment
     '''
-    bottom_depth=[]
-    for i in range(depth_small.size-1):
-        bottom_depth.append(depth_small.loc[i+1])
-    index=[find_indices(depth_large, lambda e: e >= depth_small[i] and e < depth_small[i+1]) for i in range(0, len(depth_small)-1)]
+    bottom_depth = []
+    for i in range(depth_small.size - 1):
+        bottom_depth.append(depth_small.loc[i + 1])
+    index = [find_indices(depth_large, lambda e: e >= depth_small[i] and e < depth_small[i + 1]) for i in range(0, len(depth_small) - 1)]
     return index
 
-def compiled_stats_by_dd_intervals(larger_df:DataFrame,smaller_df:DataFrame) -> List[List[CompiledStat]]:
+def compiled_stats_by_dd_intervals(larger_df:DataFrame, smaller_df:DataFrame) -> List[List[CompiledStat]]:
     '''
     From the given data frame compile statistics (mean, median, min, max, etc)
     based on the parameters.
@@ -122,43 +122,41 @@ def compiled_stats_by_dd_intervals(larger_df:DataFrame,smaller_df:DataFrame) -> 
     :return: A list of list of CompiledStat containing the resampled statistics for the
     specified sample and depth by the depth interval from df2.
     '''
-    headers_larger=process_header_data(larger_df)
-    headers_smaller=process_header_data(smaller_df)
-    depth_headers_larger=[h for h in headers_larger if h.htype == HeaderType.DEPTH]
-    depth_headers_smaller=[h for h in headers_smaller if h.htype == HeaderType.DEPTH]
-    sample_headers_larger=[h for h in headers_larger if h.htype == HeaderType.SAMPLE]
+    depth_headers_larger = process_header_data(larger_df, HeaderType.DEPTH)
+    depth_headers_smaller = process_header_data(smaller_df, HeaderType.DEPTH)
+    sample_headers_larger = process_header_data(larger_df, HeaderType.SAMPLE)
 
     result_list = []
     for depth_header_l in depth_headers_larger:
         for depth_header_s in depth_headers_smaller:
-            if depth_header_l==depth_header_s:
-                index=find_index_of_depth_intervals(larger_df.loc[:,depth_header_s.name],smaller_df.loc[:,depth_header_l.name])
-                depth_df=create_top_bottom_depth_dataframe(smaller_df,depth_header_s)
-                depth_samples=[]
+            if depth_header_l == depth_header_s:
+                index = find_index_of_depth_intervals(larger_df.loc[:, depth_header_s.name], smaller_df.loc[:, depth_header_l.name])
+                depth_df = create_top_bottom_depth_dataframe(smaller_df, depth_header_s)
+                depth_samples = []
                 for sample_header in sample_headers_larger:
                     current_stats = []
                     for i in index:
-                        current_stats.extend(compileStats([larger_df.loc[i,sample_header.name].tolist()]))
+                        current_stats.extend(compileStats([larger_df.loc[i, sample_header.name].tolist()]))
                     current_df = DataFrame(current_stats, columns=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
-                    comp_stat=CompiledStat(pandas.concat((depth_df,current_df),axis=1),depth_header_l,sample_header)
+                    comp_stat = CompiledStat(pandas.concat((depth_df, current_df), axis=1), depth_header_l, sample_header)
                     depth_samples.append(comp_stat)
         result_list.append(depth_samples)
     return result_list
 
-def create_top_bottom_depth_dataframe(df:DataFrame,depth_header:Header)->DataFrame:
+def create_top_bottom_depth_dataframe(df:DataFrame, depth_header:Header) -> DataFrame:
 
-    new_depth_headers=create_depth_headers([depth_header])
-
-    list_depth = []
-    for i in range(0, df.shape[0]-1):
-        list_depth.append([df.loc[i,depth_header.name],df.loc[i+1,depth_header.name]])
-    return DataFrame(list_depth,columns=new_depth_headers)
-
-def create_top_bottom_depth_dataframe_for_laser_file(df:DataFrame,depth_header:Header)->DataFrame:
-
-    new_depth_headers=create_depth_headers([depth_header])
+    new_depth_headers = create_depth_headers([depth_header])
 
     list_depth = []
-    for i in range(0, df.shape[0]-1):
-        list_depth.append([df.loc[i,depth_header.name],df.loc[i+1,depth_header.name]])
-    return DataFrame(list_depth,columns=new_depth_headers)
+    for i in range(0, df.shape[0] - 1):
+        list_depth.append([df.loc[i, depth_header.name], df.loc[i + 1, depth_header.name]])
+    return DataFrame(list_depth, columns=new_depth_headers)
+
+def create_top_bottom_depth_dataframe_for_laser_file(df:DataFrame, depth_header:Header) -> DataFrame:
+
+    new_depth_headers = create_depth_headers([depth_header])
+
+    list_depth = []
+    for i in range(0, df.shape[0] - 1):
+        list_depth.append([df.loc[i, depth_header.name], df.loc[i + 1, depth_header.name]])
+    return DataFrame(list_depth, columns=new_depth_headers)

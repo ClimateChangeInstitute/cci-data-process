@@ -1,17 +1,19 @@
 '''
-Created on Aug 11, 2017
+A collection of functions for filtering data.
 
-@author: Heather
+:author: Heather Clifford
+:author: Mark Royer
 '''
 
 from pandas import DataFrame
 from pandas import Series
+import pandas
 from scipy.signal import savgol_filter
 from sklearn import preprocessing
 
-from climatechange.headers import process_header_data, HeaderType, Header
+from climatechange.headers import process_header_data, HeaderType
 import numpy as np
-import pandas
+
 
 def replace(s:Series, num_std:float) -> Series:
     '''

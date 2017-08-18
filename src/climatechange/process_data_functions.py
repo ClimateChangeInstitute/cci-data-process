@@ -455,8 +455,7 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     larger_df=replace_outliers_with_nan(larger_df, 2)
     
     compiled_stats_of_larger_df = compiled_stats_by_dd_intervals(larger_df, smaller_df)
-    headers = process_header_data(smaller_df)
-    sample_headers = [h for h in headers if h.htype == HeaderType.SAMPLE]
+    smaller_df_sample_headers = process_header_data(smaller_df, HeaderType.SAMPLE)
 
     corr_stats = []
     with PdfPages(pdf_filename) as pdf:
@@ -464,7 +463,7 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
             # list of compiled stat objects with depth and header names
             for d1 in dlist1:
                 # compiled_stat_object with df, depth name, and sample name
-                        for sample_header in sample_headers:
+                        for sample_header in smaller_df_sample_headers:
                             print("Processing depth %s" % d1.x_header.name)
                             # correlate
                             print("correlating %s and %s" % (d1.sample_header.name, sample_header.name))
