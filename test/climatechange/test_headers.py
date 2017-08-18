@@ -181,6 +181,20 @@ class Test(unittest.TestCase):
         self.assertEqual(HeaderType.UNKNOWN, headers[0].htype)
         self.assertEqual(HeaderType.UNKNOWN, headers[1].htype)
         
+        unknown_parsed_headers = process_header_data(df, HeaderType.UNKNOWN)
+        
+        self.assertEqual(2, len(unknown_parsed_headers))
+        
+        mixed_headers = ["Dat011216V2", "depth (m we) ", "Sr (ng/L)"]
+        df = DataFrame(numpy.random.randn(10,3), columns=mixed_headers)
+        
+        year_h = process_header_data(df, HeaderType.YEARS)
+        depth_h = process_header_data(df, HeaderType.DEPTH)
+        sample_h = process_header_data(df, HeaderType.SAMPLE)
+        
+        self.assertEqual(HeaderType.YEARS, year_h[0].htype)
+        self.assertEqual(HeaderType.DEPTH, depth_h[0].htype)
+        self.assertEqual(HeaderType.SAMPLE, sample_h[0].htype)
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']

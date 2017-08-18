@@ -15,6 +15,7 @@ import pandas
 
 from climatechange.file import load_dict_by_package, data_dir, load_dictionary, \
     save_dictionary
+from pandas.core.frame import DataFrame
 
 
 class HeaderType(Enum):
@@ -296,18 +297,23 @@ def load_headers(file_name:IO[str]) -> List[Header]:
     
     return result
 
-def process_header_data(df) -> List[Header]:
+default_dictionary = HeaderDictionary()
+
+def process_header_data(df:DataFrame,
+                        header_type:HeaderType=None,
+                        header_dict:HeaderDictionary=default_dictionary) -> List[Header]:
     '''
-    Use the default dictionary to process the data column headers.  See 
-    :class:`Header` for additional information.
+    Use the default dictionary to process the data column headers.  If a 
+    :class:`HeaderType` is specified, only the matching types are returned 
+    in the result.  See :class:`Header` for additional information.
     
     :param df: Data containing column headers to process
+    :param header_type: The type of headers to return 
+    :param header_dict: Optional header dictionary to use instead of the default
     :return: The processed column headers
     '''
     
-    hd = HeaderDictionary()
-    
-    parsedHeaders = hd.parse_headers(df.columns.tolist())
+    parsedHeaders = header_dict.parse_headers(df.columns.tolist())
     
     unknown_headers = [h for h in parsedHeaders if h.htype == HeaderType.UNKNOWN ]
     if unknown_headers:
@@ -329,5 +335,7 @@ def process_header_data(df) -> List[Header]:
         PYTHONPATH=src python climatechange/process_data.py -l your_csv_file.csv
         """))
             
-    return parsedHeaders
-
+    if header_type:
+        return [h for h in parsedHeaders if h.htype is header_type]
+    else:
+        return parsedHeaders

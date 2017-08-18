@@ -36,8 +36,9 @@ def replace_outliers_with_nan(df:DataFrame, num_std:float) -> DataFrame:
 def savgol_smooth_filter(df:DataFrame, sample_header:Header, x_header:Header):
     headers = process_header_data(df)
     window_length = df.shape[0]
-    sample_headers = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
-    df[sample_headers] = df[sample_headers].transform(lambda x: savgol_filter(x, window_length, 3))
+    sample_header_names = [h.name for h in headers if h.htype == HeaderType.SAMPLE]
+    savgol_func = lambda x: savgol_filter(x, window_length, 3)
+    df[sample_header_names] = df[sample_header_names].transform(savgol_func)
 
     return df
 
