@@ -9,11 +9,11 @@ import datetime
 import logging
 from math import isnan
 from math import nan
-from matplotlib import pyplot
 import os
-import time
+import sys
 from typing import List, Tuple
 
+from matplotlib import pyplot
 from matplotlib.backends.backend_pdf import PdfPages
 from numpy import float64
 from pandas import DataFrame
@@ -121,8 +121,21 @@ def add_units_to_stats(df:DataFrame, sample_header:Header) -> DataFrame:
 
 
 def load_and_clean_year_data(f:str, inc_amt:int) -> Tuple[DataFrame, List[List[CompiledStat]], List[Header]]:
+    '''
+    Load data from the specified file path, and convert zeroes and strings 
+    into :data:`math.nan`.  Finally, create compiled statistics for each sample using the increment amount
+     
+    :param f: The file path containing the data to load and clean
+    :param inc_amt: The amount to group the year column by.  For example, 
+        2012.6, 2012.4, 2012.2 would all be grouped into the year 2012.
+    '''
     df = load_csv(f)
     headers = process_header_data(df)
+    
+    # Exit the progam if there are unknown headers
+    if [h for h in headers if h.htype == HeaderType.UNKNOWN]:
+        sys.exit(0)
+        
     df = clean_data(df)
     return df, get_compiled_stats_by_year(inc_amt, df, headers), headers
 

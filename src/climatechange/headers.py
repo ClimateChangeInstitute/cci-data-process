@@ -5,16 +5,16 @@ Created on Jul 12, 2017
 '''
 from enum import Enum
 import json
+import logging
 import os
 import re
+import textwrap
 from typing import Mapping, List, Any, Sequence, IO
 
-from climatechange.file import load_dict_by_package, data_dir, load_dictionary,\
-    save_dictionary
 import pandas
-import textwrap
-import sys
-import logging
+
+from climatechange.file import load_dict_by_package, data_dir, load_dictionary, \
+    save_dictionary
 
 
 class HeaderType(Enum):
@@ -35,38 +35,39 @@ class HeaderEncoder(json.JSONEncoder):
     '''
     def default(self, obj:Any):
         '''
-        Write out  types as simply the string representation  
+        Write out  types as simply the string representation.  **Note** this 
+        does not write out any object other than :class:`Header` types.
+         
         :param obj: Object to be save
         '''
         if type(obj) == Header:
             return eval(str(obj))
         else:
-            return json.JSONEncoder.default(self, obj)
+            raise NotImplementedError
 
 class Header(object):
     '''
     A header parsed by the system.  This object contains the raw header, the 
     type of header, the class of the unit (which is basically a subcategory), 
-    the unit, and a label used for plotting. 
+    the unit, and a label used for plotting.
+    
+    :ivar str: The raw header value, for example, "Dat210617"
+    :ivar htype: The type of the column data as determined from the 
+        header_dict.json file
+    :ivar hclass: The class/subcategory of the header, for example, "Years"
+    :ivar unit: The unit of the, for example, "CE"
+    :ivar label: The label used for plotting the data, for example, 
+        "Year_Dat210617_CE" 
     '''
     
-    # Read/Raw header value
-    # For example, "Dat210617"
     name: str
     
-    # The type of the column data as determined from the header_dict.json file
     htype: HeaderType = HeaderType.UNKNOWN
     
-    # The class/subcategory of the header
-    # For example, "Years"
     hclass: str
     
-    # The unit of the
-    # For example, "CE" 
     unit: str
     
-    # The label used for plotting the data
-    # For example, "Year_Dat210617_CE"
     label: str
     
     def __init__(self,
@@ -117,17 +118,19 @@ class Header(object):
      
     def __eq__(self, other):
         '''
-        Overriding this method allows us to easily compare Header objects. 
+        Overriding this method allows us to easily compare Header objects.
+        
         :param other: Header object to compare to
         :return: True IFF the two objects have equal values
         '''
         if isinstance(other, self.__class__):
             return self.__dict__ == other.__dict__
-        return NotImplemented
+        return False
 
 def to_headers(d:Mapping[str, str]) -> Header:
     '''
     Use this function to specify how a header should be loaded.
+    
     :param d: A dictionary of header information
     :return: A fully instantiated header object
     '''
@@ -182,6 +185,7 @@ class HeaderDictionary(object):
     def get_header_dict(self) -> Mapping[str, Header]:
         '''
         Returns the **already** loaded header dictionary.
+        
         :return: The known header mappings
         '''
         return self.header_dictionary
@@ -190,6 +194,7 @@ class HeaderDictionary(object):
     def get_unit_dict(self) -> Mapping[str, str]:
         '''
         Returns the **already** loaded unit dictionary.
+        
         :return: The known unit mappings
         '''
         return self.unit_dictionary
@@ -250,9 +255,10 @@ class HeaderDictionary(object):
         dictionary, if you want the dictionary persisted, you must save the 
         dictionary to disk. Throws a ValueError if the given header is an 
         Unknown type.
+        
         :param h: The new header to add
         :return: None or the previous value if a header with the same name 
-        already existed
+            already existed
         '''
         if h.htype is HeaderType.UNKNOWN:
             raise ValueError("Unwilling to add unknown header type")
@@ -266,6 +272,7 @@ class HeaderDictionary(object):
         '''
         Persist the current dictionary.  If no file path is specified, then the 
         default dictionary location is used.
+        
         :param file_path: The path to the dictionary
         '''
         if file_path is None:
@@ -277,6 +284,7 @@ def load_headers(file_name:IO[str]) -> List[Header]:
     '''
     Loads headers into a list from a CSV file.  Each row should contain name,
     type, class, unit, and label data.
+    
     :param file_name: The name of a CSV file containing header information
     :return: A list containing the headers
     '''
@@ -289,6 +297,13 @@ def load_headers(file_name:IO[str]) -> List[Header]:
     return result
 
 def process_header_data(df) -> List[Header]:
+    '''
+    Use the default dictionary to process the data column headers.  See 
+    :class:`Header` for additional information.
+    
+    :param df: Data containing column headers to process
+    :return: The processed column headers
+    '''
     
     hd = HeaderDictionary()
     
@@ -313,32 +328,6 @@ def process_header_data(df) -> List[Header]:
         
         PYTHONPATH=src python climatechange/process_data.py -l your_csv_file.csv
         """))
-        
-        sys.exit(0)
-        
-    
-    unknown_headers = [h for h in parsedHeaders if h.htype == HeaderType.UNKNOWN ]
-    if unknown_headers:
-        print("The following unknown headers were found.")
-        for h in unknown_headers:
-            print(h.name)
-        print(textwrap.dedent("""
-        Please import the headers by using a CSV file containing rows of the 
-        following format:
-        
-        name1, type1, class1, unit1, label1
-        name2, type2, class2, unit2, label2
-        name3, type3, class3, unit3, label3
-        ...
-        
-        Run the program again using the -l flag to import the header information.
-        For example,
-        
-        PYTHONPATH=src python climatechange/process_data.py -l your_csv_file.csv
-        """))
-        
-        sys.exit(0)
-        
-    
+            
     return parsedHeaders
 

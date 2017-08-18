@@ -4,12 +4,17 @@ Created on Jul 12, 2017
 @author: Mark Royer
 '''
 from builtins import ValueError
+import json
+import logging
 import os
 import unittest
 
+import numpy
+from pandas.core.frame import DataFrame
+
 from climatechange.file import load_dict_by_package
 from climatechange.headers import HeaderDictionary, HeaderType, Header, to_headers, \
-    load_headers
+    load_headers, HeaderEncoder, process_header_data
 
 
 class Test(unittest.TestCase):
@@ -30,6 +35,33 @@ class Test(unittest.TestCase):
 
     def tearDown(self):
         pass
+
+    def testHeaderEqual(self):
+        h1 = Header('test', HeaderType.YEARS, 'Years', 'BP', 'Year (BP)')
+        h2 = Header('test', HeaderType.YEARS, 'Years', 'BP', 'Year (BP)')
+        h3 = Header('test3', HeaderType.YEARS, 'Years', 'BP', 'Year (BP)')
+        
+        self.assertTrue(h1 == h1)
+        self.assertTrue(h1 == h2)
+        self.assertTrue(h2 == h1)
+        self.assertFalse(h1 == h3)
+        self.assertFalse(h3 == h1)
+        self.assertFalse(h3 == h2)
+        self.assertFalse(h1 == object())
+        
+    def testHeaderEncoder(self):
+        
+        objstr = json.dumps([ h for (_,h) in self.abcDict.items()], cls=HeaderEncoder)
+        expstr = ''.join(['[{"name": "a", "type": "Years", "class": "aclass", "unit": "aunit", "label": "alabel"},',
+                          ' {"name": "a", "type": "Years", "class": "aclass", "unit": "aunit", "label": "alabel"},',
+                          ' {"name": "c", "type": "Sample", "class": "cclass", "unit": "cunit", "label": "clabel"},',
+                          ' {"name": "d", "type": "Sample", "class": "dclass", "unit": "dunit", "label": "dlabel"},',
+                          ' {"name": "e", "type": "Years", "class": "eclass", "unit": "eunit", "label": "elabel"}]'])
+                   
+        self.assertEqual(expstr, objstr)
+        
+        self.assertRaises(NotImplementedError, HeaderEncoder().default, object())     
+
 
     def testHeaderDictionaryCreation(self):
                 
@@ -105,7 +137,7 @@ class Test(unittest.TestCase):
         
         self.assertListEqual([test_sample, test_sample_nounit],
                              testHeaderDict.parse_headers(oneHeaderWithUnitAndOneWithoutUnit))
-    
+            
     def testAddHeader(self):
         
         self.assertRaises(ValueError, self.hd.add_header, self.unknown_header)     
@@ -135,6 +167,19 @@ class Test(unittest.TestCase):
             headers = load_headers(f)
             self.assertEqual(h1, headers[0], "First header is Strontium")
             self.assertEqual(h_last, headers[len(headers)-1], "Last header is Potasium")
+        
+
+    def testProcessHeaderData(self):
+        
+        unknown_headers = ['test_sample (ppb)', 'test2 Not in (ppb)']
+        
+        df = DataFrame(numpy.random.randn(10,2), columns=unknown_headers)
+        
+        logging.disable(logging.CRITICAL)
+        headers = process_header_data(df)
+        
+        self.assertEqual(HeaderType.UNKNOWN, headers[0].htype)
+        self.assertEqual(HeaderType.UNKNOWN, headers[1].htype)
         
 
 if __name__ == "__main__":
