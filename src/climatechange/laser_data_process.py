@@ -13,15 +13,13 @@ import pandas
 from pandas.core.frame import DataFrame
 from pandas.core.series import Series
 
+from climatechange.data_filters import replace_outliers_with_nan
 from climatechange.headers import process_header_data, HeaderType, Header
+from climatechange.plot import write_data_to_csv_files
 from climatechange.process_data_functions import clean_data
+from climatechange.resample_stats import compileStats
 import matplotlib.pyplot as plt
 import numpy as np
-from climatechange.resample_stats import compileStats
-from climatechange.data_filters import replace_outliers_with_nan,\
-    normalize_min_max_scaler
-import time
-from climatechange.plot import write_data_to_csv_files
 
 
 class LaserFile:
@@ -144,14 +142,19 @@ def combine_laser_data_by_directory(directory:str,
                                     create_CSV=False,
                                     prefix:str='KCC'):
     '''
+    Combine the laser data in the specified `directory`.  The folders with the 
+    specified `prefix` in `directory` are processed in lexicographical order.
     
-    :param directory:
-    :param prefix:KCC
-    :param depth_age_file:
-    
-    - folders in directory should be named accordingly 
-        that a dictionary sort will put them in correct order of appending
-    - will lexicographical sort folders in directory
+    :param directory: The root directory to process
+    :param depth_age_file: The path to the depth age file
+    :param create_PDF: If specified as `True`, PDFs will be generated 
+    :param filtered_data: If specified as `True`, data will be filtered.  
+        Currently this involves removing data points that are beyond 2 standard 
+        deviations.
+    :param create_CSV: If specified as `True`, CSV files will be generated for 
+        the  data
+    :param prefix: The prefix of the folders containing laser data to be 
+        processed
     '''
     input_1='InputFile_1'
     input_2='InputFile_2'
@@ -166,7 +169,7 @@ def combine_laser_data_by_directory(directory:str,
             for file in sorted(os.listdir(os.path.join(directory,folder))):
                 if file.startswith(input_1):
                     df1=df1.append(combine_laser_data_by_input_file(os.path.join(directory,folder,file),
-                                                                    depth_age_file,create_PDF,filtered_data,), ignore_index=True)
+                                                                    depth_age_file,create_PDF,filtered_data), ignore_index=True)
                 elif file.startswith(input_2):
                     df2=df2.append(combine_laser_data_by_input_file(os.path.join(directory,folder,file),
                                                                     depth_age_file,create_PDF,filtered_data), ignore_index=True)
@@ -248,11 +251,14 @@ def clean_LAICPMS_data(f:LaserFile) -> DataFrame:
     return df
 
 def filtered_laser_data(df:DataFrame)->DataFrame:
-
-     
-    df=replace_outliers_with_nan(df, 2)
-     
-    return df
+    '''
+    Filter the given data by removing data points that are outside of 2 
+    standard deviations of the mean. Modification occur in-place.
+    
+    :param df: The data to be processed.
+    :return: The modified data
+    '''
+    return replace_outliers_with_nan(df, 2)
 
 def add_depth_column(df:DataFrame, start_depth:float, end_depth:float) -> DataFrame:
     """

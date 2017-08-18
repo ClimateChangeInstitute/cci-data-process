@@ -78,7 +78,10 @@ def resampled_by_inc_depths(df_x_sample:DataFrame,
     df_stats = resampled_statistics_by_x(df_x_sample, inc_amt)
     return pandas.concat([df_depths, df_stats], axis=1)
 
-def compile_stats_by_depth(df:DataFrame, depth_header:Header, sample_header:Header, inc_amt:float) -> CompiledStat:
+def compile_stats_by_depth(df:DataFrame,
+                           depth_header:Header,
+                           sample_header:Header,
+                           inc_amt:float) -> CompiledStat:
     '''
     From the given data frame compile statistics (mean, median, min, max, etc)
     based on the parameters.
@@ -87,9 +90,9 @@ def compile_stats_by_depth(df:DataFrame, depth_header:Header, sample_header:Head
     :param depth_header: The depth column to use for indexing
     :param sample_header: The sample compile to create statistics about
     :param inc_amt: The amount to group the year column by. For example,
-    2012.6, 2012.4, 2012.2 would all be grouped into the year 2012.
+        2012.6, 2012.4, 2012.2 would all be grouped into the year 2012.
     :return: A new DataFrame containing the resampled statistics for the
-    specified sample and year.
+        specified sample and year.
     '''
     df_x_sample = pandas.concat([df.loc[:, depth_header.name], df.loc[:, sample_header.name]], axis=1)
     resampled_data = resampled_by_inc_depths(df_x_sample, depth_header, inc_amt)
