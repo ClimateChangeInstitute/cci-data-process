@@ -29,7 +29,7 @@ from climatechange.plot import write_data_to_csv_files, \
 from climatechange.readme_output import create_readme_output_file, \
     write_readmefile_to_txtfile, template
 from climatechange.resample_data_by_depths import compile_stats_by_depth, \
-    compiled_stats_by_dd_intervals
+    compiled_stats_by_dd_intervals, find_index_by_increment_for_depths
 from climatechange.resample_stats import compile_stats_by_year
 import matplotlib.pyplot as plt
 import numpy as np
@@ -216,8 +216,9 @@ def get_compiled_stats_by_depth(inc_amt:float,
     compiled_stats = []
     for depth_name in depth_headers:
         cur_depth = []
+        indices = find_index_by_increment_for_depths(df.loc[:, depth_name.name].values.tolist(), inc_amt) 
         for sample_name in sample_headers:
-            cur_depth.append(compile_stats_by_depth(df, depth_name, sample_name, inc_amt))
+            cur_depth.append(compile_stats_by_depth(df, depth_name, sample_name, indices, inc_amt))
         
 #             print("compile stats for %s: %s seconds"%(sample_name,time.time()-start_time_d))
         compiled_stats.append(cur_depth)

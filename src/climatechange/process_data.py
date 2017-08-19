@@ -165,7 +165,7 @@ USAGE
         
         inc_amt = float(args.inc_amt)
         
-        if len(sys.argv) == 1:
+        if len(sys.argv) == 1: # No arguments provided. Abort!
             parser.print_help()
             sys.exit(0)
         

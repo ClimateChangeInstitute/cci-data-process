@@ -118,16 +118,22 @@ class Test(unittest.TestCase):
         input_test = load_csv(os.path.join('csv_files', 'input_depths.csv'))
         input_test = clean_data(input_test)
         df_x_sample = pandas.concat([input_test.loc[:, 'depth (m we)'], input_test.loc[:, 'Cond (+ALU-S/cm)']], axis=1)
-        result = resampled_by_inc_depths(df_x_sample, test_depth_we_header, inc_amt)
+        
+        indices = find_index_by_increment_for_depths(df_x_sample.iloc[:, 0].values.tolist(), inc_amt)
+        
+        result = resampled_by_inc_depths(df_x_sample, test_depth_we_header, indices, inc_amt)
         assert_frame_equal(expected_result, result)
         
     def test_compile_stats_by_depth(self):
         input_test = load_csv(os.path.join('csv_files', 'input_depths.csv'))
         input_test = clean_data(input_test)
         expected_result = load_csv(os.path.join('csv_files', 'output_bydepth.csv'))
+        inc_amt = 0.01
+        indices = find_index_by_increment_for_depths(input_test.loc[:, test_depth_we_header.name].values.tolist(), inc_amt)
+        
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)   
-            result = compile_stats_by_depth(input_test, test_depth_we_header, test_sample_header, 0.01)
+            result = compile_stats_by_depth(input_test, test_depth_we_header, test_sample_header, indices, inc_amt)
         assert_frame_equal(expected_result, result.df)
         
 #     def test_remove_index_if_less_than_one(self):
