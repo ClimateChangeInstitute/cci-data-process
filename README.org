@@ -11,16 +11,17 @@
   is required.  Furthermore, the system requires the following python
   libraries.
 
-  |------------+--------------------+--------------+-----------------------------------------------------------------------------|
-  | Library    | Apt                | Pip          | Description                                                                 |
-  |------------+--------------------+--------------+-----------------------------------------------------------------------------|
-  | Bottle     | python3-bottle     | bottle       | Python library for creating web interfaces                                  |
-  | Matplotlib | python3-matplotlib | matplotlib   | Python based plotting system in a style similar to Matlab                   |
-  | Pandas     | python3-pandas     | pandas       | Data structures for "relational" or "labeled" data                          |
-  | Sphinx     | python3-sphinx     | sphinx       | Documentation generator for Python projects                                 |
-  | SciKit     | python3-sklearn    | scikit-learn | Simple and efficient tools for data mining and data analysis                |
-  | SciPy      | python3-scipy      | scipy        | Ecosystem of open-source software for mathematics, science, and engineering |
-  |------------+--------------------+--------------+-----------------------------------------------------------------------------|
+  |------------------+--------------------+--------------------------+----------------------------------------------------------------------------------------------------------------------|
+  | Library          | Apt                | Pip                      | Description                                                                                                          |
+  |------------------+--------------------+--------------------------+----------------------------------------------------------------------------------------------------------------------|
+  | Bottle           | python3-bottle     | bottle                   | Python library for creating web interfaces                                                                           |
+  | Matplotlib       | python3-matplotlib | matplotlib               | Python based plotting system in a style similar to Matlab                                                            |
+  | Pandas           | python3-pandas     | pandas                   | Data structures for "relational" or "labeled" data                                                                   |
+  | Sphinx           | python3-sphinx     | sphinx                   | Documentation generator for Python projects                                                                          |
+  | Sphinx Typehints |                    | sphinx-autodoc-typehints | Allows you to use Python 3 annotations for documenting acceptable argument types and return value types of functions |
+  | SciKit           | python3-sklearn    | scikit-learn             | Simple and efficient tools for data mining and data analysis                                                         |
+  | SciPy            | python3-scipy      | scipy                    | Ecosystem of open-source software for mathematics, science, and engineering                                          |
+  |------------------+--------------------+--------------------------+----------------------------------------------------------------------------------------------------------------------|
 
   As of writing this document, the default version of Python for
   [[https://www.continuum.io][Anaconda]] is 3.6.  However, on most Linux distribution the default
