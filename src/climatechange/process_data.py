@@ -71,14 +71,18 @@ USAGE
 
     try:
         # Setup argument parser
-        parser = ArgumentParser(description=program_license, formatter_class=RawDescriptionHelpFormatter)
+        parser = ArgumentParser(description=program_license,
+                                formatter_class=RawDescriptionHelpFormatter)
         
         parser.add_argument("-c",
                             "--combine-laser",
                             dest="combine_laser",
                             action="store",
                             nargs=4,
-                            metavar=('directory', 'folder_prefix', 'depth_age_file', 'create_pdf'),
+                            metavar=('DIRECTORY',
+                                     'FOLDER_PREFIX',
+                                     'DEPTH_AGE_FILE',
+                                     'CREATE_PDF'),
                             help="process and combine laser files: %(metavar)s")
         
         parser.add_argument("-cl",
@@ -86,13 +90,13 @@ USAGE
                             dest="laser_directory",
                             action="store",
                             nargs=2,
-                            help="combines processed laser data from %(dest)")
+                            help="combines processed laser data from %(dest)s")
         
         parser.add_argument("-f",
                             "--filter-laserdata",
                             dest="filter",
                             action="store",
-                            help="combines filtered laser data from %(dest)")
+                            help="combines filtered laser data from %(dest)s")
 
                
         parser.add_argument("-d",
@@ -160,6 +164,10 @@ USAGE
         verbose = args.verbose
         
         inc_amt = float(args.inc_amt)
+        
+        if len(sys.argv) == 1:
+            parser.print_help()
+            sys.exit(0)
         
         if verbose and verbose > 0:
             logger = logging.getLogger()
