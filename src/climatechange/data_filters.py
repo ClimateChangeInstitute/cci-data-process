@@ -39,6 +39,7 @@ def replace_outliers(df:DataFrame, val:float64=np.nan, num_std:float=2) -> DataF
     :param df: The data to replace outliers in
     :param val: The new value to use (the default is :data:`np.nan`)
     :param num_std: The number of standard deviations to use as a threshold
+    :return: Data with values outside the threshold replaced
     '''
     sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
     df[sample_header_names] = df[sample_header_names].transform(lambda s: replace(s, val, num_std))
@@ -64,6 +65,10 @@ def savgol_smooth_filter(df:DataFrame):
     return df
 
 def normalize_min_max_scaler(df:DataFrame) -> DataFrame:
+    '''
+    Normalize the 
+    :param df:
+    '''
     x = df.iloc[:, 2:].values 
     min_max_scaler = preprocessing.MinMaxScaler()
     x_scaled = min_max_scaler.fit_transform(x)
