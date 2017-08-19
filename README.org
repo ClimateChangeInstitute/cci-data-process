@@ -39,8 +39,16 @@
   to install the required libraries using pip, type the following.
 
 #+BEGIN_SRC sh
-python3.6 -m pip install pandas matplotlib bottle sphinx
+python3.6 -m pip install bottle matplotlib pandas scikit-learn scipy 
 #+END_SRC
+
+  **Optional:** If you want to build the code documentation, install
+  the following packages using =pip=.
+
+#+BEGIN_SRC sh
+python3.6 -m pip install sphinx sphinx-autodoc-typehints
+#+END_SRC
+ 
 
 * Building and Testing
 
