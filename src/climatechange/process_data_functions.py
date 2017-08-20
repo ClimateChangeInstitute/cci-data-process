@@ -257,7 +257,7 @@ def resample_by_depths(f:str, inc_amt:float):
     1. Mean w/ raw, median w/ raw (by depths) on same plot for each year column
     have 1 pdf with mean and median for each sample
     
-    :param f:This is a CSV file
+    :param f: The CSV file containing the data 
     '''
     print("Creating pdf for %s" % f)
     

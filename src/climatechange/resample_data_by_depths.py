@@ -105,9 +105,11 @@ def compile_stats_by_depth(df:DataFrame,
 
 def find_index_of_depth_intervals(depth_large:Series, depth_small:Series) -> List[List[int]]:
     '''
-
-    :param depth_large:depth columns of larger dataset with smaller increment
-    :param depth_small:depth columns of smaller dataset with larger increment
+    Find the indices of intervals in the larger series such that they are 
+    between that of the smaller. 
+    
+    :param depth_large: Depth columns of larger dataset with smaller increment
+    :param depth_small: Depth columns of smaller dataset with larger increment
     '''
     bottom_depth = []
     for i in range(depth_small.size - 1):
