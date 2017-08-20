@@ -148,26 +148,18 @@ class HeaderDictionary(object):
     header_file_path = os.path.join(data_dir(), header_file_name)
 
     header_dictionary:Mapping[str, Header] = {}
-    
-    unit_dictionary:Mapping[str, str] = {}
 
-    def __init__(self, headerDict:Mapping[str, Header]=None, unitDict:Mapping[str, str]=None) -> None: 
+    def __init__(self, headerDict:Mapping[str, Header]=None) -> None: 
         '''
         Create a new HeaderDictionary object.
         
         :param headerDict:  Header dictionary to use instead of the default
-        :param unitDict: Unit dictionary to use instead of the default
         '''
         if headerDict:
             self.header_dictionary = headerDict
         else:
             self.header_dictionary = self.load_latest_header_dict()
             
-                        
-        if unitDict:
-            self.unit_dictionary = unitDict
-        else:
-            self.unit_dictionary = load_dict_by_package('unit_dict.json')
   
     def load_latest_header_dict(self) -> Mapping[str, Header]:
         

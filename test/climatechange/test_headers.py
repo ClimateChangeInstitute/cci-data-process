@@ -69,13 +69,8 @@ class Test(unittest.TestCase):
         self.assertDictEqual(h_dict,
                              self.hd.get_header_dict(),
                              'Header dictionaries do not match')
-        
-
-        self.assertDictEqual(load_dict_by_package('unit_dict.json'),
-                             self.hd.get_unit_dict(),
-                             'Unit dictionaries do not match')
-        
-        customHd = HeaderDictionary(self.abcDict, self.abcDict)
+                
+        customHd = HeaderDictionary(self.abcDict)
         
         self.assertEqual(self.abcDict, customHd.get_header_dict())
         
@@ -113,9 +108,8 @@ class Test(unittest.TestCase):
                                          "test depth (m)": test_depth,
                                          "test_sample": test_sample_nounit,
                                          "test_sample (ppb)" : test_sample}
-        testUnit:Map[str, str] = {"ppb" : "ppb"}
         
-        testHeaderDict = HeaderDictionary(testDict, testUnit)
+        testHeaderDict = HeaderDictionary(testDict)
         
         self.assertEqual([], testHeaderDict.parse_headers(noHeaders))
         
