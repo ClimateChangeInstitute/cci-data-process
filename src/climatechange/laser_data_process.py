@@ -159,9 +159,6 @@ def combine_laser_data_by_directory(directory:str,
     df1 = DataFrame()
     df2 = DataFrame()
 
-
-
-
     for folder in sorted(os.listdir(directory)):
         if folder.startswith(prefix):
             for file in sorted(os.listdir(os.path.join(directory, folder))):
@@ -208,6 +205,7 @@ def plot_laser_data_by_directory(df:DataFrame, pdf_folder):
             for sample_header in sample_headers:
                 plot_laser_data(df, depth_header, sample_header, pdf)
                 
+                
 def plot_filtered_laser_data_by_directory(df:DataFrame, pdf_folder):
 
     pdf_filename = os.path.join(pdf_folder, 'all_filtered_data_1.pdf')
@@ -229,7 +227,7 @@ def plot_laser_data(df:DataFrame,
                            sample_header:Header,
                            pdf):
     fig = plt.figure(figsize=(11, 8.5))
-    plt.plot(df.loc[:, depth_header.name], df.loc[:, sample_header.name])
+    plt.semilogy(df.loc[:, depth_header.name], df.loc[:, sample_header.name])
     plt.xlabel(depth_header.label)
     plt.ylabel(sample_header.label)
     plt.title('LA-ICP-MS-%s' % (sample_header.hclass))

@@ -36,7 +36,7 @@ class Test(unittest.TestCase):
         pass
     
     def test_replace_outliers(self):
-        
+         
         column_names = ['depth (m we)', 'Ca (ppb)']
         input_df = DataFrame([[800000., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.],
                               [800000., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.]]).transpose()
@@ -44,10 +44,10 @@ class Test(unittest.TestCase):
                                  [math.nan, 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.]]).transpose()
         output_result.columns = column_names
         input_df.columns = column_names
-        
+         
         result = replace_outliers(input_df)
         assert_frame_equal(output_result, result)
-    
+#     
     def test_normalize_min_max_scaler(self):
         df = clean_LAICPMS_data(laser_file)
         min_Al_index = numpy.argmin(df.loc[:, 'Al27'].values.tolist())
