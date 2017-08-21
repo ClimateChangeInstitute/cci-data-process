@@ -14,7 +14,7 @@ from climatechange.headers import Header, HeaderType
 import numpy as np
 
 
-def create_range_by_inc(list_to_inc:List[float], inc_amt: int=1) -> List[float]:
+def create_range_by_year(list_to_inc:List[float], inc_amt: int=1) -> List[float]:
     '''
     
     :param list_to_inc:
@@ -35,17 +35,6 @@ def find_indices(list_to_inc, condition) -> List[int]:
     return [i for i, elem in enumerate(list_to_inc) if condition(elem)]
 
 
-def find_index_by_increment(list_to_inc:List[float], inc_amt:int=1) -> List[List[float]]:
-    '''
-    
-    :param list_to_inc:
-    :param inc_amt:
-    '''
-    top_range = create_range_by_inc(list_to_inc, inc_amt)
-    bottom_range = [x + inc_amt for x in top_range]
-    return [find_indices(list_to_inc, lambda e: e >= top_range[i] and e < bottom_range[i]) for i in range(0, len(top_range))]
-
-
 def create_depth_headers(list_headers: List[Header]) -> List[str]:
     '''
     Expected output should look like
@@ -61,17 +50,17 @@ def create_depth_headers(list_headers: List[Header]) -> List[str]:
     
     return result
 
-def resampled_years(df_year_sample, year_header, inc_amt:int=1):
-    return DataFrame(create_range_by_inc(df_year_sample.iloc[:, 0].values.tolist(), inc_amt), columns=[year_header.label])
+# def resampled_years(range_list, year_header):
+#     return DataFrame(range_list, columns=[year_header.label])
 
-def resampled_statistics_by_years(df_year_sample, sample_header, index):
+def resampled_statistics(df:DataFrame, sample_header:Header, index:List[List[float]]):
     appended_data = []
     for i in index:
-        appended_data.extend(compileStats(df_year_sample.iloc[i, [1]].transpose().values.tolist()))
+        appended_data.extend(compileStats(df.loc[i, [sample_header.name]].transpose().values.tolist()))
     return DataFrame(appended_data, columns=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
     # add units to column names
 
-def resampled_depths_by_years(index, depth_columns:DataFrame, depth_column_headers:List[Header]) -> DataFrame:
+def resampled_depths_by_years(index:List[List[float]], depth_columns:DataFrame, depth_column_headers:List[Header]) -> DataFrame:
     append_depth = []
     for i in index:
         min_depth = depth_columns.iloc[i, :].min()
@@ -84,23 +73,6 @@ def resampled_depths_by_years(index, depth_columns:DataFrame, depth_column_heade
 
     return DataFrame(append_depth, columns=create_depth_headers(depth_column_headers))
 
-def resampled_by_inc_years(df_year_sample:DataFrame,
-                    sample_header:Header,
-                    year_header:Header,
-                    depth_columns:DataFrame,
-                    depth_column_headers:List[Header],
-                    index:List[List[float]],
-                    inc_amt: int=1) -> DataFrame:
-    '''
-    :param df:
-    :param inc:
-    '''
-   
-    df_years = resampled_years(df_year_sample, year_header, inc_amt)
-    df_depth = resampled_depths_by_years(index, depth_columns, depth_column_headers)
-    df_stats = resampled_statistics_by_years(df_year_sample, sample_header, index)
-    return pandas.concat([df_years, df_depth, df_stats], axis=1)
-    
 
 def findMean(array:List[List[float]]) -> List[float]:
     '''
@@ -165,7 +137,13 @@ def compileStats(array:List[List[float]]) -> List[List[float]]:
                                   findLen(array))]
 
 
-def compile_stats_by_year(df:DataFrame, headers: Header, year_header:Header, sample_header:Header,index, inc_amt:int=1) -> CompiledStat:
+def compile_stats_by_year(df:DataFrame,
+                          headers: Header,
+                          year_header:Header,
+                          sample_header:Header,
+                          index:List[List[float]],
+                          range_list:List[float],
+                          inc_amt:int=1) -> CompiledStat:
     '''
     From the given data frame compile statistics (mean, median, min, max, etc) 
     based on the parameters.
@@ -178,15 +156,15 @@ def compile_stats_by_year(df:DataFrame, headers: Header, year_header:Header, sam
     :return: A new DataFrame containing the resampled statistics for the 
         specified sample_header and year.
     '''
-    
-    year_column = df.loc[:, year_header.name]
-    sample_column = df.loc[:, sample_header.name]
-    
+
     depth_column_headers = [ h for h in headers if h.htype == HeaderType.DEPTH ]
     depth_column_headers_names = [ h.name for h in headers if h.htype == HeaderType.DEPTH ]
     depth_columns = DataFrame([df.loc[:, c].values.tolist() for c in df.columns if c in depth_column_headers_names]).transpose()
     
-    df_year_sample = pandas.concat([year_column, sample_column], axis=1)
-    resampled_data = resampled_by_inc_years(df_year_sample, sample_header, year_header, depth_columns, depth_column_headers,index, inc_amt)
-    
+    df_years=DataFrame(range_list, columns=[year_header.label])
+    df_depth = resampled_depths_by_years(index, depth_columns, depth_column_headers)
+    df_stats = resampled_statistics(df, sample_header, index)
+    resampled_data = pandas.concat([df_years, df_depth, df_stats], axis=1)
+
     return CompiledStat(resampled_data, year_header, sample_header)
+

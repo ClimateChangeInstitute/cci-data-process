@@ -18,7 +18,7 @@ from climatechange.headers import HeaderType, Header
 from climatechange.process_data_functions import clean_data, \
     correlate_samples, remove_nan_from_datasets
 from climatechange.resample_data_by_depths import resampled_depths, create_range_for_depths, \
-    find_index_by_increment_for_depths, resampled_by_inc_depths, compile_stats_by_depth, \
+    find_index_by_increment, compile_stats_by_depth, \
     compiled_stats_by_dd_intervals, find_index_of_depth_intervals
 from climatechange.resample_stats import create_depth_headers
 import numpy as np
@@ -100,7 +100,8 @@ class Test(unittest.TestCase):
         expected_result = [list(range(0, 29)), list(range(29, 56))]
         input_test = load_csv(os.path.join('csv_files', 'input_depths.csv'))
         input_test = clean_data(input_test)
-        result = find_index_by_increment_for_depths(input_test.loc[:, 'depth (m we)'].values.tolist(), inc_amt)
+        range_list=create_range_for_depths(input_test.loc[:, 'depth (m we)'].values.tolist(), inc_amt)
+        result = find_index_by_increment(input_test.loc[:, 'depth (m we)'].values.tolist(),range_list, inc_amt)
         self.assertEqual(expected_result, result)
     
     def test_resampled_depths(self):
@@ -108,20 +109,10 @@ class Test(unittest.TestCase):
         expected_result = DataFrame([[0.605, 0.615], [0.615, 0.625]], columns=['top_depth_we_(m)', 'bottom_depth_we_(m)'])
         input_test = load_csv(os.path.join('csv_files', 'input_depths.csv'))
         input_test = clean_data(input_test)
+        range_list=create_range_for_depths(input_test.loc[:, test_depth_we_header.name].values.tolist(), inc_amt)
+        
         df_x_sample = pandas.concat([input_test.loc[:, 'depth (m we)'], input_test.loc[:, 'Cond (+ALU-S/cm)']], axis=1)
-        result = resampled_depths(df_x_sample, test_depth_we_header, inc_amt)
-        assert_frame_equal(expected_result, result)
-        
-    def test_resampled_by_inc_depths(self):
-        inc_amt = 0.01
-        expected_result = load_csv(os.path.join('csv_files', 'output_bydepth.csv'))
-        input_test = load_csv(os.path.join('csv_files', 'input_depths.csv'))
-        input_test = clean_data(input_test)
-        df_x_sample = pandas.concat([input_test.loc[:, 'depth (m we)'], input_test.loc[:, 'Cond (+ALU-S/cm)']], axis=1)
-        
-        indices = find_index_by_increment_for_depths(df_x_sample.iloc[:, 0].values.tolist(), inc_amt)
-        
-        result = resampled_by_inc_depths(df_x_sample, test_depth_we_header, indices, inc_amt)
+        result = resampled_depths(range_list, test_depth_we_header, inc_amt)
         assert_frame_equal(expected_result, result)
         
     def test_compile_stats_by_depth(self):
@@ -129,11 +120,12 @@ class Test(unittest.TestCase):
         input_test = clean_data(input_test)
         expected_result = load_csv(os.path.join('csv_files', 'output_bydepth.csv'))
         inc_amt = 0.01
-        indices = find_index_by_increment_for_depths(input_test.loc[:, test_depth_we_header.name].values.tolist(), inc_amt)
+        range_list=create_range_for_depths(input_test.loc[:, test_depth_we_header.name].values.tolist(), inc_amt)
+        indices = find_index_by_increment(input_test.loc[:, test_depth_we_header.name].values.tolist(),range_list, inc_amt)
         
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)   
-            result = compile_stats_by_depth(input_test, test_depth_we_header, test_sample_header, indices, inc_amt)
+            result = compile_stats_by_depth(input_test, test_depth_we_header, test_sample_header, indices,range_list, inc_amt)
         assert_frame_equal(expected_result, result.df)
         
 #     def test_remove_index_if_less_than_one(self):

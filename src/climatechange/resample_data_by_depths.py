@@ -11,7 +11,8 @@ import pandas
 
 from climatechange.compiled_stat import CompiledStat
 from climatechange.headers import Header, HeaderType, process_header_data
-from climatechange.resample_stats import compileStats, find_indices, create_depth_headers
+from climatechange.resample_stats import compileStats, find_indices, create_depth_headers,\
+    resampled_statistics
 import numpy as np
 
 
@@ -29,13 +30,12 @@ def create_range_for_depths(list_to_inc:List[float], inc_amt: float=0.01) -> Lis
     g = np.arange(np.round(min(list_to_inc), r), max(list_to_inc), inc_amt)
     return [round(i, r) for i in g.tolist()]
 
-def find_index_by_increment_for_depths(list_to_inc:List[float], inc_amt:float=0.01) -> List[List[float]]:
+def find_index_by_increment(list_to_inc:List[float], range_list:List[float], inc_amt:float=0.01) -> List[List[float]]:
     '''
 
     :param list_to_inc:
     :param inc_amt:
     '''
-    range_list = create_range_for_depths(list_to_inc, inc_amt)
     result = []
     range_list_size = len(range_list)
     prev = 0
@@ -57,50 +57,19 @@ def find_index_by_increment_for_depths(list_to_inc:List[float], inc_amt:float=0.
     
     return result 
 
-def resampled_depths(df_x_sample:DataFrame, depth_header:Header, inc_amt):
-    top_range = create_range_for_depths(df_x_sample.iloc[:, 0].values.tolist(), inc_amt)
+def resampled_depths(range_list:List[float], depth_header:Header, inc_amt):
+    top_range = range_list
     bottom_range = [x + inc_amt for x in top_range]
-#     if len(index_to_remove)>0:
-#         for i in sorted(index_to_remove, reverse=True):
-#
-#             del top_range[i]
-#             del bottom_range[i]
+    
     df = DataFrame([top_range, bottom_range]).transpose()
     df.columns = create_depth_headers([depth_header])
     return df
 
-def resampled_statistics_by_x(df_x_sample, indices:List[int]):
-    appended_data = []
-    for i in indices:
-        appended_data.extend(compileStats(df_x_sample.iloc[i, [1]].transpose().values.tolist()))
-    return DataFrame(appended_data, columns=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
-
-
-def resampled_by_inc_depths(df_x_sample:DataFrame,
-                            depth_header:Header,
-                            indices:List[int],
-                            inc_amt:float) -> DataFrame:
-    '''
-    :param df:
-    :param inc:
-    '''
-
-#     print(index)
-#     index_to_remove=[index.index(i) for i in index if len(i)<1 or i[0]==0]
-#     index = [i for i in index if len(i)>1]
-#     print(index)
-#     print(index_to_remove)
-
-
-    df_depths = resampled_depths(df_x_sample, depth_header, inc_amt)
-#     df_depths = resampled_depths(df_x_sample, depth_header, inc_amt,index_to_remove)
-    df_stats = resampled_statistics_by_x(df_x_sample, indices)
-    return pandas.concat([df_depths, df_stats], axis=1)
-
 def compile_stats_by_depth(df:DataFrame,
                            depth_header:Header,
                            sample_header:Header,
-                           indices:List[int],
+                           index:List[List[int]],
+                           range_list:List[float],
                            inc_amt:float) -> CompiledStat:
     '''
     From the given data frame compile statistics (mean, median, min, max, etc)
@@ -109,14 +78,16 @@ def compile_stats_by_depth(df:DataFrame,
     :param df: The data to compile stats for
     :param depth_header: The depth column to use for indexing
     :param sample_header: The sample compile to create statistics about
-    :param indices: The indices that will be compiled for the provided depth
+    :param index: The index that will be compiled for the provided depth
     :param inc_amt: The amount to group the year column by. For example,
         2012.6, 2012.4, 2012.2 would all be grouped into the year 2012.
     :return: A new DataFrame containing the resampled statistics for the
         specified sample and year.
     '''
-    df_x_sample = pandas.concat([df.loc[:, depth_header.name], df.loc[:, sample_header.name]], axis=1)
-    resampled_data = resampled_by_inc_depths(df_x_sample, depth_header, indices, inc_amt)
+
+    df_depths = resampled_depths(range_list, depth_header, inc_amt)
+    df_stats = resampled_statistics(df,sample_header, index)
+    resampled_data = pandas.concat([df_depths, df_stats], axis=1)
 
     return CompiledStat(resampled_data, depth_header, sample_header)
 

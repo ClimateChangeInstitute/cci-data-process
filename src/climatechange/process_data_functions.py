@@ -29,9 +29,9 @@ from climatechange.plot import write_data_to_csv_files, \
 from climatechange.readme_output import create_readme_output_file, \
     write_readmefile_to_txtfile, template
 from climatechange.resample_data_by_depths import compile_stats_by_depth, \
-    compiled_stats_by_dd_intervals, find_index_by_increment_for_depths
-from climatechange.resample_stats import compile_stats_by_year,\
-    find_index_by_increment
+    compiled_stats_by_dd_intervals, find_index_by_increment,\
+    create_range_for_depths
+from climatechange.resample_stats import compile_stats_by_year,create_range_by_year
 import matplotlib.pyplot as plt
 import numpy as np
 import time
@@ -78,10 +78,11 @@ def get_compiled_stats_by_year(inc_amt:int, df:DataFrame, headers:List[Header]) 
     sample_headers = [h for h in headers if h.htype == HeaderType.SAMPLE]
     compiled_stats = []
     for year_header in year_headers:
-        index=find_index_by_increment(df.loc[:,year_header.name].values.tolist(), inc_amt)
+        range_list=create_range_by_year(df.loc[:,year_header.name].values.tolist(), inc_amt)
+        index=find_index_by_increment(df.loc[:,year_header.name].values.tolist(),range_list, inc_amt)
         cur_year = []
         for sample_header in sample_headers:
-            cur_year.append(compile_stats_by_year(df, headers, year_header, sample_header,index, inc_amt))
+            cur_year.append(compile_stats_by_year(df, headers, year_header, sample_header,index,range_list,inc_amt))
         compiled_stats.append(cur_year)
     
     return compiled_stats
@@ -137,8 +138,10 @@ def load_and_clean_year_data(f:str, inc_amt:int) -> Tuple[DataFrame, List[List[C
     # Exit the progam if there are unknown headers
     if [h for h in headers if h.htype == HeaderType.UNKNOWN]:
         sys.exit(0)
-        
+#             df = clean_data(df.drop_duplicates())
+#     return df.reset_index(drop=True), headers    
     df = clean_data(df)
+    df=df[::-1]
     return df, get_compiled_stats_by_year(inc_amt, df, headers), headers
 
 
@@ -169,12 +172,11 @@ def resample_by_years(f:str, inc_amt:int=1):
     
 
     for cur_year in compiled_stats:
-        #list of list of compiled stat
+
         pdf_filename = (f_base + '_plots_Resampled_%s_%s_Resolution.pdf' % (inc_amt, cur_year[0].x_header.name))
         with PdfPages(pdf_filename) as pdf:
             for c in cur_year:
-           
-            #list of compiled stat
+
                 add_compile_stats_to_pdf(f_base,
                                          df,
                                          c.df,
@@ -195,23 +197,7 @@ def resample_by_years(f:str, inc_amt:int=1):
                                               csv_filename)
 
     year_headers = [h.label for h in headers if h.htype == HeaderType.YEARS]
-# 
-#     for i in range(len(year_headers)):
-#         
-#         
-#         with PdfPages(file_name) as pdf:
-#             for c in compiled_stats[i]:
-#                 add_compile_stats_to_pdf(f_base,
-#                                          df,
-#                                          c.df,
-#                                          pdf,
-#                                          c.x_header,
-#                                          c.sample_header,
-#                                          inc_amt,
-#                                          'Year',
-#                                          stat_header)    
-#                 pyplot.close()
-#                 
+
     run_date = str(datetime.date.today())
     output_path = os.path.dirname(f)
     readme = create_readme_output_file(template, f, headers, run_date, inc_amt, 'Year', year_headers, file_headers, num_csvfiles, stat_header)
@@ -236,9 +222,10 @@ def get_compiled_stats_by_depth(inc_amt:float,
     compiled_stats = []
     for depth_name in depth_headers:
         cur_depth = []
-        indices = find_index_by_increment_for_depths(df.loc[:, depth_name.name].values.tolist(), inc_amt) 
+        range_list=create_range_for_depths(df.loc[:, depth_name.name].values.tolist(),inc_amt)
+        index = find_index_by_increment(df.loc[:, depth_name.name].values.tolist(),range_list, inc_amt) 
         for sample_name in sample_headers:
-            cur_depth.append(compile_stats_by_depth(df, depth_name, sample_name, indices, inc_amt))
+            cur_depth.append(compile_stats_by_depth(df, depth_name, sample_name, index,range_list, inc_amt))
         
 #             print("compile stats for %s: %s seconds"%(sample_name,time.time()-start_time_d))
         compiled_stats.append(cur_depth)
