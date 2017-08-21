@@ -30,9 +30,11 @@ from climatechange.readme_output import create_readme_output_file, \
     write_readmefile_to_txtfile, template
 from climatechange.resample_data_by_depths import compile_stats_by_depth, \
     compiled_stats_by_dd_intervals, find_index_by_increment_for_depths
-from climatechange.resample_stats import compile_stats_by_year
+from climatechange.resample_stats import compile_stats_by_year,\
+    find_index_by_increment
 import matplotlib.pyplot as plt
 import numpy as np
+import time
 
 
 def is_number(s):
@@ -76,9 +78,10 @@ def get_compiled_stats_by_year(inc_amt:int, df:DataFrame, headers:List[Header]) 
     sample_headers = [h for h in headers if h.htype == HeaderType.SAMPLE]
     compiled_stats = []
     for year_header in year_headers:
+        index=find_index_by_increment(df.loc[:,year_header.name].values.tolist(), inc_amt)
         cur_year = []
         for sample_header in sample_headers:
-            cur_year.append(compile_stats_by_year(df, headers, year_header, sample_header, inc_amt))
+            cur_year.append(compile_stats_by_year(df, headers, year_header, sample_header,index, inc_amt))
         compiled_stats.append(cur_year)
     
     return compiled_stats
@@ -156,6 +159,7 @@ def resample_by_years(f:str, inc_amt:int=1):
     :param: f: This is a CSV file
     '''
     logging.info("Creating pdf for %s", f)
+    start_time=time.time()
 
     df, compiled_stats, headers = load_and_clean_year_data(f, inc_amt)
     f_base = os.path.splitext(f)[0]
@@ -196,7 +200,7 @@ def resample_by_years(f:str, inc_amt:int=1):
     output_path = os.path.dirname(f)
     readme = create_readme_output_file(template, f, headers, run_date, inc_amt, 'Year', year_headers, file_headers, num_csvfiles, stat_header)
     write_readmefile_to_txtfile(readme, os.path.join(output_path, '00README.txt'))
-
+    print('Resample by years time:%s min' %((time.time()-start_time)/60.))
 
 
 def get_compiled_stats_by_depth(inc_amt:float,

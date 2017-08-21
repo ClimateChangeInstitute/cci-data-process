@@ -89,12 +89,13 @@ def resampled_by_inc_years(df_year_sample:DataFrame,
                     year_header:Header,
                     depth_columns:DataFrame,
                     depth_column_headers:List[Header],
+                    index:List[List[float]],
                     inc_amt: int=1) -> DataFrame:
     '''
     :param df:
     :param inc:
     '''
-    index = find_index_by_increment(df_year_sample.iloc[:, 0].values.tolist(), inc_amt)
+   
     df_years = resampled_years(df_year_sample, year_header, inc_amt)
     df_depth = resampled_depths_by_years(index, depth_columns, depth_column_headers)
     df_stats = resampled_statistics_by_years(df_year_sample, sample_header, index)
@@ -164,7 +165,7 @@ def compileStats(array:List[List[float]]) -> List[List[float]]:
                                   findLen(array))]
 
 
-def compile_stats_by_year(df:DataFrame, headers: Header, year_header:Header, sample_header:Header, inc_amt:int=1) -> CompiledStat:
+def compile_stats_by_year(df:DataFrame, headers: Header, year_header:Header, sample_header:Header,index, inc_amt:int=1) -> CompiledStat:
     '''
     From the given data frame compile statistics (mean, median, min, max, etc) 
     based on the parameters.
@@ -186,6 +187,6 @@ def compile_stats_by_year(df:DataFrame, headers: Header, year_header:Header, sam
     depth_columns = DataFrame([df.loc[:, c].values.tolist() for c in df.columns if c in depth_column_headers_names]).transpose()
     
     df_year_sample = pandas.concat([year_column, sample_column], axis=1)
-    resampled_data = resampled_by_inc_years(df_year_sample, sample_header, year_header, depth_columns, depth_column_headers, inc_amt)
+    resampled_data = resampled_by_inc_years(df_year_sample, sample_header, year_header, depth_columns, depth_column_headers,index, inc_amt)
     
     return CompiledStat(resampled_data, year_header, sample_header)

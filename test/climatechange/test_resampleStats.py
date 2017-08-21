@@ -44,6 +44,7 @@ test_sample_header = Header("Cond (+ALU-S/cm)", HeaderType.SAMPLE, "Conductivity
 test_year_header = Header("Dat210617", HeaderType.YEARS, "Years", "CE", "Year_Dat210617_(CE)")
 input_test_zeros_and_numbers = load_csv(os.path.join('csv_files', 'input_test_zeros_and_numbers.csv'))
 input_test_zeros_and_numbers = clean_data(input_test_zeros_and_numbers)
+
 headers = process_header_data(input_test_zeros_and_numbers)
 depth_column_headers = [ h for h in headers if h.htype == HeaderType.DEPTH ]
 test_depth_column_headers_name = [ h.name for h in headers if h.htype == HeaderType.DEPTH ]
@@ -184,13 +185,15 @@ class Test(unittest.TestCase):
     def test_resampled_by_inc_years(self): 
         expected_result = load_csv(os.path.join('csv_files', 'output_test_zeros_and_numbers.csv')) 
         df_year_sample = pandas.concat([input_test_zeros_and_numbers.loc[:, test_year_header.name], input_test_zeros_and_numbers.loc[:, test_sample_header.name]], axis=1)
-        result = resampled_by_inc_years(df_year_sample, test_sample_header, test_year_header, depth_columns, depth_column_headers, inc_amt)
+        index = find_index_by_increment(df_year_sample.iloc[:, 0].values.tolist(), inc_amt)
+        result = resampled_by_inc_years(df_year_sample, test_sample_header, test_year_header, depth_columns, depth_column_headers, index,inc_amt)
         assert_frame_equal(expected_result, result)
         
         
     def test_compile_stats_by_year(self):
         expected_result = load_csv(os.path.join('csv_files', 'output_test_zeros_and_numbers.csv')) 
-        result = compile_stats_by_year(input_test_zeros_and_numbers, headers, test_year_header, test_sample_header, inc_amt)
+        index = find_index_by_increment(input_test_zeros_and_numbers.loc[:, test_year_header.name].values.tolist(), inc_amt)
+        result = compile_stats_by_year(input_test_zeros_and_numbers, headers, test_year_header, test_sample_header,index, inc_amt)
         assert_frame_equal(expected_result, result.df)
         
     def test_empty_rows(self):
@@ -198,14 +201,16 @@ class Test(unittest.TestCase):
         expected_result = load_csv(os.path.join('csv_files', 'output_test_zeros.csv')) 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            result = compile_stats_by_year(input_test_zeros, headers_zeros, test_year_header, test_sample_header)
+            index = find_index_by_increment(input_test_zeros.loc[:, test_year_header.name].values.tolist(), inc_amt)
+            result = compile_stats_by_year(input_test_zeros, headers_zeros, test_year_header, test_sample_header,index)
         assert_frame_equal(expected_result, result.df)
          
     def test_partial_empty_rows(self):
         expected_result = load_csv(os.path.join('csv_files', 'output_test_zeros_and_numbers.csv'))
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            result = compile_stats_by_year(input_test_zeros_and_numbers, headers, test_year_header, test_sample_header)
+            index = find_index_by_increment(input_test_zeros_and_numbers.loc[:, test_year_header.name].values.tolist(), inc_amt)
+            result = compile_stats_by_year(input_test_zeros_and_numbers, headers, test_year_header, test_sample_header,index)
         assert_frame_equal(expected_result, result.df)
     
     def create_stats_headers(self):
