@@ -15,7 +15,7 @@ from climatechange.resample_stats import compileStats, find_indices, create_dept
 import numpy as np
 
 
-def create_range_for_depths(list_to_inc:List[float], inc_amt: int=0.01) -> List[float]:
+def create_range_for_depths(list_to_inc:List[float], inc_amt: float=0.01) -> List[float]:
     '''
 
     :param list_to_inc:
