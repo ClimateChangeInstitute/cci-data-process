@@ -222,7 +222,7 @@ USAGE
             if year_file.endswith('.csv'):            
                 resample_by_years(year_file, int(inc_amt))
             else:
-                print("The specified year_file must be a CSV file.", file=sys.stderr)
+                logging.error("The specified year_file must be a CSV file.", file=sys.stderr)
                 sys.exit(-1)
         
         if args.depth_file:
@@ -232,7 +232,8 @@ USAGE
             if depth_file.endswith('.csv'):
                 resample_by_depths(depth_file, inc_amt)
             else:
-                print("The specified depth_file must be a CSV file.", file=sys.stderr)
+                logging.error("The specified depth_file must be a CSV file.",
+                              file=sys.stderr)
                 sys.exit(-1)
                 
 

@@ -15,6 +15,7 @@ import warnings
 from pandas.core.frame import DataFrame
 
 import pandas as pd
+import logging
 
 
 APPNAME = 'CCI-DATA-PROCESSOR'
@@ -49,7 +50,7 @@ def load_dictionary(file:IO[str], obj_hook:Callable=None) -> Mapping[str, Any]:
         elif isinstance(array, Mapping):
             pass # do nothing
         else:
-            print("Loaded an unknown dictionary file type.", file=sys.stderr)
+            logging.warn("Loaded an unknown dictionary file type.", file=sys.stderr)
     except ValueError:
         contents = file.read()
         if len(contents) > 0:  # File was not empty and still could not read

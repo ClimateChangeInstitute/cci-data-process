@@ -29,15 +29,33 @@ def create_range_for_depths(list_to_inc:List[float], inc_amt: int=0.01) -> List[
     g = np.arange(np.round(min(list_to_inc), r), max(list_to_inc), inc_amt)
     return [round(i, r) for i in g.tolist()]
 
-def find_index_by_increment_for_depths(list_to_inc:List[float], inc_amt:int=0.01) -> List[List[float]]:
+def find_index_by_increment_for_depths(list_to_inc:List[float], inc_amt:float=0.01) -> List[List[float]]:
     '''
 
     :param list_to_inc:
     :param inc_amt:
     '''
-    top_range = create_range_for_depths(list_to_inc, inc_amt)
-    bottom_range = [x + inc_amt for x in top_range]
-    return [find_indices(list_to_inc, lambda e: e >= top_range[i] and e < bottom_range[i]) for i in range(0, len(top_range))]
+    range_list = create_range_for_depths(list_to_inc, inc_amt)
+    result = []
+    range_list_size = len(range_list)
+    prev = 0
+    for i in range(range_list_size-1):
+        tmp = []
+        for j in range(prev, len(list_to_inc)):
+            e = list_to_inc[j]
+            if e >= range_list[i] and e < range_list[i + 1]:
+                tmp.append(j)
+                prev = j + 1
+        result.append(tmp)
+    
+    tmp = []
+    for j in range(prev, len(list_to_inc)):
+        e = list_to_inc[j]
+        if e >= range_list[range_list_size-1]:
+            tmp.append(j)
+    result.append(tmp)
+    
+    return result 
 
 def resampled_depths(df_x_sample:DataFrame, depth_header:Header, inc_amt):
     top_range = create_range_for_depths(df_x_sample.iloc[:, 0].values.tolist(), inc_amt)

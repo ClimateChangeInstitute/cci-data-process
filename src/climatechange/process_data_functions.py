@@ -155,7 +155,7 @@ def resample_by_years(f:str, inc_amt:int=1):
     
     :param: f: This is a CSV file
     '''
-    logging.info("Creating pdf for %s" % f)
+    logging.info("Creating pdf for %s", f)
 
     df, compiled_stats, headers = load_and_clean_year_data(f, inc_amt)
     f_base = os.path.splitext(f)[0]
