@@ -30,7 +30,7 @@ def create_range_for_depths(list_to_inc:List[float], inc_amt: float=0.01) -> Lis
     g = np.arange(np.round(min(list_to_inc), r), max(list_to_inc), inc_amt)
     return [round(i, r) for i in g.tolist()]
 
-def find_index_by_increment(list_to_inc:List[float], range_list:List[float], inc_amt:float=0.01) -> List[List[float]]:
+def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> List[List[float]]:
     '''
 
     :param list_to_inc:
@@ -55,10 +55,19 @@ def find_index_by_increment(list_to_inc:List[float], range_list:List[float], inc
             tmp.append(j)
     result.append(tmp)
     
-    return result 
+    result_list=[]
+    top_range=[]
+    for i in range(len(result)):
+        if result[i] ==[]:
+            print('error: empty list at %s'%(range_list[i]))
+        else:
+            result_list.append(result[i])
+            x=range_list[i]
+        top_range.append(x)
+    return result_list,top_range
 
-def resampled_depths(range_list:List[float], depth_header:Header, inc_amt):
-    top_range = range_list
+def resampled_depths(top_range:List[float], depth_header:Header, inc_amt):
+
     bottom_range = [x + inc_amt for x in top_range]
     
     df = DataFrame([top_range, bottom_range]).transpose()
@@ -92,19 +101,29 @@ def compile_stats_by_depth(df:DataFrame,
     return CompiledStat(resampled_data, depth_header, sample_header)
 
 
-def find_index_of_depth_intervals(depth_large:Series, depth_small:Series) -> List[List[int]]:
-    '''
-    Find the indices of intervals in the larger series such that they are 
-    between that of the smaller. 
-    
-    :param depth_large: Depth columns of larger dataset with smaller increment
-    :param depth_small: Depth columns of smaller dataset with larger increment
-    '''
-    bottom_depth = []
-    for i in range(depth_small.size - 1):
-        bottom_depth.append(depth_small.loc[i + 1])
-    index = [find_indices(depth_large, lambda e: e >= depth_small[i] and e < depth_small[i + 1]) for i in range(0, len(depth_small) - 1)]
-    return index
+# def find_index_of_depth_intervals(depth_large:Series, depth_small:Series) -> List[List[int]]:
+#     '''
+#     Find the indices of intervals in the larger series such that they are 
+#     between that of the smaller. 
+#     
+#     :param depth_large: Depth columns of larger dataset with smaller increment
+#     :param depth_small: Depth columns of smaller dataset with larger increment
+#     '''
+# 
+#     index = [find_indices(depth_large, lambda e: e >= depth_small[i] and e < depth_small[i + 1]) for i in range(0, len(depth_small) - 1)]
+#     return index
+
+
+
+def create_top_bottom_depth_dataframe(df:DataFrame, depth_header:Header) -> DataFrame:
+
+    new_depth_headers = create_depth_headers([depth_header])
+
+    list_depth = []
+    for i in range(0, df.shape[0] - 1):
+        list_depth.append([df.loc[i, depth_header.name], df.loc[i + 1, depth_header.name]])
+    return DataFrame(list_depth, columns=new_depth_headers)
+
 
 def compiled_stats_by_dd_intervals(larger_df:DataFrame, smaller_df:DataFrame) -> List[List[CompiledStat]]:
     '''
@@ -124,7 +143,7 @@ def compiled_stats_by_dd_intervals(larger_df:DataFrame, smaller_df:DataFrame) ->
     for depth_header_l in depth_headers_larger:
         for depth_header_s in depth_headers_smaller:
             if depth_header_l == depth_header_s:
-                index = find_index_of_depth_intervals(larger_df.loc[:, depth_header_s.name], smaller_df.loc[:, depth_header_l.name])
+                index,top_range = find_index_by_increment(larger_df.loc[:, depth_header_s.name].tolist(), smaller_df.loc[:, depth_header_l.name].tolist())
                 depth_df = create_top_bottom_depth_dataframe(smaller_df, depth_header_s)
                 depth_samples = []
                 for sample_header in sample_headers_larger:
@@ -137,14 +156,6 @@ def compiled_stats_by_dd_intervals(larger_df:DataFrame, smaller_df:DataFrame) ->
         result_list.append(depth_samples)
     return result_list
 
-def create_top_bottom_depth_dataframe(df:DataFrame, depth_header:Header) -> DataFrame:
-
-    new_depth_headers = create_depth_headers([depth_header])
-
-    list_depth = []
-    for i in range(0, df.shape[0] - 1):
-        list_depth.append([df.loc[i, depth_header.name], df.loc[i + 1, depth_header.name]])
-    return DataFrame(list_depth, columns=new_depth_headers)
 
 def create_top_bottom_depth_dataframe_for_laser_file(df:DataFrame, depth_header:Header) -> DataFrame:
 

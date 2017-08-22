@@ -56,13 +56,16 @@ def create_depth_headers(list_headers: List[Header]) -> List[str]:
 def resampled_statistics(df:DataFrame, sample_header:Header, index:List[List[float]]):
     appended_data = []
     for i in index:
-        appended_data.extend(compileStats(df.loc[i, [sample_header.name]].transpose().values.tolist()))
+        appended_data.extend(compileStats([df.loc[i, sample_header.name].values]))
     return DataFrame(appended_data, columns=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
     # add units to column names
+    
 
 def resampled_depths_by_years(index:List[List[float]], depth_columns:DataFrame, depth_column_headers:List[Header]) -> DataFrame:
     append_depth = []
+
     for i in index:
+
         min_depth = depth_columns.iloc[i, :].min()
         max_depth = depth_columns.iloc[i, :].max()
         combined = []       

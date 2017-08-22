@@ -19,7 +19,7 @@ from climatechange.process_data_functions import clean_data, \
     correlate_samples, remove_nan_from_datasets
 from climatechange.resample_data_by_depths import resampled_depths, create_range_for_depths, \
     find_index_by_increment, compile_stats_by_depth, \
-    compiled_stats_by_dd_intervals, find_index_of_depth_intervals
+    compiled_stats_by_dd_intervals
 from climatechange.resample_stats import create_depth_headers
 import numpy as np
 
@@ -101,7 +101,7 @@ class Test(unittest.TestCase):
         input_test = load_csv(os.path.join('csv_files', 'input_depths.csv'))
         input_test = clean_data(input_test)
         range_list=create_range_for_depths(input_test.loc[:, 'depth (m we)'].values.tolist(), inc_amt)
-        result = find_index_by_increment(input_test.loc[:, 'depth (m we)'].values.tolist(),range_list, inc_amt)
+        result,top_range = find_index_by_increment(input_test.loc[:, 'depth (m we)'].values.tolist(),range_list)
         self.assertEqual(expected_result, result)
     
     def test_resampled_depths(self):
@@ -121,11 +121,11 @@ class Test(unittest.TestCase):
         expected_result = load_csv(os.path.join('csv_files', 'output_bydepth.csv'))
         inc_amt = 0.01
         range_list=create_range_for_depths(input_test.loc[:, test_depth_we_header.name].values.tolist(), inc_amt)
-        indices = find_index_by_increment(input_test.loc[:, test_depth_we_header.name].values.tolist(),range_list, inc_amt)
+        indices,top_range = find_index_by_increment(input_test.loc[:, test_depth_we_header.name].values.tolist(),range_list)
         
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)   
-            result = compile_stats_by_depth(input_test, test_depth_we_header, test_sample_header, indices,range_list, inc_amt)
+            result = compile_stats_by_depth(input_test, test_depth_we_header, test_sample_header, indices,top_range, inc_amt)
         assert_frame_equal(expected_result, result.df)
         
 #     def test_remove_index_if_less_than_one(self):
@@ -193,7 +193,7 @@ class Test(unittest.TestCase):
     def test_find_index_of_depth_intervals(self):
         larger_df = load_csv(os.path.join('csv_files', 'test_input_dd_2.csv'))
         smaller_df = load_csv(os.path.join('csv_files', 'test_input_dd_1.csv'))
-        result = find_index_of_depth_intervals(larger_df.loc[:, 'depth (m we)'], smaller_df.loc[:, 'depth (m we)'])
+        result,top_range = find_index_by_increment(larger_df.loc[:, 'depth (m we)'].values.tolist(), smaller_df.loc[:, 'depth (m we)'].values.tolist())
         expected_result = [[1, 2], [3, 4], [5, 6], [7, 8], [9]]
         self.assertEqual(expected_result, result)
         
