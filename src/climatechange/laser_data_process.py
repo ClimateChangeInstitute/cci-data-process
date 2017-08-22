@@ -44,7 +44,19 @@ class LaserFile:
     def __repr__(self):
         return self.__str__()
     
-
+class CombinedLaser:
+    def __init__(self, df:DataFrame=DataFrame(), laser_files:List[LaserFile]=[]):
+        
+        self.df = df
+        self.laser_files = laser_files
+        print('in constructer %s'%laser_files)
+    def append(self,cl:'CombinedLaser', ignore_index=True):
+        
+        result_df = self.df.append(cl.df,ignore_index=ignore_index)
+        result_laser_files = self.laser_files + cl.laser_files
+        return CombinedLaser(result_df, result_laser_files)
+        
+    
 def readFile(file_path, laser_time, start_depth, end_depth, washin_time,
              washout_time, depth_age_file) -> LaserFile:
                  
@@ -114,6 +126,7 @@ def plot_laser_data_by_run(f:LaserFile, pdf_folder:str) -> DataFrame:
 def combine_laser_data_by_input_file(input_file:str, depth_age_file:str, create_PDF=False) -> DataFrame:
       
     laser_files = load_input_file(input_file, depth_age_file)
+    print(laser_files)
     df = DataFrame()
     
 #     if create_PDF:
@@ -127,7 +140,7 @@ def combine_laser_data_by_input_file(input_file:str, depth_age_file:str, create_
 #         if create_PDF:
 #             plot_laser_data_by_run(f,pdf_folder)
         
-    return df
+    return CombinedLaser(df,laser_files)
 
 
 
@@ -153,35 +166,35 @@ def combine_laser_data_by_directory(directory:str,
     '''
     input_1 = 'InputFile_1'
     input_2 = 'InputFile_2'
-    df1 = DataFrame()
-    df2 = DataFrame()
+    combined_laser_1 = CombinedLaser()
+    combined_laser_2 = CombinedLaser()
 
     for folder in sorted(os.listdir(directory)):
         if folder.startswith(prefix):
             for file in sorted(os.listdir(os.path.join(directory, folder))):
                 if file.startswith(input_1):
-                    df1 = df1.append(combine_laser_data_by_input_file(os.path.join(directory, folder, file),
-                                                                    depth_age_file, create_PDF), ignore_index=True)
+                    combined_laser_1 = combined_laser_1.append(combine_laser_data_by_input_file(os.path.join(directory, folder, file),
+                                                                    depth_age_file, create_PDF))
                 elif file.startswith(input_2):
-                    df2 = df2.append(combine_laser_data_by_input_file(os.path.join(directory, folder, file),
+                    combined_laser_2 = combined_laser_2.append(combine_laser_data_by_input_file(os.path.join(directory, folder, file),
                                                                     depth_age_file, create_PDF), ignore_index=True)
     
     if create_PDF:
         pdf_folder = os.path.join(directory, 'PDF_plots')
         if not os.path.exists(pdf_folder):
             os.makedirs(pdf_folder)  
-        plot_laser_data_by_directory(df1, pdf_folder)
-        plot_laser_data_by_directory(df2, pdf_folder)
+        plot_laser_data_by_directory(combined_laser_1.df, pdf_folder)
+        plot_laser_data_by_directory(combined_laser_2.df, pdf_folder)
     
     if create_CSV:
         csv_folder = os.path.join(directory, 'CSV_files')
         if not os.path.exists(csv_folder):
             os.makedirs(csv_folder)
             #change names
-        write_data_to_csv_files(df1, os.path.join(csv_folder, 'laser_filename.csv'))
-        write_data_to_csv_files(df2, os.path.join(csv_folder, 'laser_filename2.csv'))           
+        write_data_to_csv_files(combined_laser_1.df, os.path.join(csv_folder, 'laser_filename.csv'))
+        write_data_to_csv_files(combined_laser_2.df, os.path.join(csv_folder, 'laser_filename2.csv'))           
 
-    return df1, df2
+    return combined_laser_1.df,combined_laser_2.df
     # plot each sample by depth
                     
     
