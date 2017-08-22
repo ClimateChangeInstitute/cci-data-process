@@ -452,13 +452,13 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     :param f2:
     '''
 
-    stat_header = 'Median'
+    stat_header = 'Mean'
     df1, unused_headers1 = load_and_clean_dd_data(f1)
     df2, unused_headers2 = load_and_clean_dd_data(f2)
     f1_file_path = os.path.splitext(f1)[0]
     f2_base = os.path.basename(f2).split('.')[0]
-    csv_filename = f1_file_path + '_vs_ %s__stat_correlation_removeoutliers_median.csv' % (f2_base)
-    pdf_filename = f1_file_path + '_vs_ %s__plot_correlation_removeoutliers_median.pdf' % (f2_base)
+    csv_filename = f1_file_path + '_vs_ %s__stat_correlation.csv' % (f2_base)
+    pdf_filename = f1_file_path + '_vs_ %s__plot_correlation.pdf' % (f2_base)
 
     larger_df, smaller_df = (df1, df2) if df1.shape[0] > df2.shape[0] else (df2, df1)
     larger_df = replace_outliers(larger_df)

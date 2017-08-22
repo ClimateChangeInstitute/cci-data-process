@@ -103,6 +103,16 @@ class Test(unittest.TestCase):
         range_list=create_range_for_depths(input_test.loc[:, 'depth (m we)'].values.tolist(), inc_amt)
         result,top_range = find_index_by_increment(input_test.loc[:, 'depth (m we)'].values.tolist(),range_list)
         self.assertEqual(expected_result, result)
+        
+    def test_find_index_by_increment_with_blanks(self):    
+        list_to_inc=[1,2,6,7,8]
+        range_list=[1,3,5,7,9]
+        result,top_range = find_index_by_increment(list_to_inc,range_list)
+        self.assertEqual([[0,1],[2],[3,4]],result)
+        self.assertEqual([1,5,7],top_range)
+        self.assertEqual(len(result),len(top_range))
+        
+        
     
     def test_resampled_depths(self):
         inc_amt = 0.01

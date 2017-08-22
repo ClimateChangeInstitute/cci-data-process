@@ -4,16 +4,17 @@ Created on Jul 31, 2017
 @author: Heather
 '''
 
-from typing import List
+from typing import List, Tuple
 
-from pandas import DataFrame, Series
+from pandas import DataFrame
 import pandas
 
 from climatechange.compiled_stat import CompiledStat
 from climatechange.headers import Header, HeaderType, process_header_data
-from climatechange.resample_stats import compileStats, find_indices, create_depth_headers,\
+from climatechange.resample_stats import compileStats, create_depth_headers,\
     resampled_statistics
 import numpy as np
+import logging
 
 
 def create_range_for_depths(list_to_inc:List[float], inc_amt: float=0.01) -> List[float]:
@@ -30,13 +31,14 @@ def create_range_for_depths(list_to_inc:List[float], inc_amt: float=0.01) -> Lis
     g = np.arange(np.round(min(list_to_inc), r), max(list_to_inc), inc_amt)
     return [round(i, r) for i in g.tolist()]
 
-def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> List[List[float]]:
+def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> Tuple[List[List[int]],List[float]]:
     '''
 
     :param list_to_inc:
     :param inc_amt:
     '''
     result = []
+    top_range=[]
     range_list_size = len(range_list)
     prev = 0
     for i in range(range_list_size-1):
@@ -46,25 +48,24 @@ def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> 
             if e >= range_list[i] and e < range_list[i + 1]:
                 tmp.append(j)
                 prev = j + 1
-        result.append(tmp)
-    
+        if not tmp:
+            logging.warn('no values between [%f,%f)',range_list[i],range_list[i+1])
+        else:
+            result.append(tmp)
+            top_range.append(range_list[i])
+        
     tmp = []
     for j in range(prev, len(list_to_inc)):
         e = list_to_inc[j]
         if e >= range_list[range_list_size-1]:
             tmp.append(j)
-    result.append(tmp)
-    
-    result_list=[]
-    top_range=[]
-    for i in range(len(result)):
-        if result[i] ==[]:
-            print('error: empty list at %s'%(range_list[i]))
-        else:
-            result_list.append(result[i])
-            x=range_list[i]
-        top_range.append(x)
-    return result_list,top_range
+    if not tmp:
+        logging.warn('no values > %f',range_list[range_list_size-1])
+    else:
+        result.append(tmp)
+        top_range.append(range_list[range_list_size-1])
+            
+    return result,top_range
 
 def resampled_depths(top_range:List[float], depth_header:Header, inc_amt):
 
@@ -99,20 +100,6 @@ def compile_stats_by_depth(df:DataFrame,
     resampled_data = pandas.concat([df_depths, df_stats], axis=1)
 
     return CompiledStat(resampled_data, depth_header, sample_header)
-
-
-# def find_index_of_depth_intervals(depth_large:Series, depth_small:Series) -> List[List[int]]:
-#     '''
-#     Find the indices of intervals in the larger series such that they are 
-#     between that of the smaller. 
-#     
-#     :param depth_large: Depth columns of larger dataset with smaller increment
-#     :param depth_small: Depth columns of smaller dataset with larger increment
-#     '''
-# 
-#     index = [find_indices(depth_large, lambda e: e >= depth_small[i] and e < depth_small[i + 1]) for i in range(0, len(depth_small) - 1)]
-#     return index
-
 
 
 def create_top_bottom_depth_dataframe(df:DataFrame, depth_header:Header) -> DataFrame:
