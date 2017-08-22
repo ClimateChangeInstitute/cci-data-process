@@ -55,6 +55,9 @@ class CombinedLaser:
         result_df = self.df.append(cl.df,ignore_index=ignore_index)
         result_laser_files = self.laser_files + cl.laser_files
         return CombinedLaser(result_df, result_laser_files)
+    
+    
+
         
     
 def readFile(file_path, laser_time, start_depth, end_depth, washin_time,

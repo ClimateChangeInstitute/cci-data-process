@@ -16,7 +16,7 @@ from climatechange.compiled_stat import CompiledStat
 from climatechange.file import load_csv
 from climatechange.headers import HeaderType, Header
 from climatechange.process_data_functions import clean_data, \
-    correlate_samples, remove_nan_from_datasets
+    correlate_samples, remove_nan_from_datasets, correlate_stats
 from climatechange.resample_data_by_depths import resampled_depths, create_range_for_depths, \
     find_index_by_increment, compile_stats_by_depth, \
     compiled_stats_by_dd_intervals
@@ -217,6 +217,18 @@ class Test(unittest.TestCase):
         self.assertEqual(test_output_dd.sample_header, compiled_stat_of_larger_df[0][0].sample_header)
         self.assertEqual(test_output_dd.x_header, compiled_stat_of_larger_df[0][0].x_header)
          
+    def test_correlate_stats(self):
+        df=DataFrame([y,y,x,y,x,x,x,y]).transpose()
+        df.columns=['zero','one','Mean','Stdv','Median','Max','Min','six']
+        d1= CompiledStat(df, test_depth_we_header, test_sample_header)
+        d2=Series(y,name='d2')
+        r_val=[-0.0722,-0.0722,-0.0722,-0.0722]
+        expected_result=("depth (m we)", 'Cond (+ALU-S/cm)', 'd2')+ tuple(r_val)
+        result=correlate_stats(d1, d2)
+        self.assertAlmostEqual(expected_result[0], result[0])
+        self.assertEqual(len(expected_result),len(result))
+        self.assertEqual(expected_result[3],result[3])
+        
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

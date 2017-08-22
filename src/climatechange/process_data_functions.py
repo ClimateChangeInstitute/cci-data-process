@@ -112,7 +112,6 @@ def round_depth_values_to_sigfig(df:DataFrame):
     return df
     
              
-     
 def add_units_to_stats(df:DataFrame, sample_header:Header) -> DataFrame:
     df.rename(columns={'Mean':'mean_%s' % sample_header.label,
                        'Median':'median_%s' % sample_header.label,
@@ -183,12 +182,12 @@ def resample_by_years(f:str, inc_amt:int=1,stat_header:str='Mean'):
                                          stat_header)    
                 pyplot.close()
             
-            csv_filename = os.path.splitext(f)[0] + '_stats_Resampled_%s_%s_Resolution_for_%s.csv' % (inc_amt,
+                csv_filename = os.path.splitext(f)[0] + '_stats_Resampled_%s_%s_Resolution_for_%s_afterchange.csv' % (inc_amt,
                                                                          c.x_header.label,
                                                                          c.sample_header.hclass.replace("/", ""))
 
-            to_csv_df = add_units_to_stats(round_values_to_sigfig(c.df[:]), c.sample_header)
-            write_data_to_csv_files(to_csv_df,
+                to_csv_df = add_units_to_stats(round_values_to_sigfig(c.df[:]), c.sample_header)
+                write_data_to_csv_files(to_csv_df,
                                               csv_filename)
 
     readme = create_readme_output_file(template,
@@ -383,11 +382,22 @@ def load_and_clean_dd_data(f:str) -> Tuple[DataFrame, List[Header]]:
     return df.reset_index(drop=True), headers    
  
 
-def correlate_dd_samples(d1:CompiledStat, d2:Series, stat_header:str='Mean') -> Tuple[float, float, float, float, float]:
+def correlate_dd_samples(d1:CompiledStat, d2:Series,stat_header:str='Mean') -> Tuple[float, float, float, float, float]:
     d1_stat = d1.df.loc[:, stat_header]
      
     slope, intercept, r_value, p_value, std_err = linregress(remove_nan_from_datasets(d1_stat, d2))
     return d1.x_header.name, d1.sample_header.name, d2.name, slope, intercept, r_value, p_value, std_err
+
+def correlate_stats(d1:CompiledStat, d2:Series) -> Tuple[float, float, float, List[float]]:
+    
+    r_val=[]
+    for stat_header in d1.df.columns[2:7]:
+        if not stat_header=='Stdv':
+            d1_stat = d1.df.loc[:, stat_header]
+            slope, intercept, r_value, p_value, std_err = linregress(remove_nan_from_datasets(d1_stat, d2))
+            r_val.append(round(r_value,4))
+    return (d1.x_header.name, d1.sample_header.name, d2.name)+ tuple(r_val)
+                                                                    
 
 def plot_linregress_of_samples(d1:CompiledStat,
                                d2:Series,
@@ -408,23 +418,7 @@ def plot_linregress_of_samples(d1:CompiledStat,
     pdf.savefig(fig)
     plt.close()
     
-# def plot_2_samples_vs_depth(d1:CompiledStat,
-#                                d2:Series,
-#                                sample_header:Header,
-#                                stat_header,
-#                                pdf):
-#     d1_stat = d1.df.loc[:, stat_header]
-#     d2=d2[:-1]
-#     plt.figure(figsize=(11, 8.5))
-#     fig,ax=plt.subplots()
-#     ax.plot(d1.df.loc[:, d1.x_header.name],d1_stat,label='d1')
-#     ax.plot(d1.df.loc[:, d1.x_header.name],d2,label='d2'))
-#     plt.xlabel(d1.x_header.label)
-#     plt.title('Plot of %s and %s'% (d1.sample_header.hclass,sample_header.hclass))
-#     plt.legend()
-#     pdf.savefig(fig)
-#     plt.close()
-    
+
     
 def double_resample_by_depth_intervals(f1:str, f2:str):
     '''
@@ -452,7 +446,7 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     :param f2:
     '''
 
-    stat_header = 'Mean'
+    stat_header='Mean'
     df1, unused_headers1 = load_and_clean_dd_data(f1)
     df2, unused_headers2 = load_and_clean_dd_data(f2)
     f1_file_path = os.path.splitext(f1)[0]
@@ -466,7 +460,8 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     compiled_stats_of_larger_df = compiled_stats_by_dd_intervals(larger_df, smaller_df)
     smaller_df_sample_headers = process_header_data(smaller_df, HeaderType.SAMPLE)
 
-    corr_stats = []
+#     corr_stats = []
+    corr_allstats=[]
     with PdfPages(pdf_filename) as pdf:
         for dlist1 in compiled_stats_of_larger_df:
             # list of compiled stat objects with depth and header names
@@ -476,12 +471,15 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
                             print("Processing depth %s" % d1.x_header.name)
                             # correlate
                             print("correlating %s and %s" % (d1.sample_header.name, sample_header.name))
-                            corr_stats.append(correlate_dd_samples(d1, smaller_df.loc[:, sample_header.name], stat_header))
+#                             corr_stats.append(correlate_dd_samples(d1, smaller_df.loc[:, sample_header.name], stat_header))
+                            corr_allstats.append(correlate_stats(d1, smaller_df.loc[:, sample_header.name]))
+                            
                             plot_linregress_of_samples(d1, smaller_df.loc[:, sample_header.name], sample_header, stat_header, pdf)
-#                             plot_2_samples_by_depth(d1,smaller_df.loc[:, sample_header.name],sample_header,stat_header,pdf)
-    df_corr_stats = DataFrame(corr_stats, columns=['depth', 'sample_1', 'sample_2', 'slope', 'intercept', 'r_value', 'p_value', 'std_err'])    
-        
-    write_data_to_csv_files(df_corr_stats, csv_filename)
+# #                             plot_2_samples_by_depth(d1,smaller_df.loc[:, sample_header.name],sample_header,stat_header,pdf)
+#     df_corr_stats = DataFrame(corr_stats, columns=['depth', 'sample_1', 'sample_2', 'slope', 'intercept', 'r_value', 'p_value', 'std_err'])    
+    df_corr_allstats = DataFrame(corr_allstats, columns=['depth', 'sample_1', 'sample_2', 'r_value:Mean', 'r_value:Median','r_value:Max','r_value:Min'])    
+#     write_data_to_csv_files(df_corr_stats, csv_filename)
+    write_data_to_csv_files(df_corr_allstats, csv_filename)
     
 def load_and_store_header_file(path:str):
     print("Adding headers from %s to header dictionary." % path) 
@@ -508,6 +506,22 @@ def load_and_store_header_file(path:str):
           "replaced %d old headers with new definitions" % (len(all_new),
                                                             len(all_replaced)))
             
+    # def plot_2_samples_vs_depth(d1:CompiledStat,
+#                                d2:Series,
+#                                sample_header:Header,
+#                                stat_header,
+#                                pdf):
+#     d1_stat = d1.df.loc[:, stat_header]
+#     d2=d2[:-1]
+#     plt.figure(figsize=(11, 8.5))
+#     fig,ax=plt.subplots()
+#     ax.plot(d1.df.loc[:, d1.x_header.name],d1_stat,label='d1')
+#     ax.plot(d1.df.loc[:, d1.x_header.name],d2,label='d2'))
+#     plt.xlabel(d1.x_header.label)
+#     plt.title('Plot of %s and %s'% (d1.sample_header.hclass,sample_header.hclass))
+#     plt.legend()
+#     pdf.savefig(fig)
+#     plt.close()
     
 # def main(files):
 #     start_time = time.time()

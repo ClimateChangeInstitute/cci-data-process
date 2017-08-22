@@ -1,7 +1,6 @@
-/ignore_files/
 /ca_laser_runs.csv
-/test_writefile.csv
-/00README.txt
+/output_round_values.csv
+/output_stat_corr.csv
 /small_depth_interval_test.csv
 /small_depth_interval_test_output.csv
-/output_round_values.csv
+/test_input_laser_stats.csv
