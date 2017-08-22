@@ -274,7 +274,7 @@ def resample_by_depths(f:str, inc_amt:float,stat_header:str='Mean'):
 
     
     for cur_depth in compiled_stats:
-        file_name = (os.path.splitext(f)[0] + '_plots_Resampled_%s_inc_%s_resolution.pdf' % (inc_amt, cur_depth[0].depth_header.name))
+        file_name = (os.path.splitext(f)[0] + '_plots_Resampled_%s_inc_%s_resolution.pdf' % (inc_amt, cur_depth[0].x_header.name))
         with PdfPages(file_name) as pdf:
             for c in cur_depth:
                 add_compile_stats_to_pdf(os.path.splitext(f)[0],

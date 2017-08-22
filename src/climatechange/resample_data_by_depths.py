@@ -136,7 +136,7 @@ def compiled_stats_by_dd_intervals(larger_df:DataFrame, smaller_df:DataFrame) ->
                 for sample_header in sample_headers_larger:
                     current_stats = []
                     for i in index:
-                        current_stats.extend(compileStats([larger_df.loc[i, sample_header.name].tolist()]))
+                        current_stats.append(compileStats(larger_df.loc[i, sample_header.name].tolist()))
                     current_df = DataFrame(current_stats, columns=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
                     comp_stat = CompiledStat(pandas.concat((depth_df, current_df), axis=1), depth_header_l, sample_header)
                     depth_samples.append(comp_stat)

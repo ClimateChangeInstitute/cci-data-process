@@ -56,7 +56,7 @@ def create_depth_headers(list_headers: List[Header]) -> List[str]:
 def resampled_statistics(df:DataFrame, sample_header:Header, index:List[List[float]]):
     appended_data = []
     for i in index:
-        appended_data.extend(compileStats([df.loc[i, sample_header.name].values]))
+        appended_data.append(compileStats(df.loc[i, sample_header.name].values))
     return DataFrame(appended_data, columns=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
     # add units to column names
     
@@ -77,67 +77,16 @@ def resampled_depths_by_years(index:List[List[float]], depth_columns:DataFrame, 
     return DataFrame(append_depth, columns=create_depth_headers(depth_column_headers))
 
 
-def findMean(array:List[List[float]]) -> List[float]:
-    '''
-    find mean value of each list within a list
-    :param array: list of lists, 2D array of floats
-    :return: list of mean values for each list
-    '''
-    return [np.nanmean(i) for i in array]  
 
-def findMedian(array:List[List[float]]) -> List[float]:
-    '''
-    find median value of each list within a list
-    :param array: list of lists, 2D array floats
-    :return: list of median values for each list
-    '''
-    return [np.nanmedian(i) for i in array]
-       
-def findMax(array:List[List[float]]) -> List[float]:
-    '''
-    find maximum value of each list within a list
-    :param array: list of lists, 2D array floats
-    :return: list of maximum values for each list
-    '''
-    return [np.nanmax(i) for i in array]
-      
-def findMin(array:List[List[float]]) -> List[float]:
-    '''
-    find minimum value of each list within a list
-    :param array: list of lists, 2D array floats
-    :return: list of minimum values for each list
-    '''     
-    return [np.nanmin(i) for i in array]
 
-def findStd(array:List[List[float]]) -> List[float]:
-    '''
-    find standard deviation value of each list within a list
-    :param array: list of lists, 2D array floats
-    :return: list of standard deviation values for each list
-    '''
-    return [np.nanstd(i) for i in array]
-
-def findLen(array:List[List[float]]) -> List[float]:
-    '''
-    find length of list within each list within a list
-    :param array: list of lists, 2D array floats
-    :return: list of lengths of each list
-    '''  
-    return [len(i) for i in array]  
-
-def compileStats(array:List[List[float]]) -> List[List[float]]:
+def compileStats(array:List[float]) -> List[float]:
     '''
     compile statistics of each list within a list
-    :param array: list of lists, 2D array floats
-    :return: list of statistics for each list
+    :param array: array of floats
+    :return: list of statistics
     '''
-#     result=[findMean(array), findMedian(array), findMax(array), findMin(array), findStd(array), findLen(array)]
-    return [ list(x) for x in zip(findMean(array),
-                                  findStd(array),
-                                  findMedian(array),
-                                  findMax(array),
-                                  findMin(array),
-                                  findLen(array))]
+    return [np.nanmean(array), np.nanstd(array), np.nanmedian(array), 
+            np.nanmax(array), np.nanmin(array), len(array)]
 
 
 def compile_stats_by_year(df:DataFrame,

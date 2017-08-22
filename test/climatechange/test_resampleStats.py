@@ -19,8 +19,7 @@ from climatechange.laser_data_process import clean_LAICPMS_data, readFile
 from climatechange.process_data_functions import clean_data, \
     load_and_clean_dd_data
 from climatechange.resample_stats import compileStats, compile_stats_by_year,resampled_depths_by_years, \
-    create_range_by_year, findMean, findMedian, findMax, findMin, findStd, \
-    findLen, create_depth_headers, resampled_statistics
+    create_range_by_year, create_depth_headers, resampled_statistics
 import numpy as np
 from climatechange.resample_data_by_depths import find_index_by_increment
 from pandas.core.series import Series
@@ -30,7 +29,7 @@ from pandas.core.series import Series
 inc_amt = 1
 emptyArray = [[]]
 nanArray = [[np.NaN, np.nan, np.nan]]
-singleRowArray = [[5, 3, 4, 5, 3]]
+singleRowArray = [5, 3, 4, 5, 3]
 multipleRowArray = [[5.0, 4.0, 3.0, 2.0, 1.0],
                    [2.0, 3.0, 4.0, 5.0, 6.0 ],
                    [1.0, 3.0, 2.0, 5.0, 4.0]]
@@ -73,58 +72,14 @@ class Test(unittest.TestCase):
     def testName(self):
         pass
 
-    def testfindMean(self):
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=RuntimeWarning)
-            assert_almost_equal([np.nan], findMean(emptyArray))
-            assert_almost_equal([4.0], findMean(singleRowArray))
-            self.assertTrue(isnan(findMean(nanArray)[0]))
-            assert_almost_equal([3.0, 4.0, 3.0], findMean(multipleRowArray))
-        
-            str_input = [['f', 'r', '6']]
-            self.assertRaises(TypeError, findMean, str_input)
-            series_input=Series([5, 3, 4, 5, 3])
-            assert_almost_equal([4.0], findMean([series_input]))
-    
-    def testfindMedian(self):  
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=RuntimeWarning)   
-            assert_almost_equal([np.nan], findMedian(emptyArray))
-            assert_almost_equal([4.0], findMedian(singleRowArray))
-            assert_almost_equal([3.0, 4.0, 3.0], findMedian(multipleRowArray))
-    
-    def testfindMax(self):
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=RuntimeWarning)
-#             assert_almost_equal([np.nan], findMax(emptyArray))
-            assert_almost_equal([5.0], findMax(singleRowArray))
-            self.assertTrue(isnan(findMax(nanArray)[0]))
-            assert_almost_equal([5.0, 6.0, 5.0], findMax(multipleRowArray))
-
-    
-    def testfindMin(self): 
-#         assert_almost_equal([np.nan], findMin(emptyArray))
-        assert_almost_equal([3.0], findMin(singleRowArray))
-        assert_almost_equal([1.0, 2.0, 1.0], findMin(multipleRowArray))
-    
-    def testfindStd(self):
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=RuntimeWarning)
-            assert_almost_equal([np.nan], findStd(emptyArray))
-            assert_almost_equal([0.8944271], findStd(singleRowArray))
-            assert_almost_equal([1.4142135, 1.4142135, 1.4142135], findStd(multipleRowArray))
-
-    def testfindLen(self):
-        assert_almost_equal([0], findLen(emptyArray))
-        assert_almost_equal([5.0], findLen(singleRowArray))
-        assert_almost_equal([5.0, 5.0, 5.0], findLen(multipleRowArray))
  
     def testcompileStats(self):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)        
 #           assert_almost_equal([[]], compileStats(emptyArray))
-            assert_almost_equal([[4, 0.8944271, 4, 5, 3, 5]], compileStats(singleRowArray))
-            assert_almost_equal(test_output, compileStats(test_input))
+            assert_almost_equal([4, 0.8944271, 4, 5, 3, 5], compileStats(singleRowArray))
+            for i in range(len(test_input)):
+                np.testing.assert_array_almost_equal(test_output[i], compileStats(test_input[i]))
 
                         
     def test_resample_statistics(self):
@@ -153,7 +108,9 @@ class Test(unittest.TestCase):
                       [0004.3684210, 1.0863035, 0004.0000000, 0006.0000000, 0002.0000000, 19.0000000],
                       [0005.3684210, 1.0863035, 0005.0000000, 0007.0000000, 0003.0000000, 19.0000000]]
         frame = load_csv(os.path.join('csv_files', 'small.csv'))
-        assert_almost_equal(small_output, compileStats(frame.transpose().values.tolist()))
+        for i in range(len(small_output)):
+            np.testing.assert_array_almost_equal(small_output[i],
+                                                 compileStats(frame.iloc[:,i].values.tolist()))
         
     def test_create_depth_headers(self):
         input_test = [Header("depth (m we)", HeaderType.DEPTH, "Depth", "meters", "depth_we_(m)")]
@@ -234,17 +191,6 @@ class Test(unittest.TestCase):
         result = compile_stats_by_year(input_test_zeros_and_numbers, headers, test_year_header, test_sample_header)
         assert_frame_equal(expected_result.columns, result.columns) 
     
-    def test_compiledStats_with_laser_file(self):
-        expected_mean = [2953.133789, 3318804, 488.9444478, 945, 41502.778646666673]
-        expected_count = 3
-        result = compileStats(laser_file_df.iloc[:, 2:].transpose().values.tolist())
-        self.assertAlmostEqual(expected_mean[0], result[0][0])
-        self.assertAlmostEqual(expected_count, result[0][5])
-        self.assertAlmostEqual(expected_mean[4], result[4][0])
-        
-        
-#     def test_find_round_values(self):
-#         expected_result=    
         
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']

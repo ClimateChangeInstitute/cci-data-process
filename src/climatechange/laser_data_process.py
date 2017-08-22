@@ -49,7 +49,7 @@ class CombinedLaser:
         
         self.df = df
         self.laser_files = laser_files
-        print('in constructer %s'%laser_files)
+        
     def append(self,cl:'CombinedLaser', ignore_index=True):
         
         result_df = self.df.append(cl.df,ignore_index=ignore_index)
@@ -126,7 +126,7 @@ def plot_laser_data_by_run(f:LaserFile, pdf_folder:str) -> DataFrame:
 def combine_laser_data_by_input_file(input_file:str, depth_age_file:str, create_PDF=False) -> DataFrame:
       
     laser_files = load_input_file(input_file, depth_age_file)
-    print(laser_files)
+
     df = DataFrame()
     
 #     if create_PDF:
