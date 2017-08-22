@@ -78,22 +78,17 @@ USAGE
                             "--combine-laser",
                             dest="combine_laser",
                             action="store",
-                            nargs=4,
+                            nargs=5,
                             metavar=('DIRECTORY',
-                                     'FOLDER_PREFIX',
                                      'DEPTH_AGE_FILE',
-                                     'CREATE_PDF'),
+                                     'CREATE_PDF',
+                                     'CREATE_CSV',
+                                     'FOLDER_PREFIX'),
                             help="process and combine laser files: %(metavar)s")
         
-        parser.add_argument("-cl",
-                            "--combine-laserdata",
-                            dest="laser_directory",
-                            action="store",
-                            nargs=2,
-                            help="combines processed laser data from %(dest)s")
         
         parser.add_argument("-f",
-                            "--filter-laserdata",
+                            "--filter_laserdata",
                             dest="filter",
                             action="store",
                             help="combines filtered laser data from %(dest)s")
@@ -184,21 +179,11 @@ USAGE
             logging.info("Using verbosity of %s for logging.", level)
         
         if args.combine_laser:
-            # 'directory', 'folder_prefix', 'depth_age_file', 'create_pdf
-            directory, folder_prefix, depth_age_file, create_pdf = args.combine_laser
-            combine_laser_data_by_directory(directory, folder_prefix, depth_age_file, bool(create_pdf))
+            # 'directory', 'depth_age_file', 'create_pdf', 'create_csv', 'folder_prefix'
+            directory, depth_age_file, create_pdf, create_csv, folder_prefix,  = args.combine_laser
+            combine_laser_data_by_directory(directory, depth_age_file, bool(create_pdf),bool(create_csv),folder_prefix)
             
-        if args.laser_directory:
-            if args.filter:
-                filtered_data=True
-            else:
-                filtered_data=False
-                
-            create_PDF=True
-            combine_laser_data_by_directory(args.laser_directory[0],
-                                            args.laser_directory[1],create_PDF,filtered_data)
 
-        
         if args.headers_file:
             load_and_store_header_file(args.headers_file)
             return

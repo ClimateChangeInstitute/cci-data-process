@@ -35,7 +35,7 @@ class LaserFile:
         self.processed_data = clean_LAICPMS_data(self)
         self.background_info = compileStats(self.raw_data.iloc[0:11, 1:].transpose().values.tolist())
         self.stats = compileStats(self.processed_data.iloc[:, 2:].transpose().values.tolist())
-        self.filtered_data = filtered_laser_data(self.processed_data)
+#         self.filtered_data = filtered_laser_data(self.processed_data)
 #         self.normalized_data=normalize_min_max_scaler(self.processed_data)
 
     def __str__(self):
@@ -111,7 +111,7 @@ def plot_laser_data_by_run(f:LaserFile, pdf_folder:str) -> DataFrame:
                 plot_laser_data(f.processed_data, depth_header, sample_header, pdf)
 
 
-def combine_laser_data_by_input_file(input_file:str, depth_age_file:str, create_PDF=False, filtered_data=False) -> DataFrame:
+def combine_laser_data_by_input_file(input_file:str, depth_age_file:str, create_PDF=False) -> DataFrame:
       
     laser_files = load_input_file(input_file, depth_age_file)
     df = DataFrame()
@@ -122,10 +122,8 @@ def combine_laser_data_by_input_file(input_file:str, depth_age_file:str, create_
 #             os.makedirs(pdf_folder)
         
     for f in laser_files:
-        if filtered_data:
-            df = df.append(f.filtered_data, ignore_index=True)
-        else:
-            df = df.append(f.processed_data, ignore_index=True)
+
+        df = df.append(f.processed_data, ignore_index=True)
 #         if create_PDF:
 #             plot_laser_data_by_run(f,pdf_folder)
         
@@ -136,7 +134,6 @@ def combine_laser_data_by_input_file(input_file:str, depth_age_file:str, create_
 def combine_laser_data_by_directory(directory:str,
                                     depth_age_file:str,
                                     create_PDF=False,
-                                    filtered_data=False,
                                     create_CSV=False,
                                     prefix:str='KCC'):
     '''
@@ -164,28 +161,25 @@ def combine_laser_data_by_directory(directory:str,
             for file in sorted(os.listdir(os.path.join(directory, folder))):
                 if file.startswith(input_1):
                     df1 = df1.append(combine_laser_data_by_input_file(os.path.join(directory, folder, file),
-                                                                    depth_age_file, create_PDF, filtered_data), ignore_index=True)
+                                                                    depth_age_file, create_PDF), ignore_index=True)
                 elif file.startswith(input_2):
                     df2 = df2.append(combine_laser_data_by_input_file(os.path.join(directory, folder, file),
-                                                                    depth_age_file, create_PDF, filtered_data), ignore_index=True)
+                                                                    depth_age_file, create_PDF), ignore_index=True)
     
     if create_PDF:
         pdf_folder = os.path.join(directory, 'PDF_plots')
         if not os.path.exists(pdf_folder):
-            os.makedirs(pdf_folder)
-        if filtered_data:    
-            plot_filtered_laser_data_by_directory(df1, pdf_folder)
-            plot_filtered_laser_data_by_directory(df2, pdf_folder)
-        else:
-            plot_laser_data_by_directory(df1, pdf_folder)
-            plot_laser_data_by_directory(df2, pdf_folder)
+            os.makedirs(pdf_folder)  
+        plot_laser_data_by_directory(df1, pdf_folder)
+        plot_laser_data_by_directory(df2, pdf_folder)
     
     if create_CSV:
         csv_folder = os.path.join(directory, 'CSV_files')
         if not os.path.exists(csv_folder):
             os.makedirs(csv_folder)
-        write_data_to_csv_files(df1, os.path.join(csv_folder, 'filename'))
-        write_data_to_csv_files(df2, os.path.join(csv_folder, 'filename2'))           
+            #change names
+        write_data_to_csv_files(df1, os.path.join(csv_folder, 'laser_filename.csv'))
+        write_data_to_csv_files(df2, os.path.join(csv_folder, 'laser_filename2.csv'))           
 
     return df1, df2
     # plot each sample by depth
