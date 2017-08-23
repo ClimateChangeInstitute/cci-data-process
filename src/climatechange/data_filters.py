@@ -77,6 +77,40 @@ def normalize_min_max_scaler(df:DataFrame) -> DataFrame:
     df_norm = pandas.DataFrame(x_scaled, columns=df.iloc[:, 2:].columns)
     return pandas.concat((df.iloc[:, :2], df_norm), axis=1)
 
+def standardize_scaler(df:DataFrame) -> DataFrame:
+    '''
+    standardize dataframe by mean and std
+    doesn't take nan values
+    :param df:
+    '''
+    x = df.iloc[:, 2:].values
+    scaler = preprocessing.StandardScaler()
+    x_scaled=scaler.fit_transform(x)
+    df_norm = pandas.DataFrame(x_scaled, columns=df.iloc[:, 2:].columns)
+    return pandas.concat((df.iloc[:, :2], df_norm), axis=1)
+
+def robust_scaler(df:DataFrame) -> DataFrame:
+    x = df.iloc[:, 2:].values
+    robust_scaler = preprocessing.RobustScaler(quantile_range=(25, 75))
+    x_scaled=robust_scaler.fit_transform(x)
+    df_norm = pandas.DataFrame(x_scaled, columns=df.iloc[:, 2:].columns)
+    return pandas.concat((df.iloc[:, :2], df_norm), axis=1)
+
+def scaler(df:DataFrame) -> DataFrame:
+    x = df.iloc[:, 2:].values
+    x_scaled = preprocessing.scale(x)
+    df_norm = pandas.DataFrame(x_scaled, columns=df.iloc[:, 2:].columns)
+    return pandas.concat((df.iloc[:, :2], df_norm), axis=1)
+
+def fill_missing_values(df:DataFrame) -> DataFrame:
+    x = df.iloc[:, 2:].values
+    
+    imp = preprocessing.Imputer(missing_values='NaN', strategy='mean', axis=0)
+    x_fill=imp.fit_transform(x)
+    df_norm = pandas.DataFrame(x_fill, columns=df.iloc[:, 2:].columns)
+    return pandas.concat((df.iloc[:, :2], df_norm), axis=1)
+
+
 def adjust_data_by_background(df:DataFrame,
                                  background_stats:DataFrame,
                                  stat:str='Mean')->DataFrame:
@@ -97,11 +131,5 @@ def adjust_data_by_stats(df:DataFrame,
     
     return df   
     
-    
-    
-    
-    
-    
-    pass
     
     

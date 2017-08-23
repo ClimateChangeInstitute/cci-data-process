@@ -38,10 +38,10 @@ def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> 
     :param inc_amt:
     '''
     result = []
-    top_range=[]
+    top_range = []
     range_list_size = len(range_list)
     prev = 0
-    for i in range(range_list_size-1):
+    for i in range(range_list_size - 1):
         tmp = []
         for j in range(prev, len(list_to_inc)):
             e = list_to_inc[j]
@@ -49,8 +49,8 @@ def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> 
                 tmp.append(j)
                 prev = j + 1
         if not tmp:
-            logging.warn('no values between [%f,%f)',range_list[i],range_list[i+1])
-        else:
+            logging.warn('no values between [%f,%f)', range_list[i], range_list[i + 1])
+        else: 
             result.append(tmp)
             top_range.append(range_list[i])
         
@@ -65,7 +65,7 @@ def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> 
         result.append(tmp)
         top_range.append(range_list[range_list_size-1])
             
-    return result,top_range
+    return result, top_range
 
 def resampled_depths(top_range:List[float], depth_header:Header, inc_amt):
 
@@ -75,31 +75,6 @@ def resampled_depths(top_range:List[float], depth_header:Header, inc_amt):
     df.columns = create_depth_headers([depth_header])
     return df
 
-def compile_stats_by_depth(df:DataFrame,
-                           depth_header:Header,
-                           sample_header:Header,
-                           index:List[List[int]],
-                           range_list:List[float],
-                           inc_amt:float) -> CompiledStat:
-    '''
-    From the given data frame compile statistics (mean, median, min, max, etc)
-    based on the parameters.
-
-    :param df: The data to compile stats for
-    :param depth_header: The depth column to use for indexing
-    :param sample_header: The sample compile to create statistics about
-    :param index: The index that will be compiled for the provided depth
-    :param inc_amt: The amount to group the year column by. For example,
-        2012.6, 2012.4, 2012.2 would all be grouped into the year 2012.
-    :return: A new DataFrame containing the resampled statistics for the
-        specified sample and year.
-    '''
-
-    df_depths = resampled_depths(range_list, depth_header, inc_amt)
-    df_stats = resampled_statistics(df,sample_header, index)
-    resampled_data = pandas.concat([df_depths, df_stats], axis=1)
-
-    return CompiledStat(resampled_data, depth_header, sample_header)
 
 
 def create_top_bottom_depth_dataframe(df:DataFrame, depth_header:Header) -> DataFrame:

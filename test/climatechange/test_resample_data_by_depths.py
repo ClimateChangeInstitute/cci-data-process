@@ -14,12 +14,12 @@ from pandas.util.testing import assert_frame_equal
 
 from climatechange.compiled_stat import CompiledStat
 from climatechange.file import load_csv
-from climatechange.headers import HeaderType, Header
+from climatechange.headers import HeaderType, Header, process_header_data
 from climatechange.process_data_functions import clean_data, \
-    correlate_samples, remove_nan_from_datasets, correlate_stats
+    correlate_samples, remove_nan_from_datasets, correlate_stats,\
+    get_compiled_stats_by_depth
 from climatechange.resample_data_by_depths import resampled_depths, create_range_for_depths, \
-    find_index_by_increment, compile_stats_by_depth, \
-    compiled_stats_by_dd_intervals
+    find_index_by_increment,compiled_stats_by_dd_intervals
 from climatechange.resample_stats import create_depth_headers
 import numpy as np
 
@@ -100,57 +100,37 @@ class Test(unittest.TestCase):
         expected_result = [list(range(0, 29)), list(range(29, 56))]
         input_test = load_csv(os.path.join('csv_files', 'input_depths.csv'))
         input_test = clean_data(input_test)
-        range_list=create_range_for_depths(input_test.loc[:, 'depth (m we)'].values.tolist(), inc_amt)
-        result,top_range = find_index_by_increment(input_test.loc[:, 'depth (m we)'].values.tolist(),range_list)
+        range_list = create_range_for_depths(input_test.loc[:, 'depth (m we)'].values.tolist(), inc_amt)
+        result, unused_top_range = find_index_by_increment(input_test.loc[:, 'depth (m we)'].values.tolist(), range_list)
         self.assertEqual(expected_result, result)
         
     def test_find_index_by_increment_with_blanks(self):    
-        list_to_inc=[1,2,6,7,8]
-        range_list=[1,3,5,7,9]
-        result,top_range = find_index_by_increment(list_to_inc,range_list)
-        self.assertEqual([[0,1],[2],[3,4]],result)
-        self.assertEqual([1,5,7],top_range)
-        self.assertEqual(len(result),len(top_range))
+        list_to_inc = [1, 2, 6, 7, 8]
+        range_list = [1, 3, 5, 7, 9]
+        result, top_range = find_index_by_increment(list_to_inc, range_list)
+        self.assertEqual([[0, 1], [2], [3, 4]], result)
+        self.assertEqual([1, 5, 7], top_range)
+        self.assertEqual(len(result), len(top_range))
         
-        
-    
     def test_resampled_depths(self):
         inc_amt = 0.01
         expected_result = DataFrame([[0.605, 0.615], [0.615, 0.625]], columns=['top_depth_we_(m)', 'bottom_depth_we_(m)'])
         input_test = load_csv(os.path.join('csv_files', 'input_depths.csv'))
         input_test = clean_data(input_test)
-        range_list=create_range_for_depths(input_test.loc[:, test_depth_we_header.name].values.tolist(), inc_amt)
-        
-        df_x_sample = pandas.concat([input_test.loc[:, 'depth (m we)'], input_test.loc[:, 'Cond (+ALU-S/cm)']], axis=1)
+        range_list = create_range_for_depths(input_test.loc[:, test_depth_we_header.name].values.tolist(), inc_amt)
         result = resampled_depths(range_list, test_depth_we_header, inc_amt)
         assert_frame_equal(expected_result, result)
         
-    def test_compile_stats_by_depth(self):
+    def test_get_compiled_stats_by_depth(self):
         input_test = load_csv(os.path.join('csv_files', 'input_depths.csv'))
         input_test = clean_data(input_test)
+        headers=process_header_data(input_test)
         expected_result = load_csv(os.path.join('csv_files', 'output_bydepth.csv'))
         inc_amt = 0.01
-        range_list=create_range_for_depths(input_test.loc[:, test_depth_we_header.name].values.tolist(), inc_amt)
-        indices,top_range = find_index_by_increment(input_test.loc[:, test_depth_we_header.name].values.tolist(),range_list)
-        
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)   
-            result = compile_stats_by_depth(input_test, test_depth_we_header, test_sample_header, indices,top_range, inc_amt)
-        assert_frame_equal(expected_result, result.df)
-        
-#     def test_remove_index_if_less_than_one(self):
-#         inc_amt=0.001
-#         input_test = load_csv(os.path.join('csv_files','input_depth_index.csv'))
-#         expected_result = load_csv(os.path.join('csv_files','output_depth_index.csv'))
-#         input_test = clean_data(input_test)
-#         print(expected_result)
-#         df_x_sample=pandas.concat([input_test.loc[:,'depth (m abs)'],input_test.loc[:,'Cond (+ALU-S/cm)']], axis=1)
-#         with warnings.catch_warnings():
-#             warnings.simplefilter("ignore", category=RuntimeWarning)  
-#             result=resampled_by_inc_depths(df_x_sample,test_depth_abs_header,inc_amt)
-#         print(result)
-#         assert_frame_equal(expected_result, result)
-#         
+            result = get_compiled_stats_by_depth(input_test, headers, inc_amt)
+        assert_frame_equal(expected_result, result[0][0].df)
         
 
     def test_correlate_samples(self):
@@ -191,7 +171,6 @@ class Test(unittest.TestCase):
         self.assertAlmostEqual(sample2, d2)
         self.assertAlmostEqual(depth1, depth)
     
-    
     def test_remove_nan_from_datasets(self):
         input1 = Series([1, 2, 3, 4, np.nan, 6, 7])
         input2 = Series([1, np.nan, 3, 4, 5, 6, np.nan])
@@ -203,7 +182,7 @@ class Test(unittest.TestCase):
     def test_find_index_of_depth_intervals(self):
         larger_df = load_csv(os.path.join('csv_files', 'test_input_dd_2.csv'))
         smaller_df = load_csv(os.path.join('csv_files', 'test_input_dd_1.csv'))
-        result,top_range = find_index_by_increment(larger_df.loc[:, 'depth (m we)'].values.tolist(), smaller_df.loc[:, 'depth (m we)'].values.tolist())
+        result, unused_top_range = find_index_by_increment(larger_df.loc[:, 'depth (m we)'].values.tolist(), smaller_df.loc[:, 'depth (m we)'].values.tolist())
         expected_result = [[1, 2], [3, 4], [5, 6], [7, 8], [9]]
         self.assertEqual(expected_result, result)
         
@@ -218,16 +197,16 @@ class Test(unittest.TestCase):
         self.assertEqual(test_output_dd.x_header, compiled_stat_of_larger_df[0][0].x_header)
          
     def test_correlate_stats(self):
-        df=DataFrame([y,y,x,y,x,x,x,y]).transpose()
-        df.columns=['zero','one','Mean','Stdv','Median','Max','Min','six']
-        d1= CompiledStat(df, test_depth_we_header, test_sample_header)
-        d2=Series(y,name='d2')
-        r_val=[-0.0722,-0.0722,-0.0722,-0.0722]
-        expected_result=("depth (m we)", 'Cond (+ALU-S/cm)', 'd2')+ tuple(r_val)
-        result=correlate_stats(d1, d2)
+        df = DataFrame([y, y, x, y, x, x, x, y]).transpose()
+        df.columns = ['zero', 'one', 'Mean', 'Stdv', 'Median', 'Max', 'Min', 'six']
+        d1 = CompiledStat(df, test_depth_we_header, test_sample_header)
+        d2 = Series(y, name='d2')
+        r_val = [-0.0722, -0.0722, -0.0722, -0.0722]
+        expected_result = ("depth (m we)", 'Cond (+ALU-S/cm)', 'd2') + tuple(r_val)
+        result = correlate_stats(d1, d2)
         self.assertAlmostEqual(expected_result[0], result[0])
-        self.assertEqual(len(expected_result),len(result))
-        self.assertEqual(expected_result[3],result[3])
+        self.assertEqual(len(expected_result), len(result))
+        self.assertEqual(expected_result[3], result[3])
         
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
