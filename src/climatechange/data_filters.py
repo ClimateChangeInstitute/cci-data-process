@@ -9,13 +9,13 @@ from numpy import float64
 from pandas import DataFrame
 from pandas import Series
 import pandas
-from scipy.signal import savgol_filter
+from scipy.signal import savgol_filter, medfilt,spline_filter,gauss_spline,wiener
 from sklearn import preprocessing
+
 
 from climatechange.headers import process_header_data, HeaderType
 import numpy as np
 from typing import List
-
 
 def replace(s:Series, val:float64=np.nan, num_std:float=2) -> Series:
     '''
@@ -65,6 +65,67 @@ def savgol_smooth_filter(df:DataFrame):
 
     return df
 
+def medfilt_filter(df:DataFrame,val:int):
+    '''
+    Apply the  Median filter to the columns of the supplied data.  
+    The filter is only applied to columns that appear as samples in the default 
+    header dictionary. Modifications occur in-place.
+    
+    :param df: The data to filter
+    :return: The resampled data
+    '''
+    sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
+    medfilt_func = lambda x: medfilt(x, val)
+    df[sample_header_names] = df[sample_header_names].transform(medfilt_func)
+
+    return df
+
+def spline_filter(df:DataFrame,val:int):
+    '''
+    Apply the  spline filter to the columns of the supplied data.  
+    The filter is only applied to columns that appear as samples in the default 
+    header dictionary. Modifications occur in-place.
+    
+    :param df: The data to filter
+    :return: The resampled data
+    '''
+    sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
+    spline_filter_func = lambda x: spline_filter(x, val)
+    df[sample_header_names] = df[sample_header_names].transform(spline_filter_func)
+
+    return df
+
+def gauss_spline_filter(df:DataFrame,val:int):
+    '''
+    Apply the  spline filter to the columns of the supplied data.  
+    The filter is only applied to columns that appear as samples in the default 
+    header dictionary. Modifications occur in-place.
+    
+    :param df: The data to filter
+    :return: The resampled data
+    '''
+    sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
+    gauss_spline_filter_func = lambda x: gauss_spline(x, val)
+    df[sample_header_names] = df[sample_header_names].transform(gauss_spline_filter_func)
+
+    return df
+
+def wiener_filter(df:DataFrame):
+    '''
+    Apply the  spline filter to the columns of the supplied data.  
+    The filter is only applied to columns that appear as samples in the default 
+    header dictionary. Modifications occur in-place.
+    
+    :param df: The data to filter
+    :return: The resampled data
+    '''
+    sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
+    wiener_func = lambda x: wiener(x)
+    df[sample_header_names] = df[sample_header_names].transform(wiener_func)
+
+    return df
+
+
 def normalize_min_max_scaler(df:DataFrame) -> DataFrame:
     '''
     Normalize dataframe by min and max
@@ -103,12 +164,13 @@ def scaler(df:DataFrame) -> DataFrame:
     return pandas.concat((df.iloc[:, :2], df_norm), axis=1)
 
 def fill_missing_values(df:DataFrame) -> DataFrame:
-    x = df.iloc[:, 2:].values
     
+    x = df.iloc[:, 2:].values
     imp = preprocessing.Imputer(missing_values='NaN', strategy='mean', axis=0)
     x_fill=imp.fit_transform(x)
     df_norm = pandas.DataFrame(x_fill, columns=df.iloc[:, 2:].columns)
     return pandas.concat((df.iloc[:, :2], df_norm), axis=1)
+
 
 
 def adjust_data_by_background(df:DataFrame,

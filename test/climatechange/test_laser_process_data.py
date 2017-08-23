@@ -96,6 +96,10 @@ class Test(unittest.TestCase):
         df_output=adjust_data_by_background(laser_file.processed_data,laser_file.background_stats)
         self.assertEqual(df_output.iloc[0,2],proc_data.iloc[0,2]-bg_stats.loc['Mean','Al27'])    
 
+#     def test_plot_data_filters(self):
+#         
+#         
+        
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

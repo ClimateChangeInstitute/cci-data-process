@@ -12,8 +12,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from pandas import DataFrame, Series
 import pandas
 
-from climatechange.data_filters import replace_outliers,\
-    adjust_background
+from climatechange.data_filters import replace_outliers
 from climatechange.headers import process_header_data, HeaderType, Header
 from climatechange.plot import write_data_to_csv_files
 from climatechange.process_data_functions import clean_data
@@ -59,8 +58,38 @@ class CombinedLaser:
         result_laser_files = self.laser_files + cl.laser_files
         return CombinedLaser(result_df, result_laser_files)
     
-    
-
+# class FilterData():
+#     def __init__(self, combined_laser:CombinedLaser):
+#         self.combined_laser = combined_laser
+#         self.df = combined_laser.df
+#         self.laser_files = combined_laser.laser_files
+#     
+#     def apply_filters(self,df:DataFrame):
+#        
+#         val=np.nan
+#         num_std=3
+#         f_presets = {
+#             '1. Do nothing' : [],
+#             '2. Replace outliers' : [lambda f: replace_outliers(f,val,numstd)],
+#             '3. Savitzky-Golay filter' : [lambda x: savgol_filter(x, window_length, 3)],
+#             '4. Median filter' : [lambda f: medfilt_filter(f,val)],
+#             '5. Spline filter' : [lambda f: spline_filter(f,val)],
+#             '6. Gaussian spline filter' : [lambda f: gauss_spline_filter(f,val)],
+#             '7. Wiener filter' : [lambda f: wiener_filter(f,val)],  
+#             '8. Normalize by min and max' : [lambda f: normalize_min_max_scaler(f)],
+#             '9. Standardize scaler' : [lambda f: standardize_scaler(f)],
+#             '10. Robust scaler' : [lambda f: robust_scaler(f)],
+#             '11. Scaler' : [lambda f: scaler(f)], 
+#             '12. Fill missing values' : [lambda f: fill_missing_values(f)]
+#                                               }
+#         fw_trans = enum(*sorted(f_presets.keys()),
+#                      label='Filters')
+#         sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]                                        
+#         for i in fw_trans:
+#             df[sample_header_names] = df[sample_header_names].transform(i)
+#             #create object of dataframe?
+#         pass
+#     pass
         
     
 def readFile(file_path, laser_time, start_depth, end_depth, washin_time,
