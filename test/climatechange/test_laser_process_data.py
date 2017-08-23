@@ -13,6 +13,8 @@ from climatechange.headers import Header, HeaderType
 from climatechange.laser_data_process import load_input_file, \
     load_laser_txt_file, readFile, combine_laser_data_by_input_file, \
     clean_LAICPMS_data, combine_laser_data_by_directory
+from climatechange.resample_stats import compileStats
+from climatechange.data_filters import adjust_data_by_background
 
 
 depth_age_file = os.path.join('csv_files', 'depthAge7617.txt')
@@ -61,7 +63,6 @@ class Test(unittest.TestCase):
         self.assertEqual(1486, df.df.shape[0])
         self.assertEqual(7, df.df.shape[1])
         
-                
     def test_load_and_clean_LAICPMS_data(self):
         df = clean_LAICPMS_data(laser_file)
         self.assertEqual(df.columns[0], 'depth (m abs)') 
@@ -77,6 +78,24 @@ class Test(unittest.TestCase):
         self.assertEqual(7, df_list[0].shape[1])
         self.assertEqual(0, df_list[1].shape[0])
         
+    def test_laser_file_background_info(self):
+        result=laser_file.background_stats
+        x=DataFrame({i:compileStats(laser_file.raw_data.loc[0:12, i].tolist()) for i in laser_file.raw_data.iloc[0:13, 1:]},
+                    index=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
+        assert_frame_equal(x, result)
+
+    def test_laser_file_stats(self):
+        result=laser_file.stats
+        x=DataFrame({i:compileStats(laser_file.raw_data[i].tolist()) for i in laser_file.raw_data[1:]},
+                    index=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
+        assert_frame_equal(x, result)
+        
+    def test_adjust_laser_file_by_background(self):
+        bg_stats=laser_file.background_stats
+        proc_data=laser_file.processed_data.copy()
+        df_output=adjust_data_by_background(laser_file.processed_data,laser_file.background_stats)
+        self.assertEqual(df_output.iloc[0,2],proc_data.iloc[0,2]-bg_stats.loc['Mean','Al27'])    
+
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

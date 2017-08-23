@@ -12,7 +12,8 @@ from matplotlib.backends.backend_pdf import PdfPages
 from pandas import DataFrame, Series
 import pandas
 
-from climatechange.data_filters import replace_outliers
+from climatechange.data_filters import replace_outliers,\
+    adjust_background
 from climatechange.headers import process_header_data, HeaderType, Header
 from climatechange.plot import write_data_to_csv_files
 from climatechange.process_data_functions import clean_data
@@ -33,8 +34,10 @@ class LaserFile:
         self.depth_age_file = depth_age_file
         self.raw_data = load_laser_txt_file(file_path)
         self.processed_data = clean_LAICPMS_data(self)
-        self.background_info = compileStats(self.raw_data.iloc[0:11, 1:].transpose().values.tolist())
-        self.stats = compileStats(self.processed_data.iloc[:, 2:].transpose().values.tolist())
+        self.background_stats = DataFrame({i:compileStats(self.raw_data.loc[0:12, i].tolist()) for i in self.raw_data.iloc[0:13, 1:]},
+                    index=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
+        self.stats =DataFrame({i:compileStats(self.raw_data[i].tolist()) for i in self.raw_data[1:]},
+                    index=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
 #         self.filtered_data = filtered_laser_data(self.processed_data)
 #         self.normalized_data=normalize_min_max_scaler(self.processed_data)
 
@@ -140,6 +143,7 @@ def combine_laser_data_by_input_file(input_file:str, depth_age_file:str, create_
     for f in laser_files:
 
         df = df.append(f.processed_data, ignore_index=True)
+#         df_adjust_background=adjust_background(f.processed_data,f.background_info)
 #         if create_PDF:
 #             plot_laser_data_by_run(f,pdf_folder)
         
@@ -263,6 +267,7 @@ def filtered_laser_data(df:DataFrame) -> DataFrame:
     :param df: The data to be processed.
     :return: The modified data
     '''
+    
     return replace_outliers(df)
 
 def add_depth_column(df:DataFrame, start_depth:float, end_depth:float) -> DataFrame:

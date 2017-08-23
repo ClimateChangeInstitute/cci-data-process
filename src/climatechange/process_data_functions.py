@@ -28,13 +28,14 @@ from climatechange.plot import write_data_to_csv_files, \
     add_compile_stats_to_pdf
 from climatechange.readme_output import create_readme_output_file, \
     write_readmefile_to_txtfile, template
-from climatechange.resample_data_by_depths import compile_stats_by_depth, \
-    compiled_stats_by_dd_intervals, find_index_by_increment,\
-    create_range_for_depths
-from climatechange.resample_stats import compile_stats_by_year,create_range_by_year
+from climatechange.resample_data_by_depths import compiled_stats_by_dd_intervals, \
+    find_index_by_increment,create_range_for_depths, resampled_depths
+from climatechange.resample_stats import create_range_by_year,\
+    resampled_depths_by_years, resampled_statistics
 import matplotlib.pyplot as plt
 import numpy as np
 import time
+import pandas
 
 
 def is_number(s):
@@ -73,19 +74,25 @@ def clean_data(df):
     
     return df
 
-def get_compiled_stats_by_year(inc_amt:int, df:DataFrame, headers:List[Header]) -> List[List[CompiledStat]]:
+def get_compiled_stats_by_year(df:DataFrame, headers:List[Header],inc_amt:int,) -> List[List[CompiledStat]]:
     year_headers = [h for h in headers if h.htype == HeaderType.YEARS]
     sample_headers = [h for h in headers if h.htype == HeaderType.SAMPLE]
+    
     compiled_stats = []
     for year_header in year_headers:
         range_list=create_range_by_year(df.loc[:,year_header.name].values.tolist(), inc_amt)
         index,top_range=find_index_by_increment(df.loc[:,year_header.name].values.tolist(),range_list)
+        df_years=DataFrame(range_list, columns=[year_header.label])
+        df_depth=resampled_depths_by_years(df,headers,index)
         cur_year = []
         for sample_header in sample_headers:
-            cur_year.append(compile_stats_by_year(df, headers, year_header, sample_header,index,top_range,inc_amt))
+            df_stats = resampled_statistics(df, sample_header, index)
+            cur_year.append(CompiledStat(pandas.concat([df_years, df_depth, df_stats], axis=1), year_header, sample_header))
+
         compiled_stats.append(cur_year)
     
     return compiled_stats
+
 
 def find_round_values():
     pass
@@ -206,9 +213,9 @@ def resample_by_years(f:str, inc_amt:int=1,stat_header:str='Mean'):
     print('Resample by years time:%s min' %((time.time()-start_time)/60.))
 
 
-def get_compiled_stats_by_depth(inc_amt:float,
-                                df:DataFrame,
-                                headers:List[Header]) -> List[List[CompiledStat]]:
+def get_compiled_stats_by_depth(df:DataFrame,
+                                headers:List[Header],
+                                inc_amt:float,) -> List[List[CompiledStat]]:
     '''
     Create statistics for every depth column vs every sample column, which 
     results in a list of compiled statistics of each sample for every depth 
@@ -221,17 +228,18 @@ def get_compiled_stats_by_depth(inc_amt:float,
     depth_headers = [h for h in headers if h.htype == HeaderType.DEPTH]
     sample_headers = [h for h in headers if h.htype == HeaderType.SAMPLE]
     compiled_stats = []
-    for depth_name in depth_headers:
+    for depth_header in depth_headers:
         cur_depth = []
-        range_list=create_range_for_depths(df.loc[:, depth_name.name].values.tolist(),inc_amt)
-        index,top_range = find_index_by_increment(df.loc[:, depth_name.name].values.tolist(),range_list) 
-        for sample_name in sample_headers:
-            cur_depth.append(compile_stats_by_depth(df, depth_name, sample_name, index,top_range, inc_amt))
-        
-#             print("compile stats for %s: %s seconds"%(sample_name,time.time()-start_time_d))
+        range_list=create_range_for_depths(df.loc[:, depth_header.name].values.tolist(),inc_amt)
+        index,top_range = find_index_by_increment(df.loc[:, depth_header.name].values.tolist(),range_list) 
+        df_depths = resampled_depths(top_range, depth_header, inc_amt)
+        for sample_header in sample_headers:
+            df_stats = resampled_statistics(df,sample_header, index)
+            cur_depth.append(CompiledStat(pandas.concat([df_depths, df_stats], axis=1), depth_header, sample_header))
         compiled_stats.append(cur_depth)
     
     return compiled_stats
+    
 
 
 def load_and_clean_depth_data(f:str, inc_amt:float) -> Tuple[DataFrame,
@@ -248,7 +256,7 @@ def load_and_clean_depth_data(f:str, inc_amt:float) -> Tuple[DataFrame,
     df = load_csv(f)
     headers = process_header_data(df)
     df = clean_data(df)
-    return df, get_compiled_stats_by_depth(inc_amt, df, headers), headers
+    return df, get_compiled_stats_by_depth(df, headers,inc_amt), headers
 
 def resample_by_depths(f:str, inc_amt:float,stat_header:str='Mean'):
     '''

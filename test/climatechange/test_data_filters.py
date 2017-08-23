@@ -81,6 +81,9 @@ class Test(unittest.TestCase):
         
         assert_frame_equal(expected_df, result_df)
 
+
+
+#         mean_bg=sa
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

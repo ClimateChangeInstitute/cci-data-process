@@ -14,6 +14,7 @@ from sklearn import preprocessing
 
 from climatechange.headers import process_header_data, HeaderType
 import numpy as np
+from typing import List
 
 
 def replace(s:Series, val:float64=np.nan, num_std:float=2) -> Series:
@@ -66,7 +67,8 @@ def savgol_smooth_filter(df:DataFrame):
 
 def normalize_min_max_scaler(df:DataFrame) -> DataFrame:
     '''
-    Normalize the 
+    Normalize dataframe by min and max
+    doesn't take nan values
     :param df:
     '''
     x = df.iloc[:, 2:].values 
@@ -75,3 +77,31 @@ def normalize_min_max_scaler(df:DataFrame) -> DataFrame:
     df_norm = pandas.DataFrame(x_scaled, columns=df.iloc[:, 2:].columns)
     return pandas.concat((df.iloc[:, :2], df_norm), axis=1)
 
+def adjust_data_by_background(df:DataFrame,
+                                 background_stats:DataFrame,
+                                 stat:str='Mean')->DataFrame:
+    df=df.copy()
+
+    for col in background_stats:
+            df[col]=df[col]-background_stats.loc[stat,col]
+    
+    return df
+
+def adjust_data_by_stats(df:DataFrame,
+                            df_stats:DataFrame,
+                            stat:str='Mean')->DataFrame: 
+    df=df.copy()
+
+    for col in df_stats:
+            df[col]=df[col]-df_stats.loc[stat,col]
+    
+    return df   
+    
+    
+    
+    
+    
+    
+    pass
+    
+    
