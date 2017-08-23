@@ -3,7 +3,7 @@ Created on Jul 13, 2017
 
 @author: Heather
 '''
-from math import isnan, nan
+from math import nan
 import os
 import unittest
 import warnings
@@ -18,11 +18,10 @@ from climatechange.headers import HeaderType, Header, process_header_data
 from climatechange.laser_data_process import clean_LAICPMS_data, readFile
 from climatechange.process_data_functions import clean_data, \
     load_and_clean_dd_data
-from climatechange.resample_stats import compileStats, compile_stats_by_year,resampled_depths_by_years, \
+from climatechange.resample_data_by_depths import find_index_by_increment
+from climatechange.resample_stats import compileStats, compile_stats_by_year, resampled_depths_by_years, \
     create_range_by_year, create_depth_headers, resampled_statistics
 import numpy as np
-from climatechange.resample_data_by_depths import find_index_by_increment
-from pandas.core.series import Series
 
 
 # list of values by column, first index is column index, for each you get element of row 
@@ -83,18 +82,18 @@ class Test(unittest.TestCase):
 
                         
     def test_resample_statistics(self):
-        df=DataFrame([5., 3., 4., 5., 3.],columns=["Cond (+ALU-S/cm)"])
-        df=clean_data(df)
-        df2=DataFrame([5., 3., 4., 5., 3.,5., 3., 4., 5., 3.],columns=["Cond (+ALU-S/cm)"])
-        index=[[0,1,2,3,4]]        
-        index2=[[0,1,2,3,4] ,[5,6,7,8,9]]
-        result=resampled_statistics(df, test_sample_header, index)
-        expected_result=DataFrame([[4., 0.894427, 4., 5., 3., 5]],columns=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
-        assert_frame_equal(expected_result,result)
+        df = DataFrame([5., 3., 4., 5., 3.], columns=["Cond (+ALU-S/cm)"])
+        df = clean_data(df)
+        df2 = DataFrame([5., 3., 4., 5., 3., 5., 3., 4., 5., 3.], columns=["Cond (+ALU-S/cm)"])
+        index = [[0, 1, 2, 3, 4]]        
+        index2 = [[0, 1, 2, 3, 4] , [5, 6, 7, 8, 9]]
+        result = resampled_statistics(df, test_sample_header, index)
+        expected_result = DataFrame([[4., 0.894427, 4., 5., 3., 5]], columns=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
+        assert_frame_equal(expected_result, result)
     
-        result2=resampled_statistics(df2, test_sample_header, index2)
-        expected_result2=DataFrame([[4., 0.894427, 4., 5., 3., 5],[4., 0.894427, 4., 5., 3., 5]],columns=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
-        assert_frame_equal(expected_result2,result2)
+        result2 = resampled_statistics(df2, test_sample_header, index2)
+        expected_result2 = DataFrame([[4., 0.894427, 4., 5., 3., 5], [4., 0.894427, 4., 5., 3., 5]], columns=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
+        assert_frame_equal(expected_result2, result2)
     
     def testSmallcsv(self):
         small_output = [[2009.8000000, 1.0954451, 2009.8000000, 2011.5999999, 2008.0000000, 19.0000000],
@@ -110,7 +109,7 @@ class Test(unittest.TestCase):
         frame = load_csv(os.path.join('csv_files', 'small.csv'))
         for i in range(len(small_output)):
             np.testing.assert_array_almost_equal(small_output[i],
-                                                 compileStats(frame.iloc[:,i].values.tolist()))
+                                                 compileStats(frame.iloc[:, i].values.tolist()))
         
     def test_create_depth_headers(self):
         input_test = [Header("depth (m we)", HeaderType.DEPTH, "Depth", "meters", "depth_we_(m)")]
@@ -146,25 +145,25 @@ class Test(unittest.TestCase):
           
     def test_index_by_increment(self):
         expected_output = [list(range(0, 871, inc_amt))]
-        range_list=create_range_by_year(input_test_zeros_and_numbers.loc[:, 'Dat210617'].values.tolist(), inc_amt)
-        index,top_range = find_index_by_increment(input_test_zeros_and_numbers.loc[:, 'Dat210617'].values.tolist(),range_list)
+        range_list = create_range_by_year(input_test_zeros_and_numbers.loc[:, 'Dat210617'].values.tolist(), inc_amt)
+        index, unused_top_range = find_index_by_increment(input_test_zeros_and_numbers.loc[:, 'Dat210617'].values.tolist(), range_list)
         self.assertEqual(expected_output, index)
     
     def test_resampled_depths_by_years(self):            
         expected_result = DataFrame([[0.593488372], [0.916582279], [1.61], [2.48]]).transpose()
         expected_result.columns = ['top_depth_we_(m)', 'bottom_depth_we_(m)', 'top_depth_abs_(m)', 'bottom_depth_abs_(m)']
         df_year_sample = pandas.concat([input_test_zeros_and_numbers.loc[:, test_year_header.name], input_test_zeros_and_numbers.loc[:, test_sample_header.name]], axis=1)
-        range_list=create_range_by_year(df_year_sample.iloc[:, 0].values.tolist(), inc_amt)
-        index,top_range = find_index_by_increment(df_year_sample.iloc[:, 0].values.tolist(), range_list)       
+        range_list = create_range_by_year(df_year_sample.iloc[:, 0].values.tolist(), inc_amt)
+        index, unused_top_range = find_index_by_increment(df_year_sample.iloc[:, 0].values.tolist(), range_list)       
         result = resampled_depths_by_years(index, depth_columns, depth_column_headers)
         assert_frame_equal(expected_result, result)
         
         
     def test_compile_stats_by_year(self):
         expected_result = load_csv(os.path.join('csv_files', 'output_test_zeros_and_numbers.csv')) 
-        range_list=create_range_by_year(input_test_zeros_and_numbers.loc[:, test_year_header.name].values.tolist(), inc_amt)
-        index,top_range = find_index_by_increment(input_test_zeros_and_numbers.loc[:, test_year_header.name].values.tolist(),range_list)
-        result = compile_stats_by_year(input_test_zeros_and_numbers, headers, test_year_header, test_sample_header,index,range_list, inc_amt)
+        range_list = create_range_by_year(input_test_zeros_and_numbers.loc[:, test_year_header.name].values.tolist(), inc_amt)
+        index, unused_top_range = find_index_by_increment(input_test_zeros_and_numbers.loc[:, test_year_header.name].values.tolist(), range_list)
+        result = compile_stats_by_year(input_test_zeros_and_numbers, headers, test_year_header, test_sample_header, index, range_list, inc_amt)
         assert_frame_equal(expected_result, result.df)
         
     def test_empty_rows(self):
@@ -172,18 +171,18 @@ class Test(unittest.TestCase):
         expected_result = load_csv(os.path.join('csv_files', 'output_test_zeros.csv')) 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            range_list=create_range_by_year(input_test_zeros.loc[:, test_year_header.name].values.tolist(), inc_amt)
-            index,top_range = find_index_by_increment(input_test_zeros.loc[:, test_year_header.name].values.tolist(),range_list)
-            result = compile_stats_by_year(input_test_zeros, headers_zeros, test_year_header, test_sample_header,index,range_list)
+            range_list = create_range_by_year(input_test_zeros.loc[:, test_year_header.name].values.tolist(), inc_amt)
+            index, unused_top_range = find_index_by_increment(input_test_zeros.loc[:, test_year_header.name].values.tolist(), range_list)
+            result = compile_stats_by_year(input_test_zeros, headers_zeros, test_year_header, test_sample_header, index, range_list)
         assert_frame_equal(expected_result, result.df)
          
     def test_partial_empty_rows(self):
         expected_result = load_csv(os.path.join('csv_files', 'output_test_zeros_and_numbers.csv'))
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            range_list=create_range_by_year(input_test_zeros_and_numbers.loc[:, test_year_header.name].values.tolist(), inc_amt)
-            index,top_range = find_index_by_increment(input_test_zeros_and_numbers.loc[:, test_year_header.name].values.tolist(),range_list)
-            result = compile_stats_by_year(input_test_zeros_and_numbers, headers, test_year_header, test_sample_header,index,range_list)
+            range_list = create_range_by_year(input_test_zeros_and_numbers.loc[:, test_year_header.name].values.tolist(), inc_amt)
+            index, unused_top_range = find_index_by_increment(input_test_zeros_and_numbers.loc[:, test_year_header.name].values.tolist(), range_list)
+            result = compile_stats_by_year(input_test_zeros_and_numbers, headers, test_year_header, test_sample_header, index, range_list)
         assert_frame_equal(expected_result, result.df)
     
     def create_stats_headers(self):

@@ -11,7 +11,7 @@ import pandas
 
 from climatechange.compiled_stat import CompiledStat
 from climatechange.headers import Header, HeaderType, process_header_data
-from climatechange.resample_stats import compileStats, create_depth_headers,\
+from climatechange.resample_stats import compileStats, create_depth_headers, \
     resampled_statistics
 import numpy as np
 import logging
@@ -31,17 +31,17 @@ def create_range_for_depths(list_to_inc:List[float], inc_amt: float=0.01) -> Lis
     g = np.arange(np.round(min(list_to_inc), r), max(list_to_inc), inc_amt)
     return [round(i, r) for i in g.tolist()]
 
-def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> Tuple[List[List[int]],List[float]]:
+def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> Tuple[List[List[int]], List[float]]:
     '''
 
     :param list_to_inc:
     :param inc_amt:
     '''
     result = []
-    top_range=[]
+    top_range = []
     range_list_size = len(range_list)
     prev = 0
-    for i in range(range_list_size-1):
+    for i in range(range_list_size - 1):
         tmp = []
         for j in range(prev, len(list_to_inc)):
             e = list_to_inc[j]
@@ -49,7 +49,7 @@ def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> 
                 tmp.append(j)
                 prev = j + 1
         if not tmp:
-            logging.warn('no values between [%f,%f)',range_list[i],range_list[i+1])
+            logging.warn('no values between [%f,%f)', range_list[i], range_list[i + 1])
         else:
             result.append(tmp)
             top_range.append(range_list[i])
@@ -57,15 +57,15 @@ def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> 
     tmp = []
     for j in range(prev, len(list_to_inc)):
         e = list_to_inc[j]
-        if e >= range_list[range_list_size-1]:
+        if e >= range_list[range_list_size - 1]:
             tmp.append(j)
     if not tmp:
-        logging.warn('no values > %f',range_list[range_list_size-1])
+        logging.warn('no values > %f', range_list[range_list_size - 1])
     else:
         result.append(tmp)
-        top_range.append(range_list[range_list_size-1])
+        top_range.append(range_list[range_list_size - 1])
             
-    return result,top_range
+    return result, top_range
 
 def resampled_depths(top_range:List[float], depth_header:Header, inc_amt):
 
@@ -96,7 +96,7 @@ def compile_stats_by_depth(df:DataFrame,
     '''
 
     df_depths = resampled_depths(range_list, depth_header, inc_amt)
-    df_stats = resampled_statistics(df,sample_header, index)
+    df_stats = resampled_statistics(df, sample_header, index)
     resampled_data = pandas.concat([df_depths, df_stats], axis=1)
 
     return CompiledStat(resampled_data, depth_header, sample_header)
@@ -130,7 +130,7 @@ def compiled_stats_by_dd_intervals(larger_df:DataFrame, smaller_df:DataFrame) ->
     for depth_header_l in depth_headers_larger:
         for depth_header_s in depth_headers_smaller:
             if depth_header_l == depth_header_s:
-                index,top_range = find_index_by_increment(larger_df.loc[:, depth_header_s.name].tolist(), smaller_df.loc[:, depth_header_l.name].tolist())
+                index, unused_top_range = find_index_by_increment(larger_df.loc[:, depth_header_s.name].tolist(), smaller_df.loc[:, depth_header_l.name].tolist())
                 depth_df = create_top_bottom_depth_dataframe(smaller_df, depth_header_s)
                 depth_samples = []
                 for sample_header in sample_headers_larger:
