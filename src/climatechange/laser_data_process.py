@@ -12,8 +12,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from pandas import DataFrame, Series
 import pandas
 
-from climatechange.data_filters import replace_outliers,\
-    adjust_background
+from climatechange.data_filters import replace_outliers
 from climatechange.headers import process_header_data, HeaderType, Header
 from climatechange.plot import write_data_to_csv_files
 from climatechange.process_data_functions import clean_data
