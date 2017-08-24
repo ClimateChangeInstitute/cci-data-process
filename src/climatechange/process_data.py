@@ -218,10 +218,6 @@ USAGE
                               file=sys.stderr)
                 sys.exit(-1)
                 
-
-    except KeyboardInterrupt:
-        ### handle keyboard interrupt ###
-        return 0
     except Exception as e:
         raise(e)
         if logging.getLogger().level == 'DEBUG':

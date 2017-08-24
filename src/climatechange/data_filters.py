@@ -5,17 +5,19 @@ A collection of functions for filtering data.
 :author: Mark Royer
 '''
 
-from numpy import float64
 from pandas import DataFrame
 from pandas import Series
 import pandas
-from scipy.signal import savgol_filter, medfilt,spline_filter,gauss_spline,wiener
+import pprint
 from sklearn import preprocessing
+from typing import List, Any, Tuple, Callable, Type
 
+from numpy import float64
+from scipy.signal import savgol_filter, medfilt, spline_filter, gauss_spline, wiener
 
 from climatechange.headers import process_header_data, HeaderType
 import numpy as np
-from typing import List
+
 
 def replace(s:Series, val:float64=np.nan, num_std:float=2) -> Series:
     '''
@@ -31,6 +33,38 @@ def replace(s:Series, val:float64=np.nan, num_std:float=2) -> Series:
     outliers = (s - mean).abs() > num_std * std
     s[outliers] = val
     return s
+
+##############################################################################
+############## PLACE DATA FILTER FUNCTIONS AFTER THIS LINE ###################
+##############################################################################
+
+class Filter:
+    '''
+    Represents a filter function.
+    '''
+    
+    def __init__(self, name:str, args:List[Tuple[str, Type, Any]], func:Callable):
+        '''
+        Create filter function information
+        
+        :param name: The name of the filter 
+        :param args: The types of arguments
+        :param func: The function that should be invoked
+        '''
+        self.name = name
+        self.args = args
+        self.func = func
+        
+    def __repr__(self):
+        return "%s(%s" % (self.name,
+                          ', '.join(
+                              map(lambda y: '%s:%s=%s' % (y[0], y[1].__name__, y[2]),
+                                  self.args)))
+
+        
+# :data: Contains any of the filters available to the end user
+filter_map = {}
+
  
 def replace_outliers(df:DataFrame, val:float64=np.nan, num_std:float=2) -> DataFrame:
     '''
@@ -45,6 +79,12 @@ def replace_outliers(df:DataFrame, val:float64=np.nan, num_std:float=2) -> DataF
     sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
     df[sample_header_names] = df[sample_header_names].transform(lambda s: replace(s, val, num_std))
     return df
+filter_map['replace_outlers'] = Filter('replace_outliers',
+                                       [('df', DataFrame, None),
+                                        ('val', float64, np.nan),
+                                        ('num_std', float, 2.0)],
+                                       replace_outliers)
+
 
 def savgol_smooth_filter(df:DataFrame):
     '''
@@ -56,7 +96,7 @@ def savgol_smooth_filter(df:DataFrame):
     :return: The resampled data
     '''
     window_length = df.shape[0]
-    if window_length % 2 == 0: # window_length must be odd
+    if window_length % 2 == 0:  # window_length must be odd
         window_length = window_length - 1
     
     sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
@@ -64,8 +104,9 @@ def savgol_smooth_filter(df:DataFrame):
     df[sample_header_names] = df[sample_header_names].transform(savgol_func)
 
     return df
+filter_map['savgol'] = Filter('savgol', [('df', DataFrame, None)], savgol_smooth_filter)
 
-def medfilt_filter(df:DataFrame,val:int):
+def medfilt_filter(df:DataFrame, val:int=3):
     '''
     Apply the  Median filter to the columns of the supplied data.  
     The filter is only applied to columns that appear as samples in the default 
@@ -79,8 +120,12 @@ def medfilt_filter(df:DataFrame,val:int):
     df[sample_header_names] = df[sample_header_names].transform(medfilt_func)
 
     return df
+filter_map['medfilt'] = Filter('medfilt',
+                                       [('df', DataFrame, None),
+                                        ('val', int, 3)],
+                                       medfilt_filter)
 
-def spline_filter(df:DataFrame,val:int):
+def spline_filter(df:DataFrame, val:float=5.0):
     '''
     Apply the  spline filter to the columns of the supplied data.  
     The filter is only applied to columns that appear as samples in the default 
@@ -94,8 +139,12 @@ def spline_filter(df:DataFrame,val:int):
     df[sample_header_names] = df[sample_header_names].transform(spline_filter_func)
 
     return df
+filter_map['spline'] = Filter('spline',
+                              [('df', DataFrame, None), ('val', float, 5.0)],
+                              spline_filter)
 
-def gauss_spline_filter(df:DataFrame,val:int):
+# TODO: Figure out if the default val is Ok
+def gauss_spline_filter(df:DataFrame, val:float=3.0):
     '''
     Apply the  spline filter to the columns of the supplied data.  
     The filter is only applied to columns that appear as samples in the default 
@@ -109,6 +158,9 @@ def gauss_spline_filter(df:DataFrame,val:int):
     df[sample_header_names] = df[sample_header_names].transform(gauss_spline_filter_func)
 
     return df
+filter_map['gauss_spline'] = Filter('gauss_spline',
+                                    [('df', DataFrame, None), ('val', float, 3.0)],
+                                    gauss_spline_filter)
 
 def wiener_filter(df:DataFrame):
     '''
@@ -124,6 +176,9 @@ def wiener_filter(df:DataFrame):
     df[sample_header_names] = df[sample_header_names].transform(wiener_func)
 
     return df
+filter_map['wiener'] = Filter('wiener',
+                                    [('df', DataFrame, None)],
+                                    wiener_filter)
 
 
 def normalize_min_max_scaler(df:DataFrame) -> DataFrame:
@@ -137,6 +192,10 @@ def normalize_min_max_scaler(df:DataFrame) -> DataFrame:
     x_scaled = min_max_scaler.fit_transform(x)
     df_norm = pandas.DataFrame(x_scaled, columns=df.iloc[:, 2:].columns)
     return pandas.concat((df.iloc[:, :2], df_norm), axis=1)
+filter_map['norm_min_max'] = Filter('norm_min_max',
+                                    [('df', DataFrame, None)],
+                                    normalize_min_max_scaler)
+
 
 def standardize_scaler(df:DataFrame) -> DataFrame:
     '''
@@ -146,28 +205,38 @@ def standardize_scaler(df:DataFrame) -> DataFrame:
     '''
     x = df.iloc[:, 2:].values
     scaler = preprocessing.StandardScaler()
-    x_scaled=scaler.fit_transform(x)
+    x_scaled = scaler.fit_transform(x)
     df_norm = pandas.DataFrame(x_scaled, columns=df.iloc[:, 2:].columns)
     return pandas.concat((df.iloc[:, :2], df_norm), axis=1)
+filter_map['standardize_scaler'] = Filter('standardize_scaler',
+                                    [('df', DataFrame, None)],
+                                    standardize_scaler)
+
 
 def robust_scaler(df:DataFrame) -> DataFrame:
     x = df.iloc[:, 2:].values
     robust_scaler = preprocessing.RobustScaler(quantile_range=(25, 75))
-    x_scaled=robust_scaler.fit_transform(x)
+    x_scaled = robust_scaler.fit_transform(x)
     df_norm = pandas.DataFrame(x_scaled, columns=df.iloc[:, 2:].columns)
     return pandas.concat((df.iloc[:, :2], df_norm), axis=1)
+filter_map['robust_scaler'] = Filter('robust_scaler',
+                                    [('df', DataFrame, None)],
+                                    robust_scaler)
+
 
 def scaler(df:DataFrame) -> DataFrame:
     x = df.iloc[:, 2:].values
     x_scaled = preprocessing.scale(x)
     df_norm = pandas.DataFrame(x_scaled, columns=df.iloc[:, 2:].columns)
     return pandas.concat((df.iloc[:, :2], df_norm), axis=1)
+filter_map['scaler'] = Filter('scaler', [('df', DataFrame, None)], scaler)
+
 
 def fill_missing_values(df:DataFrame) -> DataFrame:
     
     x = df.iloc[:, 2:].values
     imp = preprocessing.Imputer(missing_values='NaN', strategy='mean', axis=0)
-    x_fill=imp.fit_transform(x)
+    x_fill = imp.fit_transform(x)
     df_norm = pandas.DataFrame(x_fill, columns=df.iloc[:, 2:].columns)
     return pandas.concat((df.iloc[:, :2], df_norm), axis=1)
 
@@ -175,23 +244,24 @@ def fill_missing_values(df:DataFrame) -> DataFrame:
 
 def adjust_data_by_background(df:DataFrame,
                                  background_stats:DataFrame,
-                                 stat:str='Mean')->DataFrame:
-    df=df.copy()
+                                 stat:str='Mean') -> DataFrame:
+    df = df.copy()
 
     for col in background_stats:
-            df[col]=df[col]-background_stats.loc[stat,col]
+            df[col] = df[col] - background_stats.loc[stat, col]
     
     return df
 
 def adjust_data_by_stats(df:DataFrame,
                             df_stats:DataFrame,
-                            stat:str='Mean')->DataFrame: 
-    df=df.copy()
+                            stat:str='Mean') -> DataFrame: 
+    df = df.copy()
 
     for col in df_stats:
-            df[col]=df[col]-df_stats.loc[stat,col]
+            df[col] = df[col] - df_stats.loc[stat, col]
     
     return df   
     
     
-    
+if __name__ == '__main__':
+    pprint.pprint(filter_map)
