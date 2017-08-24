@@ -21,7 +21,7 @@ import os
 import sys
 
 from climatechange.process_data_functions import resample_by_years, \
-    resample_by_depths, load_and_store_header_file, double_resample_by_depths,\
+    resample_by_depths, load_and_store_header_file, double_resample_by_depths, \
     double_resample_by_depth_intervals
 import logging
 import textwrap
@@ -44,6 +44,83 @@ class CLIError(Exception):
         return self.msg
     def __unicode__(self):
         return self.msg
+
+
+def setup_argument_parser(program_version_message, program_license):
+    '''
+    Create and setup an argument parser.  Make sure that any arguments added to 
+    the parser are added to the test framework.
+    
+    :param program_version_message: Program version
+    :param program_license: The program license
+    :return: Fully setup argument parser
+    '''
+    parser = ArgumentParser(description=program_license,
+                            formatter_class=RawDescriptionHelpFormatter)
+    
+    # Order lexicographically using the short option for sanity!
+    parser.add_argument("-c",
+                        "--combine-laser",
+                        dest="combine_laser",
+                        action="store",
+                        nargs=5,
+                        metavar=('DIRECTORY', 'DEPTH_AGE_FILE', 'CREATE_PDF', 'CREATE_CSV', 'FOLDER_PREFIX'),
+                        help="process and combine laser files: %(metavar)s")
+
+    parser.add_argument("-d",
+                        "--depth",
+                        dest="depth_file",
+                        action="store",
+                        help="resample %(dest)s by depth [default: %(default)s]")
+    
+    parser.add_argument("-dd",
+                        "--double-depth",
+                        dest="depth_files",
+                        action="store",
+                        nargs=2,
+                        help="resample %(dest)s by depth")
+    
+    parser.add_argument("-di",
+                        "--double-interval",
+                        dest="interval_files",
+                        action="store",
+                        nargs=2,
+                        help="resample %(dest)s to the higher resolution of the two files")
+
+#     TODO: Will add back similar soon enough
+#     parser.add_argument("-f",
+#                         "--filter_laserdata",
+#                         dest="filter",
+#                         action="store",
+#                         help="combines filtered laser data from %(dest)s")
+        
+    parser.add_argument("-i",
+                        "--inc_amt",
+                        dest="inc_amt",
+                        action="store",
+                        default=1,
+                        help="the size of the resampling increment [default: %(default)s]")
+    parser.add_argument("-l",
+                        "--load",
+                        dest="headers_file",
+                        action="store",
+                        help="load the headers of the CSV and store them in the header dictionary.  "
+                             "This file should contain rows of (name, type, class, unit, label)")
+    parser.add_argument("-v", "--verbose", dest="verbose", action="count",
+                        help=textwrap.dedent(
+                 """set verbosity level [default: %(default)s]\n
+                    Increasing the verbosity level increases what is logged.  For example,\n
+                    specifying -v outputs INFO level and -vv outputs DEBUG level messages."""))
+    parser.add_argument('-V',
+                        '--version',
+                        action='version',
+                        version=program_version_message)
+    parser.add_argument("-y",
+                        "--year",
+                        dest="year_file",
+                        action="store",
+                        help="resample %(dest)s by years and depth [default: %(default)s]")
+    return parser
 
 def main(argv=None):  # IGNORE:C0111
     '''Command line options.'''
@@ -70,87 +147,7 @@ USAGE
 ''' % (program_shortdesc, str(__date__))
 
     try:
-        # Setup argument parser
-        parser = ArgumentParser(description=program_license,
-                                formatter_class=RawDescriptionHelpFormatter)
-        
-        parser.add_argument("-c",
-                            "--combine-laser",
-                            dest="combine_laser",
-                            action="store",
-                            nargs=5,
-                            metavar=('DIRECTORY',
-                                     'DEPTH_AGE_FILE',
-                                     'CREATE_PDF',
-                                     'CREATE_CSV',
-                                     'FOLDER_PREFIX'),
-                            help="process and combine laser files: %(metavar)s")
-        
-        
-        parser.add_argument("-f",
-                            "--filter_laserdata",
-                            dest="filter",
-                            action="store",
-                            help="combines filtered laser data from %(dest)s")
-
-               
-        parser.add_argument("-d",
-                            "--depth",
-                            dest="depth_file",
-                            action="store",
-                            help="resample %(dest)s by depth [default: %(default)s]")
-          
-        parser.add_argument("-dd",
-                            "--double-depth",
-                            dest="depth_files",
-                            action="store",
-                            nargs=2,
-                            help="resample %(dest)s by depth")
-          
-        parser.add_argument("-di",
-                            "--double-interval",
-                            dest="interval_files",
-                            action="store",
-                            nargs=2,
-                            help="resample %(dest)s to the higher resolution of the two files")
-         
-        parser.add_argument("-i",
-                            "--inc_amt",
-                            dest="inc_amt",
-                            action="store",
-                            default=1,
-                            help="the size of the resampling increment [default: %(default)s]")
-         
-        parser.add_argument("-l",
-                            "--load",
-                            dest="headers_file",
-                            action="store",
-                            help="load the headers of the CSV and store them in the header dictionary.  "
-                                 "This file should contain rows of (name, type, class, unit, label)")
-         
-        parser.add_argument("-r",
-                            "--recursive",
-                            dest="recurse",
-                            action="store_true",
-                            help="recurse into subfolders [default: %(default)s]")
- 
-        parser.add_argument("-v",
-                            "--verbose",
-                            dest="verbose",
-                            action="count",
-                            help=textwrap.dedent("""set verbosity level [default: %(default)s]\n
-                            Increasing the verbosity level increases what is logged.  For example,\n
-                            specifying -v outputs INFO level and -vv outputs DEBUG level messages."""))
-         
-        parser.add_argument('-V', '--version', action='version', version=program_version_message)
- 
-        parser.add_argument("-y",
-                            "--year",
-                            dest="year_file",
-                            action="store",
-                            help="resample %(dest)s by years and depth [default: %(default)s]")
-        
-#         parser.add_argument(dest="paths", default=".", help="paths to folder(s) with data file(s) [default: %(default)s]", metavar="path", nargs='+')
+        parser = setup_argument_parser(program_version_message, program_license)
 
         # Process arguments
         args = parser.parse_args()
@@ -160,7 +157,7 @@ USAGE
         
         inc_amt = float(args.inc_amt)
         
-        if len(sys.argv) == 1: # No arguments provided. Abort!
+        if len(sys.argv) == 1:  # No arguments provided. Abort!
             parser.print_help()
             sys.exit(0)
         
@@ -180,8 +177,8 @@ USAGE
         
         if args.combine_laser:
             # 'directory', 'depth_age_file', 'create_pdf', 'create_csv', 'folder_prefix'
-            directory, depth_age_file, create_pdf, create_csv, folder_prefix,  = args.combine_laser
-            combine_laser_data_by_directory(directory, depth_age_file, bool(create_pdf),bool(create_csv),folder_prefix)
+            directory, depth_age_file, create_pdf, create_csv, folder_prefix, = args.combine_laser
+            combine_laser_data_by_directory(directory, depth_age_file, bool(create_pdf), bool(create_csv), folder_prefix)
             
 
         if args.headers_file:
