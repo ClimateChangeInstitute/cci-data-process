@@ -118,12 +118,3 @@ def compiled_stats_by_dd_intervals(larger_df:DataFrame, smaller_df:DataFrame) ->
         result_list.append(depth_samples)
     return result_list
 
-
-def create_top_bottom_depth_dataframe_for_laser_file(df:DataFrame, depth_header:Header) -> DataFrame:
-
-    new_depth_headers = create_depth_headers([depth_header])
-
-    list_depth = []
-    for i in range(0, df.shape[0] - 1):
-        list_depth.append([df.loc[i, depth_header.name], df.loc[i + 1, depth_header.name]])
-    return DataFrame(list_depth, columns=new_depth_headers)

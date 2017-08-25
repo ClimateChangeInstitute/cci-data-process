@@ -1,0 +1,8 @@
+# Input to laserProcess.py for KCC 80 from 04.24.17 and 04.25.17					
+#In terminal type ./laserProcess.py inputFileName outputFileName					
+#					
+# Commented lines start with a # sign.					
+#					
+# FileName 	LaserTime	StartDepth	EndDepth	WashinTime	WashoutTime
+1.TXT	955	6008.5	6012.5	12	23
+3.TXT	955	6012.505	6016.505	12	23

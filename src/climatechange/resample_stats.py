@@ -26,13 +26,6 @@ def create_range_by_year(list_to_inc:List[float], inc_amt: int=1) -> List[float]
     y = max(list_to_inc)
     return [i for i in range(round(x), round(y), inc_amt)]
 
-def find_indices(list_to_inc, condition) -> List[int]:
-    '''
-    
-    :param list_to_inc:
-    :param condition:
-    '''
-    return [i for i, elem in enumerate(list_to_inc) if condition(elem)]
 
 
 def create_depth_headers(list_headers: List[Header]) -> List[str]:

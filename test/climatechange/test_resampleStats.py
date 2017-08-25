@@ -17,7 +17,7 @@ from climatechange.file import load_csv
 from climatechange.headers import HeaderType, Header, process_header_data
 from climatechange.laser_data_process import clean_LAICPMS_data, readFile
 from climatechange.process_data_functions import clean_data, \
-    load_and_clean_dd_data, get_compiled_stats_by_year
+    load_and_clean_dd_data, get_compiled_stats_by_year, round_values_to_sigfig
 from climatechange.resample_stats import compileStats,resampled_depths_by_years, \
     create_range_by_year, create_depth_headers, resampled_statistics
 import numpy as np
@@ -182,6 +182,13 @@ class Test(unittest.TestCase):
             warnings.simplefilter("ignore", category=RuntimeWarning)
             result = get_compiled_stats_by_year(input_test_zeros_and_numbers, headers, 1)
         assert_frame_equal(expected_result, result[0][0].df)
+        
+    def test_round_values_to_sigfig(self):
+        df = load_csv(os.path.join('csv_files', 'output_test_zeros_and_numbers.csv'))
+        result=round_values_to_sigfig(df)
+        self.assertEqual(0.5935,result.iloc[0,1])
+        self.assertEqual(5.915, result.iloc[0,5])
+        self.assertEqual(2011,result.iloc[0,0])
     
 
     
