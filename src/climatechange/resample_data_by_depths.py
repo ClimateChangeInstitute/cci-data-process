@@ -11,8 +11,7 @@ import pandas
 
 from climatechange.compiled_stat import CompiledStat
 from climatechange.headers import Header, HeaderType, process_header_data
-from climatechange.resample_stats import compileStats, create_depth_headers,\
-    resampled_statistics
+from climatechange.resample_stats import compileStats, create_depth_headers
 import numpy as np
 import logging
 from climatechange.plot import write_data_to_csv_files
@@ -39,7 +38,7 @@ def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> 
     :param list_to_inc:
     :param inc_amt:
     '''
-    print(range_list)
+    logging.debug("find_index_by_increment: range_list=%s", range_list)
     result = []
     top_range = []
     gaps=[]
