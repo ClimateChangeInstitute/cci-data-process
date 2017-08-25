@@ -73,10 +73,14 @@ class Test(unittest.TestCase):
         
     def test_combine_laser_data_by_directory(self):
         directory = os.path.join('csv_files', 'test_directory')
-        df_list = combine_laser_data_by_directory(directory, depth_age_file)
-        self.assertEqual(2972, df_list[0].shape[0])
-        self.assertEqual(7, df_list[0].shape[1])
-        self.assertEqual(0, df_list[1].shape[0])
+        df_1,df_2 = combine_laser_data_by_directory(directory, depth_age_file)
+        self.assertEqual(2972, df_1.shape[0])
+        self.assertEqual(7, df_1.shape[1])
+        self.assertEqual(2972, df_2.shape[0])
+        self.assertEqual(7, df_2.shape[1])
+        
+#     def test_laser_file(self):
+#         self.assertEqual(laser_file.file_path,laser_file)
         
     def test_laser_file_background_info(self):
         result=laser_file.background_stats

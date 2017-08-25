@@ -17,7 +17,8 @@ from climatechange.file import load_csv
 from climatechange.headers import HeaderType, Header, process_header_data
 from climatechange.process_data_functions import clean_data, \
     correlate_samples, remove_nan_from_datasets, correlate_stats,\
-    get_compiled_stats_by_depth
+    get_compiled_stats_by_depth, round_depth_values_to_sigfig,\
+    add_units_to_stats
 from climatechange.resample_data_by_depths import resampled_depths, create_range_for_depths, \
     find_index_by_increment,compiled_stats_by_dd_intervals
 from climatechange.resample_stats import create_depth_headers
@@ -207,6 +208,21 @@ class Test(unittest.TestCase):
         self.assertAlmostEqual(expected_result[0], result[0])
         self.assertEqual(len(expected_result), len(result))
         self.assertEqual(expected_result[3], result[3])
+        
+    def test_round_depth_values_to_sigfig(self):
+        df = load_csv(os.path.join('csv_files', 'output_bydepth.csv'))
+        result=round_depth_values_to_sigfig(df)
+        self.assertEqual(0.605,result.iloc[0,0])
+        self.assertEqual(3.699, result.iloc[0,2])
+        self.assertEqual(3.358,result.iloc[1,5])
+        
+    def test_add_units_to_stats(self):
+        df = load_csv(os.path.join('csv_files', 'output_bydepth.csv'))
+        result=add_units_to_stats(df,test_sample_header)
+        self.assertEqual('mean_Cond_(+ALU-S/cm)',result.columns[2])
+        self.assertEqual('count_(#pts/inc)',result.columns[7])
+        
+
         
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']

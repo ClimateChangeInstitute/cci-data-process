@@ -119,6 +119,8 @@ def load_input_file(input_file:str, depth_age_file:str) -> List[LaserFile]:  # g
 def load_laser_txt_file(file_path:str) -> DataFrame:
     
     rows = []
+    if not (os.path.splitext(file_path)[1]=='.txt') | (os.path.splitext(file_path)[1]=='.TXT'):
+        file_path = file_path + '.txt'
     with open(file_path) as f:
         for i, line in enumerate(f):
             if i == 0:
@@ -219,26 +221,26 @@ def combine_laser_data_by_directory(directory:str,
         pdf_folder = os.path.join(directory, 'PDF_plots')
         if not os.path.exists(pdf_folder):
             os.makedirs(pdf_folder)  
-        plot_laser_data_by_directory(combined_laser_1.df, pdf_folder)
-        plot_laser_data_by_directory(combined_laser_2.df, pdf_folder)
+        plot_laser_data_by_directory(combined_laser_1.df,prefix, pdf_folder)
+        plot_laser_data_by_directory(combined_laser_2.df,prefix, pdf_folder)
     
     if create_CSV:
         csv_folder = os.path.join(directory, 'CSV_files')
         if not os.path.exists(csv_folder):
             os.makedirs(csv_folder)
             #change names
-        write_data_to_csv_files(combined_laser_1.df, os.path.join(csv_folder, 'laser_filename.csv'))
-        write_data_to_csv_files(combined_laser_2.df, os.path.join(csv_folder, 'laser_filename2.csv'))           
+        write_data_to_csv_files(combined_laser_1.df, os.path.join(csv_folder, ('%s_laser_MR_%s.csv'%(prefix,os.path.basename(directory)))))
+        write_data_to_csv_files(combined_laser_2.df, os.path.join(csv_folder, ('%s_laser_LR_%s.csv'%(prefix,os.path.basename(directory)))))           
 
     return combined_laser_1.df,combined_laser_2.df
     # plot each sample by depth
                     
     
-def plot_laser_data_by_directory(df:DataFrame, pdf_folder):
+def plot_laser_data_by_directory(df:DataFrame,prefix:str, pdf_folder):
 
-    pdf_filename = os.path.join(pdf_folder, 'all_original_data_1.pdf')
+    pdf_filename = os.path.join(pdf_folder, ('%s_MR_plots.pdf' %prefix))
     if os.path.exists(pdf_filename):
-        pdf_filename = os.path.join(pdf_folder, 'all_original_data_2.pdf')
+        pdf_filename = os.path.join(pdf_folder, ('%s_LR_plots.pdf' %prefix))
         
     sample_headers = process_header_data(df, HeaderType.SAMPLE)
     depth_headers = process_header_data(df, HeaderType.DEPTH)
@@ -249,19 +251,19 @@ def plot_laser_data_by_directory(df:DataFrame, pdf_folder):
                 plot_laser_data(df, depth_header, sample_header, pdf)
                 
                 
-def plot_filtered_laser_data_by_directory(df:DataFrame, pdf_folder):
-
-    pdf_filename = os.path.join(pdf_folder, 'all_filtered_data_1.pdf')
-    if os.path.exists(pdf_filename):
-        pdf_filename = os.path.join(pdf_folder, 'all_filtered_data_2.pdf')
-            
-    sample_headers = process_header_data(df, HeaderType.SAMPLE)
-    depth_headers = process_header_data(df, HeaderType.DEPTH)
-    
-    with PdfPages(pdf_filename) as pdf:
-        for depth_header in depth_headers:
-            for sample_header in sample_headers:
-                plot_laser_data(df, depth_header, sample_header, pdf)
+# def plot_filtered_laser_data_by_directory(df:DataFrame, pdf_folder):
+# 
+#     pdf_filename = os.path.join(pdf_folder, 'all_filtered_data_1.pdf')
+#     if os.path.exists(pdf_filename):
+#         pdf_filename = os.path.join(pdf_folder, 'all_filtered_data_2.pdf')
+#             
+#     sample_headers = process_header_data(df, HeaderType.SAMPLE)
+#     depth_headers = process_header_data(df, HeaderType.DEPTH)
+#     
+#     with PdfPages(pdf_filename) as pdf:
+#         for depth_header in depth_headers:
+#             for sample_header in sample_headers:
+#                 plot_laser_data(df, depth_header, sample_header, pdf)
 
 
 
@@ -287,17 +289,17 @@ def clean_LAICPMS_data(f:LaserFile) -> DataFrame:
     df = df.drop('Time', 1)
     return df
 
-def filtered_laser_data(df:DataFrame) -> DataFrame:
-    '''
-    Filter the given data by removing data points that are outside of 2 
-    standard deviations of the mean and replacing them with :data:`np.nan`. 
-    Modification occur in-place.
-    
-    :param df: The data to be processed.
-    :return: The modified data
-    '''
-    
-    return replace_outliers(df)
+# def filtered_laser_data(df:DataFrame) -> DataFrame:
+#     '''
+#     Filter the given data by removing data points that are outside of 2 
+#     standard deviations of the mean and replacing them with :data:`np.nan`. 
+#     Modification occur in-place.
+#     
+#     :param df: The data to be processed.
+#     :return: The modified data
+#     '''
+#     
+#     return replace_outliers(df)
 
 def add_depth_column(df:DataFrame, start_depth:float, end_depth:float) -> DataFrame:
     """
