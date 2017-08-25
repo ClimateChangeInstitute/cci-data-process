@@ -59,9 +59,9 @@ class Test(unittest.TestCase):
         
     def test_combine_laser_data_by_input_file(self):
         input_file = os.path.join('csv_files', 'Input_File_test.txt')
-        df = combine_laser_data_by_input_file(input_file, depth_age_file)
-        self.assertEqual(1486, df.df.shape[0])
-        self.assertEqual(7, df.df.shape[1])
+        comb_laser = combine_laser_data_by_input_file(input_file, depth_age_file)
+        self.assertEqual(1486, comb_laser.df.shape[0])
+        self.assertEqual(7, comb_laser.df.shape[1])
         
     def test_load_and_clean_LAICPMS_data(self):
         df = clean_LAICPMS_data(laser_file)

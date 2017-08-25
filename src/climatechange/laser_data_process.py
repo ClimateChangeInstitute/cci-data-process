@@ -206,7 +206,7 @@ def combine_laser_data_by_directory(directory:str,
     input_2 = 'InputFile_2'
     combined_laser_1 = CombinedLaser()
     combined_laser_2 = CombinedLaser()
-
+ 
     for folder in sorted(os.listdir(directory)):
         if folder.startswith(prefix):
             for file in sorted(os.listdir(os.path.join(directory, folder))):
