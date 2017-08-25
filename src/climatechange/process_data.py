@@ -31,19 +31,7 @@ from climatechange.laser_data_process import combine_laser_data_by_directory
 __all__ = []
 __version__ = 0.1
 __date__ = '2017-07-24'
-__updated__ = '2017-07-24'
-
-PROFILE = 1
-
-class CLIError(Exception):
-    '''Generic exception to raise and log different fatal errors.'''
-    def __init__(self, msg):
-        super(CLIError).__init__(type(self))
-        self.msg = "E: %s" % msg
-    def __str__(self):
-        return self.msg
-    def __unicode__(self):
-        return self.msg
+__updated__ = '2017-08-25'
 
 
 def setup_argument_parser(program_version_message, program_license):
@@ -127,8 +115,6 @@ def main(argv=None):  # IGNORE:C0111
 
     if argv is None:
         argv = sys.argv
-    else:
-        sys.argv.extend(argv)
 
     program_name = os.path.basename(sys.argv[0])
     program_version = "v%s" % __version__
@@ -152,7 +138,6 @@ USAGE
         # Process arguments
         args = parser.parse_args()
 
-#         paths = args.paths
         verbose = args.verbose
         
         inc_amt = float(args.inc_amt)
