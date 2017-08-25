@@ -271,9 +271,9 @@ def resample_by_depths(f:str, inc_amt:float,stat_header:str='Mean'):
     
     :param f: The CSV file containing the data 
     '''
-    print("Creating pdf for %s" % f)
+    logging.info("Resampling by depths file:%s, inc_amt:%f, stat_header:%s",
+                 f, inc_amt, stat_header)
     
-    print(f)
     df, compiled_stats, headers = load_and_clean_depth_data(f, inc_amt)
 
     
