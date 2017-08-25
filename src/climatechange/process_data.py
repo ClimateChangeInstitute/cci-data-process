@@ -22,7 +22,7 @@ import sys
 
 from climatechange.process_data_functions import resample_by_years, \
     resample_by_depths, load_and_store_header_file, double_resample_by_depths, \
-    double_resample_HR_by_LR
+    resample_HR_by_LR
 import logging
 import textwrap
 from climatechange.laser_data_process import combine_laser_data_by_directory
@@ -179,7 +179,7 @@ USAGE
             if args.inc_amt:
                 logging.warn("Specified increment amount %d is not used "
                              "when resampling by depth intervals.", inc_amt)
-            double_resample_HR_by_LR(args.interval_files[0],
+            resample_HR_by_LR(args.interval_files[0],
                                       args.interval_files[1])    
         
         if args.year_file:

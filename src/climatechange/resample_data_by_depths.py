@@ -11,11 +11,11 @@ import pandas
 
 from climatechange.compiled_stat import CompiledStat
 from climatechange.headers import Header, HeaderType, process_header_data
-from climatechange.resample_stats import compileStats, create_depth_headers,\
-    resampled_statistics
+from climatechange.resample_stats import compileStats, create_depth_headers
 import numpy as np
 import logging
 from climatechange.plot import write_data_to_csv_files
+import os
 
 
 def create_range_for_depths(list_to_inc:List[float], inc_amt: float=0.01) -> List[float]:
@@ -39,7 +39,6 @@ def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> 
     :param list_to_inc:
     :param inc_amt:
     '''
-    print(range_list)
     result = []
     top_range = []
     gaps=[]
@@ -70,10 +69,39 @@ def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> 
         result.append(tmp)
         top_range.append(range_list[range_list_size-1])
        
-            
-    write_data_to_csv_files(DataFrame(gaps,columns=['gap_start','gap_end']),'gaps.csv')
-    
     return result, top_range
+
+
+def find_gaps(df_HR:DataFrame, df_LR:DataFrame, pdf_folder:str,file:str) -> Tuple[List[List[int]],List[float]]:
+    '''
+
+    :param list_to_inc:
+    :param inc_amt:
+    '''
+    depth_headers_HR = process_header_data(df_HR, HeaderType.DEPTH)
+    depth_headers_LR = process_header_data(df_LR, HeaderType.DEPTH)
+
+    
+    for dh_HR in depth_headers_HR:
+        for dh_LR in depth_headers_LR:
+            if dh_HR == dh_LR:
+                csv_gaps=os.path.join(pdf_folder,'%s_%s_gaps.csv'%(file,dh_LR.label))
+                list_to_inc=df_HR.loc[:, dh_HR.name].tolist()
+                range_list=df_LR.loc[:, dh_LR.name].tolist()
+                gaps=[]
+                range_list_size = len(range_list)
+                prev = 0
+                for i in range(range_list_size - 1):
+                    tmp = []
+                    for j in range(prev, len(list_to_inc)):
+                        e = list_to_inc[j]
+                        if e >= range_list[i] and e < range_list[i + 1]:
+                            tmp.append(j)
+                            prev = j + 1
+                    if not tmp:
+                        gaps.append([range_list[i], range_list[i + 1]])
+                        
+                write_data_to_csv_files(DataFrame(gaps,columns=[('gap_start'),('gap_end')]),csv_gaps)
 
 def resampled_depths(top_range:List[float], depth_header:Header, inc_amt):
 

@@ -20,7 +20,8 @@ from pandas import DataFrame, Series
 from scipy.stats._stats_mstats_common import linregress
 
 from climatechange.compiled_stat import CompiledStat
-from climatechange.data_filters import replace_outliers
+from climatechange.data_filters import replace_outliers,\
+    adjust_data_by_background
 from climatechange.file import load_csv
 from climatechange.headers import HeaderDictionary, HeaderType, Header, \
     load_headers, process_header_data
@@ -29,7 +30,7 @@ from climatechange.plot import write_data_to_csv_files, \
 from climatechange.readme_output import create_readme_output_file, \
     write_readmefile_to_txtfile, template
 from climatechange.resample_data_by_depths import compiled_stats_HR_by_LR, \
-    find_index_by_increment,create_range_for_depths, resampled_depths
+    find_index_by_increment,create_range_for_depths, resampled_depths, find_gaps
 from climatechange.resample_stats import create_range_by_year,\
     resampled_depths_by_years, resampled_statistics
 
@@ -38,6 +39,14 @@ import numpy as np
 import time
 import pandas
 
+class DataFile():
+
+    def __init__(self, df:DataFrame=DataFrame(), file_path:str=[]):
+        
+        self.df = df
+        self.file_path = file_path
+        self.base=os.path.basename(self.file_path).split('.')[0]
+        self.sample_headers=process_header_data(df, HeaderType.SAMPLE) 
 
 def is_number(s):
     try:
@@ -445,8 +454,8 @@ def plot_linregress_of_samples(d1:CompiledStat,
     plt.close()
     
 
-    
-def double_resample_HR_by_LR(f1:str, f2:str):
+
+def resample_HR_by_LR(f1:str, f2:str):
     '''
     
     Double Resampler by Depth Intervals
@@ -471,22 +480,21 @@ def double_resample_HR_by_LR(f1:str, f2:str):
     :param f1:
     :param f2:
     '''
+    f_HR,f_LR=find_HR_and_LR_df(f1,f2)
 
-    df1, unused_headers1 = load_and_clean_dd_data(f1)
-    df2, unused_headers2 = load_and_clean_dd_data(f2)
-    f1_file_path = os.path.splitext(f1)[0]
-    f2_base = os.path.basename(f2).split('.')[0]
-    csv_filename = f1_file_path + '_vs_ %s__stat_correlation.csv' % (f2_base)
-    pdf_filename = f1_file_path + '_vs_ %s__plot_correlation.pdf' % (f2_base)
-    pdf_corr_stats = f1_file_path + '_vs_ %s__plots.pdf' % (f2_base)
-
-    df_HR, df_LR = (df1, df2) if df1.shape[0] > df2.shape[0] else (df2, df1)
-#     df_HR = replace_outliers(df_HR)
+    pdf_folder = os.path.join(os.path.dirname(f_HR.file_path), 'Resample_HR_by_LR')
     
-    compiled_stats_of_df_HR = compiled_stats_HR_by_LR(df_HR, df_LR)
-    sample_headers_LR = process_header_data(df_LR, HeaderType.SAMPLE)
+    print(os.path.dirname(f_HR.base))
+    if not os.path.exists(pdf_folder):
+        os.makedirs(pdf_folder)
+        
+    find_gaps(f_HR.df, f_LR.df, pdf_folder, f_HR.base)
 
-
+    csv_filename = os.path.join(pdf_folder,'%s_vs_ %s__stat_correlation.csv' % (f_HR.base,f_LR.base))
+    pdf_corr_stats = os.path.join(pdf_folder,'%s_vs_ %s__plots.pdf' % (f_HR.base,f_LR.base))
+    
+    compiled_stats_of_df_HR = compiled_stats_HR_by_LR(f_HR.df, f_LR.df)
+    
     corr_allstats=[]
 
     with PdfPages(pdf_corr_stats) as pdf_cs:
@@ -494,21 +502,50 @@ def double_resample_HR_by_LR(f1:str, f2:str):
                 # list of compiled stat objects with depth and header names
             for cs in cs_list:
                 # compiled_stat_object with df, depth name, and sample name
-                for sh_LR in sample_headers_LR:
+                for sh_LR in f_LR.sample_headers:
 
                     if (sh_LR.hclass==cs.sample_header.hclass) | (sh_LR.hclass=='Dust') | (sh_LR.hclass=='Conductivity') \
                         | (cs.sample_header.hclass=='Dust') | (cs.sample_header.hclass=='Conductivity'):
                         print("Processing %s" % cs.x_header.name)
-                        print("correlating %s and %s" % (cs.sample_header.name, sh_LR.name))
+                        print("correlating %s and %s" % (cs.sample_header.hclass, sh_LR.hclass))
  
-                        corr_allstats.append(correlate_stats(cs, df_LR.loc[:, sh_LR.name]))
+                        corr_allstats.append(correlate_stats(cs, f_LR.df.loc[:, sh_LR.name]))
                         for stat_header in cs.df.columns[2:5]:
                             if not stat_header=='Stdv':
-                                plot_corr_stats(cs,df_LR,sh_LR,stat_header,pdf_cs)
+                                plot_corr_stats(cs,f_LR.df,sh_LR,stat_header,pdf_cs)
+                                pyplot.close()
 
     df_corr_allstats = DataFrame(corr_allstats, columns=['depth', 'sample_1', 'sample_2', 'r_value:Mean', 'r_value:Median','r_value:Max','r_value:Min'])    
 
     write_data_to_csv_files(df_corr_allstats, csv_filename)
+    
+    
+def find_HR_and_LR_df(f1:str,f2:str)->Tuple[DataFile,DataFile]:
+    
+    df1, unused_headers1 = load_and_clean_dd_data(f1)
+    df2, unused_headers2 = load_and_clean_dd_data(f2)
+
+    dh_1 = process_header_data(df1, HeaderType.DEPTH)
+    dh_2 = process_header_data(df2, HeaderType.DEPTH)
+    
+    #     df_HR, df_LR = (df1, df2) if df1.shape[0] > df2.shape[0] else (df2, df1)
+    for depth1 in dh_1:
+        for depth2 in dh_2:
+            if depth1.name==depth2.name:
+                
+                df_HR, df_LR = (df1, df2) if (df1[depth1.name].iloc[-1]-df1[depth1.name].iloc[0]/df1.shape[0]) < \
+                    (df2[depth2.name].iloc[-1]-df2[depth2.name].iloc[0]/df2.shape[0]) else (df2, df1)
+        
+                f_HR,f_LR = (f1, f2) if (df1[depth1.name].iloc[-1]-df1[depth1.name].iloc[0]/df1.shape[0]) < \
+                    (df2[depth2.name].iloc[-1]-df2[depth2.name].iloc[0]/df2.shape[0]) else (f2, f1)
+            break
+#         depth_range_HR=[min(df_HR[depth1.name]),max(df_HR[depth1.name])]
+#         print(depth_range_HR)
+#         depth_range_LR=[min(df_LR[depth1.name]),max(df_LR[depth1.name])]
+#         print(depth_range_LR)
+  
+    return DataFile(df_HR,f_HR),DataFile(df_LR,f_LR)
+    
     
 def load_and_store_header_file(path:str):
     print("Adding headers from %s to header dictionary." % path) 
