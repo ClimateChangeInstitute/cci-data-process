@@ -5,8 +5,6 @@ Created on Aug 24, 2017
 '''
 import unittest
 from climatechange.process_data import setup_argument_parser
-import sys
-from _pytest.config import ArgumentError
 
 
 class Test(unittest.TestCase):
@@ -61,17 +59,32 @@ class Test(unittest.TestCase):
         self.assertEqual('/tmp/interval_file1.csv', interval_file1)
         self.assertEqual('/tmp/interval_file2.csv', interval_file2)
 
-#         TODO: Make this match the setup argrument parser
-#         # -f or --filter 
-#         args = parser.parse_args(['replace_outliers'])
-#         
-#         directory, depth_age_file, create_pdf, create_csv, folder_prefix, = args.combine_laser
-#         
-#         self.assertEqual('/tmp', directory)
-#         self.assertEqual('/tmp/depth_age_file.csv', depth_age_file)
-#         self.assertEqual('True', create_pdf)
-#         self.assertEqual('True', create_csv)
-#         self.assertEqual('KCC', folder_prefix)
+        # -f or --filter 
+        args = parser.parse_args(['-f', 'replace_outliers'])
+         
+        #:var filters: List[List[str]]
+        filters = args.filters 
+        self.assertEqual('replace_outliers', filters[0][0])
+
+        # One filter with arguments
+        args = parser.parse_args(['-f', 'replace_outliers', '0', '2'])
+        
+        filters = args.filters
+        self.assertEqual('replace_outliers', filters[0][0])
+        self.assertEqual('0', filters[0][1])
+        self.assertEqual('2', filters[0][2])
+
+        # Two filters with arguments
+        args = parser.parse_args(['-f', 'replace_outliers', '0', '2',
+                                  '--filter', 'medfilt', 'val=3'])
+        
+        filters = args.filters
+        self.assertEqual('replace_outliers', filters[0][0])
+        self.assertEqual('0', filters[0][1])
+        self.assertEqual('2', filters[0][2])
+        self.assertEqual('medfilt', filters[1][0])
+        self.assertEqual('val=3', filters[1][1])
+
 
         # -i or --inc_amt
         args = parser.parse_args(['-i','1.1'])
@@ -100,8 +113,3 @@ class Test(unittest.TestCase):
         year_inc_amt = int(args.inc_amt) # should have a default value of 1
         self.assertEqual('/tmp/year_file.csv', year_file)
         self.assertEqual(1, year_inc_amt)
-
-
-if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
-    unittest.main()

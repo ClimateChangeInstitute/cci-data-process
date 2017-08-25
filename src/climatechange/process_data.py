@@ -87,12 +87,12 @@ def setup_argument_parser(program_version_message, program_license):
                         nargs=2,
                         help="resample %(dest)s to the higher resolution of the two files")
 
-#     TODO: Will add back similar soon enough
-#     parser.add_argument("-f",
-#                         "--filter_laserdata",
-#                         dest="filter",
-#                         action="store",
-#                         help="combines filtered laser data from %(dest)s")
+    parser.add_argument("-f",
+                        "--filter",
+                        dest="filters",
+                        action="append",
+                        nargs='+',
+                        help="Apply filters to processed data.  Multiple filters with optional parameters may be specified.")
         
     parser.add_argument("-i",
                         "--inc_amt",
