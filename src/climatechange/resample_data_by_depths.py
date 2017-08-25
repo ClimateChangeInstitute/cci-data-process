@@ -39,6 +39,7 @@ def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> 
     :param list_to_inc:
     :param inc_amt:
     '''
+    logging.debug("find_index_by_increment: range_list=%s", range_list)
     result = []
     top_range = []
     gaps=[]

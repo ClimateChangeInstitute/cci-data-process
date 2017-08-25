@@ -4,23 +4,22 @@ Created on Jul 31, 2017
 @author: Heather
 '''
 import os
+from pandas import DataFrame, Series
+from pandas.util.testing import assert_frame_equal
 import unittest
 import warnings
 
-from pandas import DataFrame, Series
-import pandas
 from pandas.testing import assert_series_equal
-from pandas.util.testing import assert_frame_equal
 
 from climatechange.compiled_stat import CompiledStat
 from climatechange.file import load_csv
 from climatechange.headers import HeaderType, Header, process_header_data
 from climatechange.process_data_functions import clean_data, \
-    correlate_samples, remove_nan_from_datasets, correlate_stats,\
-    get_compiled_stats_by_depth, round_depth_values_to_sigfig,\
+    correlate_samples, remove_nan_from_datasets, correlate_stats, \
+    get_compiled_stats_by_depth, round_depth_values_to_sigfig, \
     add_units_to_stats
 from climatechange.resample_data_by_depths import resampled_depths, create_range_for_depths, \
-    find_index_by_increment,compiled_stats_by_dd_intervals
+    find_index_by_increment, compiled_stats_HR_by_LR
 from climatechange.resample_stats import create_depth_headers
 import numpy as np
 
@@ -105,14 +104,14 @@ class Test(unittest.TestCase):
         result, unused_top_range = find_index_by_increment(input_test.loc[:, 'depth (m we)'].values.tolist(), range_list)
         self.assertEqual(expected_result, result)
         
-    def test_find_index_by_increment_with_blanks(self):    
+    def test_find_index_by_increment_with_blanks(self):
         list_to_inc = [1, 2, 6, 7, 8]
         range_list = [1, 3, 5, 7, 9]
         result, top_range = find_index_by_increment(list_to_inc, range_list)
         self.assertEqual([[0, 1], [2], [3, 4]], result)
         self.assertEqual([1, 5, 7], top_range)
         self.assertEqual(len(result), len(top_range))
-        
+
     def test_resampled_depths(self):
         inc_amt = 0.01
         expected_result = DataFrame([[0.605, 0.615], [0.615, 0.625]], columns=['top_depth_we_(m)', 'bottom_depth_we_(m)'])
@@ -125,7 +124,7 @@ class Test(unittest.TestCase):
     def test_get_compiled_stats_by_depth(self):
         input_test = load_csv(os.path.join('csv_files', 'input_depths.csv'))
         input_test = clean_data(input_test)
-        headers=process_header_data(input_test)
+        headers = process_header_data(input_test)
         expected_result = load_csv(os.path.join('csv_files', 'output_bydepth.csv'))
         inc_amt = 0.01
         with warnings.catch_warnings():
@@ -190,7 +189,7 @@ class Test(unittest.TestCase):
     def test_compile_stats_by_dd_intervals(self):
         larger_df = load_csv(os.path.join('csv_files', 'test_input_dd_2.csv'))
         smaller_df = load_csv(os.path.join('csv_files', 'test_input_dd_1.csv'))      
-        compiled_stat_of_larger_df = compiled_stats_by_dd_intervals(larger_df, smaller_df)
+        compiled_stat_of_larger_df = compiled_stats_HR_by_LR(larger_df, smaller_df)
         self.assertEqual(2, len(compiled_stat_of_larger_df))
         self.assertEqual(3, len(compiled_stat_of_larger_df[0]))
         assert_frame_equal(test_output_dd.df, compiled_stat_of_larger_df[0][0].df)
@@ -211,20 +210,20 @@ class Test(unittest.TestCase):
         
     def test_round_depth_values_to_sigfig(self):
         df = load_csv(os.path.join('csv_files', 'output_bydepth.csv'))
-        df=clean_data(df)
+        df = clean_data(df)
         expected_result = load_csv(os.path.join('csv_files', 'output_bydepth_round.csv'))
-        result=round_depth_values_to_sigfig(df)
-        assert_frame_equal(expected_result,result)
+        result = round_depth_values_to_sigfig(df)
+        assert_frame_equal(expected_result, result)
 
     def test_add_units_to_stats(self):
         df = load_csv(os.path.join('csv_files', 'output_bydepth.csv'))
-        df=clean_data(df)
-        df=round_depth_values_to_sigfig(df)
-        result=add_units_to_stats(df,test_sample_header)
+        df = clean_data(df)
+        df = round_depth_values_to_sigfig(df)
+        result = add_units_to_stats(df, test_sample_header)
         expected_result = load_csv(os.path.join('csv_files', 'output_bydepth_units.csv'))
-        assert_frame_equal(expected_result,result)
-        self.assertEqual('mean_Cond_(+ALU-S/cm)',result.columns[2])
-        self.assertEqual('count_(#pts/inc)',result.columns[7])
+        assert_frame_equal(expected_result, result)
+        self.assertEqual('mean_Cond_(+ALU-S/cm)', result.columns[2])
+        self.assertEqual('count_(#pts/inc)', result.columns[7])
         
 
         
