@@ -1,0 +1,3 @@
+top_depth_we_(m),bottom_depth_we_(m),mean_Cond_(+ALU-S/cm),stdev_Cond_(+ALU-S/cm),median_Cond_(+ALU-S/cm),max_Cond_(+ALU-S/cm),min_Cond_(+ALU-S/cm),count_(#pts/inc)
+0.605,0.615,3.699,0.199,3.687,4.038,3.399,29.000
+0.615,0.625,3.017,0.153,2.951,3.358,2.859,27.000

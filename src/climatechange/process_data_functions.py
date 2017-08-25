@@ -94,9 +94,6 @@ def get_compiled_stats_by_year(df:DataFrame, headers:List[Header],inc_amt:int,) 
     return compiled_stats
 
 
-def find_round_values():
-    pass
-
 def round_values_to_sigfig(df:DataFrame):
     year_round_amt = 0
     depth_round_amt = 4

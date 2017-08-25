@@ -211,14 +211,18 @@ class Test(unittest.TestCase):
         
     def test_round_depth_values_to_sigfig(self):
         df = load_csv(os.path.join('csv_files', 'output_bydepth.csv'))
+        df=clean_data(df)
+        expected_result = load_csv(os.path.join('csv_files', 'output_bydepth_round.csv'))
         result=round_depth_values_to_sigfig(df)
-        self.assertEqual(0.605,result.iloc[0,0])
-        self.assertEqual(3.699, result.iloc[0,2])
-        self.assertEqual(3.358,result.iloc[1,5])
-        
+        assert_frame_equal(expected_result,result)
+
     def test_add_units_to_stats(self):
         df = load_csv(os.path.join('csv_files', 'output_bydepth.csv'))
+        df=clean_data(df)
+        df=round_depth_values_to_sigfig(df)
         result=add_units_to_stats(df,test_sample_header)
+        expected_result = load_csv(os.path.join('csv_files', 'output_bydepth_units.csv'))
+        assert_frame_equal(expected_result,result)
         self.assertEqual('mean_Cond_(+ALU-S/cm)',result.columns[2])
         self.assertEqual('count_(#pts/inc)',result.columns[7])
         

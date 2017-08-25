@@ -185,10 +185,12 @@ class Test(unittest.TestCase):
         
     def test_round_values_to_sigfig(self):
         df = load_csv(os.path.join('csv_files', 'output_test_zeros_and_numbers.csv'))
+        df=clean_data(df)
+        expected_result = load_csv(os.path.join('csv_files', 'output_test_zeros_and_numbers_round.csv'))
+        expected_result=clean_data(expected_result)
         result=round_values_to_sigfig(df)
-        self.assertEqual(0.5935,result.iloc[0,1])
-        self.assertEqual(5.915, result.iloc[0,5])
-        self.assertEqual(2011,result.iloc[0,0])
+        assert_frame_equal(expected_result, result)
+
     
 
     
