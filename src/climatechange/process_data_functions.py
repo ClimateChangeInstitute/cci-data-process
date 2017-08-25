@@ -28,7 +28,7 @@ from climatechange.plot import write_data_to_csv_files, \
     add_compile_stats_to_pdf
 from climatechange.readme_output import create_readme_output_file, \
     write_readmefile_to_txtfile, template
-from climatechange.resample_data_by_depths import compiled_stats_by_dd_intervals, \
+from climatechange.resample_data_by_depths import compiled_stats_HR_by_LR, \
     find_index_by_increment,create_range_for_depths, resampled_depths
 from climatechange.resample_stats import create_range_by_year,\
     resampled_depths_by_years, resampled_statistics
@@ -409,10 +409,7 @@ def plot_corr_stats(d1:CompiledStat,
                         sample_header:Header,
                         stat_header:'str',
                         pdf_cs):
-    print('size of df1:%s'%d1.df.shape[0])
-    print('size of df1:%s'%d1.df.shape[1])
-    print('size of df2:%s'%d2.shape[0])
-    print('size of df2:%s'%d2.shape[1])
+    
     plt.figure(figsize=(11, 8.5))
     fig,ax=plt.subplots()
     ax2=ax.twinx()
@@ -421,7 +418,7 @@ def plot_corr_stats(d1:CompiledStat,
     ax.set_xlabel(d1.x_header.label)
     ax.set_ylabel(d1.sample_header.label)
     ax2.set_ylabel(sample_header.label)
-    plt.title('%s Resampled by %s vs. %s'% (d1.sample_header.hclass,stat_header,sample_header.hclass))
+    plt.title('HR %s: %s vs. LR %s'% (d1.sample_header.hclass,stat_header,sample_header.hclass))
     lns = lns1+lns2
     labs = [l.get_label() for l in lns]
     ax.legend(lns, labs, loc=0)
@@ -449,7 +446,7 @@ def plot_linregress_of_samples(d1:CompiledStat,
     
 
     
-def double_resample_by_depth_intervals(f1:str, f2:str):
+def double_resample_HR_by_LR(f1:str, f2:str):
     '''
     
     Double Resampler by Depth Intervals
@@ -465,7 +462,7 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     c. correlates only the depth intervals that correspond with both datasets
     ex: correlation between CompiledStat.df['Mean']=[2.5 4.5 6.5 8.5 1] and
     CompiledStat.df['top depth']=[1,2,3,4,5],CompiledStat.df['bottom depth']=[2,3,4,5,6] 
-    smaller_df[sample]=[1,2,3,4,5,6], smaller_df[depth]=[1,2,3,4,5,6] will only account 
+    df_LR[sample]=[1,2,3,4,5,6], df_LR[depth]=[1,2,3,4,5,6] will only account 
     for the depth of 1-5 and not 6.
     
 
@@ -483,31 +480,31 @@ def double_resample_by_depth_intervals(f1:str, f2:str):
     pdf_filename = f1_file_path + '_vs_ %s__plot_correlation.pdf' % (f2_base)
     pdf_corr_stats = f1_file_path + '_vs_ %s__plots.pdf' % (f2_base)
 
-    larger_df, smaller_df = (df1, df2) if df1.shape[0] > df2.shape[0] else (df2, df1)
-    larger_df = replace_outliers(larger_df)
+    df_HR, df_LR = (df1, df2) if df1.shape[0] > df2.shape[0] else (df2, df1)
+#     df_HR = replace_outliers(df_HR)
     
-    compiled_stats_of_larger_df = compiled_stats_by_dd_intervals(larger_df, smaller_df)
-    smaller_df_sample_headers = process_header_data(smaller_df, HeaderType.SAMPLE)
+    compiled_stats_of_df_HR = compiled_stats_HR_by_LR(df_HR, df_LR)
+    sample_headers_LR = process_header_data(df_LR, HeaderType.SAMPLE)
 
-#     corr_stats = []
+
     corr_allstats=[]
-#     with PdfPages(pdf_filename) as pdf:
+
     with PdfPages(pdf_corr_stats) as pdf_cs:
-        for dlist1 in compiled_stats_of_larger_df:
+        for cs_list in compiled_stats_of_df_HR:
                 # list of compiled stat objects with depth and header names
-            for d1 in dlist1:
+            for cs in cs_list:
                 # compiled_stat_object with df, depth name, and sample name
-                for sample_header in smaller_df_sample_headers:
-                    print("Processing %s" % d1.x_header.name)
-                    # correlate
-                    print("correlating %s and %s" % (d1.sample_header.name, sample_header.name))
-                    corr_allstats.append(correlate_stats(d1, smaller_df.loc[:, sample_header.name]))
-                            
-#                         plot_linregress_of_samples(d1, smaller_df.loc[:, sample_header.name], sample_header, stat_header, pdf)
-                    if (sample_header.hclass==d1.sample_header.hclass) | (sample_header.hclass=='Dust') | (sample_header.hclass=='Conductivity'):
-                        for stat_header in d1.df.columns[2:5]:
-                            if not stat_header=='Stdv':    
-                                plot_corr_stats(d1,smaller_df,sample_header,stat_header,pdf_cs)
+                for sh_LR in sample_headers_LR:
+
+                    if (sh_LR.hclass==cs.sample_header.hclass) | (sh_LR.hclass=='Dust') | (sh_LR.hclass=='Conductivity') \
+                        | (cs.sample_header.hclass=='Dust') | (cs.sample_header.hclass=='Conductivity'):
+                        print("Processing %s" % cs.x_header.name)
+                        print("correlating %s and %s" % (cs.sample_header.name, sh_LR.name))
+ 
+                        corr_allstats.append(correlate_stats(cs, df_LR.loc[:, sh_LR.name]))
+                        for stat_header in cs.df.columns[2:5]:
+                            if not stat_header=='Stdv':
+                                plot_corr_stats(cs,df_LR,sh_LR,stat_header,pdf_cs)
 
     df_corr_allstats = DataFrame(corr_allstats, columns=['depth', 'sample_1', 'sample_2', 'r_value:Mean', 'r_value:Median','r_value:Max','r_value:Min'])    
 

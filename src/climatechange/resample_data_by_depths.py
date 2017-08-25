@@ -15,6 +15,7 @@ from climatechange.resample_stats import compileStats, create_depth_headers,\
     resampled_statistics
 import numpy as np
 import logging
+from climatechange.plot import write_data_to_csv_files
 
 
 def create_range_for_depths(list_to_inc:List[float], inc_amt: float=0.01) -> List[float]:
@@ -29,6 +30,7 @@ def create_range_for_depths(list_to_inc:List[float], inc_amt: float=0.01) -> Lis
     else:
         r = str(inc_amt)[::-1].find('.')
     g = np.arange(np.round(min(list_to_inc), r), max(list_to_inc), inc_amt)
+    
     return [round(i, r) for i in g.tolist()]
 
 def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> Tuple[List[List[int]],List[float]]:
@@ -37,8 +39,10 @@ def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> 
     :param list_to_inc:
     :param inc_amt:
     '''
+    print(range_list)
     result = []
     top_range = []
+    gaps=[]
     range_list_size = len(range_list)
     prev = 0
     for i in range(range_list_size - 1):
@@ -50,6 +54,7 @@ def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> 
                 prev = j + 1
         if not tmp:
             logging.warn('no values between [%f,%f)', range_list[i], range_list[i + 1])
+            gaps.append([range_list[i], range_list[i + 1]])
         else: 
             result.append(tmp)
             top_range.append(range_list[i])
@@ -64,7 +69,10 @@ def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> 
     else:
         result.append(tmp)
         top_range.append(range_list[range_list_size-1])
+       
             
+    write_data_to_csv_files(DataFrame(gaps,columns=['gap_start','gap_end']),'gaps.csv')
+    
     return result, top_range
 
 def resampled_depths(top_range:List[float], depth_header:Header, inc_amt):
@@ -87,7 +95,7 @@ def create_top_bottom_depth_dataframe(df:DataFrame, depth_header:Header) -> Data
     return DataFrame(list_depth, columns=new_depth_headers)
 
 
-def compiled_stats_by_dd_intervals(larger_df:DataFrame, smaller_df:DataFrame) -> List[List[CompiledStat]]:
+def compiled_stats_HR_by_LR(df_HR:DataFrame, df_LR:DataFrame) -> List[List[CompiledStat]]:
     '''
     From the given data frame compile statistics (mean, median, min, max, etc)
     based on the parameters.
@@ -97,23 +105,23 @@ def compiled_stats_by_dd_intervals(larger_df:DataFrame, smaller_df:DataFrame) ->
     :return: A list of list of CompiledStat containing the resampled statistics for the
     specified sample and depth by the depth interval from df2.
     '''
-    depth_headers_larger = process_header_data(larger_df, HeaderType.DEPTH)
-    depth_headers_smaller = process_header_data(smaller_df, HeaderType.DEPTH)
-    sample_headers_larger = process_header_data(larger_df, HeaderType.SAMPLE)
+    depth_headers_HR = process_header_data(df_HR, HeaderType.DEPTH)
+    depth_headers_LR = process_header_data(df_LR, HeaderType.DEPTH)
+    sample_headers_HR = process_header_data(df_HR, HeaderType.SAMPLE)
 
     result_list = []
-    for depth_header_l in depth_headers_larger:
-        for depth_header_s in depth_headers_smaller:
-            if depth_header_l == depth_header_s:
-                index,top_range = find_index_by_increment(larger_df.loc[:, depth_header_s.name].tolist(), smaller_df.loc[:, depth_header_l.name].tolist())
-                depth_df = create_top_bottom_depth_dataframe(smaller_df, depth_header_s)
+    for dh_HR in depth_headers_HR:
+        for dh_LR in depth_headers_LR:
+            if dh_HR == dh_LR:
+                index,top_range = find_index_by_increment(df_HR.loc[:, dh_HR.name].tolist(), df_LR.loc[:, dh_LR.name].tolist())
+                depth_df = create_top_bottom_depth_dataframe(df_LR, dh_LR)
                 depth_samples = []
-                for sample_header in sample_headers_larger:
+                for sample_header in sample_headers_HR:
                     current_stats = []
                     for i in index:
-                        current_stats.append(compileStats(larger_df.loc[i, sample_header.name].tolist()))
+                        current_stats.append(compileStats(df_HR.loc[i, sample_header.name].tolist()))
                     current_df = DataFrame(current_stats, columns=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
-                    comp_stat = CompiledStat(pandas.concat((depth_df, current_df), axis=1), depth_header_l, sample_header)
+                    comp_stat = CompiledStat(pandas.concat((depth_df, current_df), axis=1), dh_HR, sample_header)
                     depth_samples.append(comp_stat)
         result_list.append(depth_samples)
     return result_list
