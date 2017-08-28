@@ -12,7 +12,8 @@ from matplotlib.backends.backend_pdf import PdfPages
 from pandas import DataFrame, Series
 import pandas
 
-from climatechange.data_filters import replace_outliers
+from climatechange.data_filters import replace_outliers,\
+    adjust_data_by_background, adjust_data_by_stats
 from climatechange.headers import process_header_data, HeaderType, Header
 from climatechange.plot import write_data_to_csv_files
 from climatechange.process_data_functions import clean_data
@@ -35,9 +36,9 @@ class LaserFile:
         self.processed_data = clean_LAICPMS_data(self)
         self.background_stats = DataFrame({i:compileStats(self.raw_data.loc[0:12, i].tolist()) for i in self.raw_data.iloc[0:13, 1:]},
                     index=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
-        self.stats =DataFrame({i:compileStats(self.raw_data[i].tolist()) for i in self.raw_data[1:]},
+        self.stats =DataFrame({i:compileStats(self.processed_data[i].tolist()) for i in self.processed_data.columns[2:]},
                     index=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
-#         self.filtered_data = filtered_laser_data(self.processed_data)
+        self.filtered_data = filtered_laser_data(self)
 #         self.normalized_data=normalize_min_max_scaler(self.processed_data)
 
     def __str__(self):
@@ -174,7 +175,7 @@ def combine_laser_data_by_input_file(input_file:str, depth_age_file:str, create_
         
     for f in laser_files:
 
-        df = df.append(f.processed_data, ignore_index=True)
+        df = df.append(f.filtered_data, ignore_index=True)
 #         df_adjust_background=adjust_background(f.processed_data,f.background_info)
 #         if create_PDF:
 #             plot_laser_data_by_run(f,pdf_folder)
@@ -230,8 +231,8 @@ def combine_laser_data_by_directory(directory:str,
         if not os.path.exists(csv_folder):
             os.makedirs(csv_folder)
             #change names
-        write_data_to_csv_files(combined_laser_1.df, os.path.join(csv_folder, ('%s_laser_MR_%s.csv'%(prefix,os.path.basename(directory)))))
-        write_data_to_csv_files(combined_laser_2.df, os.path.join(csv_folder, ('%s_laser_LR_%s.csv'%(prefix,os.path.basename(directory)))))           
+        write_data_to_csv_files(combined_laser_1.df, os.path.join(csv_folder, ('%s_laser_MR_%s_filter.csv'%(prefix,os.path.basename(directory)))))
+        write_data_to_csv_files(combined_laser_2.df, os.path.join(csv_folder, ('%s_laser_LR_%s_filter.csv'%(prefix,os.path.basename(directory)))))           
 
     return combined_laser_1.df,combined_laser_2.df
     # plot each sample by depth
@@ -239,9 +240,9 @@ def combine_laser_data_by_directory(directory:str,
     
 def plot_laser_data_by_directory(df:DataFrame,prefix:str, pdf_folder):
 
-    pdf_filename = os.path.join(pdf_folder, ('%s_MR_plots.pdf' %prefix))
+    pdf_filename = os.path.join(pdf_folder, ('%s_MR_plots_filter.pdf' %prefix))
     if os.path.exists(pdf_filename):
-        pdf_filename = os.path.join(pdf_folder, ('%s_LR_plots.pdf' %prefix))
+        pdf_filename = os.path.join(pdf_folder, ('%s_LR_plots_filter.pdf' %prefix))
         
     sample_headers = process_header_data(df, HeaderType.SAMPLE)
     depth_headers = process_header_data(df, HeaderType.DEPTH)
@@ -285,22 +286,25 @@ def clean_LAICPMS_data(f:LaserFile) -> DataFrame:
     df = clean_data(f.raw_data)
     df = df[(df['Time'] > f.washin_time) & (df['Time'] < f.laser_time - f.washout_time)]
     df = df.reset_index(drop=True)
+    df = df.drop('Time', 1)
+    df = df.round(5)
     df = add_depth_column(df, f.start_depth, f.end_depth)
     df = add_year_column(df, f.depth_age_file)
-    df = df.drop('Time', 1)
+    
     return df
 
-# def filtered_laser_data(df:DataFrame) -> DataFrame:
-#     '''
-#     Filter the given data by removing data points that are outside of 2 
-#     standard deviations of the mean and replacing them with :data:`np.nan`. 
-#     Modification occur in-place.
-#     
-#     :param df: The data to be processed.
-#     :return: The modified data
-#     '''
-#     
-#     return replace_outliers(df)
+def filtered_laser_data(laser_file) -> DataFrame:
+    '''
+    Filter the given data by removing data points that are outside of 2 
+    standard deviations of the mean and replacing them with :data:`np.nan`. 
+    Modification occur in-place.
+     
+    :param df: The data to be processed.
+    :return: The modified data
+    '''
+    df=adjust_data_by_stats(laser_file.processed_data,laser_file.stats)
+    
+    return df
 
 def add_depth_column(df:DataFrame, start_depth:float, end_depth:float) -> DataFrame:
     """

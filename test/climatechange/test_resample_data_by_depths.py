@@ -17,7 +17,8 @@ from climatechange.headers import HeaderType, Header, process_header_data
 from climatechange.process_data_functions import clean_data, \
     correlate_samples, remove_nan_from_datasets, correlate_stats, \
     get_compiled_stats_by_depth, round_depth_values_to_sigfig, \
-    add_units_to_stats
+    add_units_to_stats, find_HR_and_LR_df, load_and_clean_dd_data,\
+    resample_HR_by_LR
 from climatechange.resample_data_by_depths import resampled_depths, create_range_for_depths, \
     find_index_by_increment, compiled_stats_HR_by_LR
 from climatechange.resample_stats import create_depth_headers
@@ -40,8 +41,14 @@ output_result = DataFrame([[800000., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.,
                             [np.nan, 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.]]).transpose()
 input_df.columns = column_names
 output_result.columns = column_names
-        
+df_HR_test,headers = load_and_clean_dd_data(os.path.join('csv_files', 'test_input_dd_2.csv'))
 
+df_LR_test,headers = load_and_clean_dd_data(os.path.join('csv_files', 'test_input_dd_1.csv'))
+      
+df_LR_test=df_LR_test[(df_LR_test[test_depth_we_header.name]>=min(df_HR_test[test_depth_we_header.name])) & (df_LR_test[test_depth_we_header.name] <=max(df_HR_test[test_depth_we_header.name]))]
+df_HR_test=df_HR_test[(df_HR_test[test_depth_we_header.name]>=min(df_LR_test[test_depth_we_header.name])) & (df_HR_test[test_depth_we_header.name] <=max(df_LR_test[test_depth_we_header.name]))]
+df_HR_test=df_HR_test.reset_index(drop=True)
+df_LR_test=df_LR_test.reset_index(drop=True)
 
 class Test(unittest.TestCase):
 
@@ -195,6 +202,24 @@ class Test(unittest.TestCase):
         assert_frame_equal(test_output_dd.df, compiled_stat_of_larger_df[0][0].df)
         self.assertEqual(test_output_dd.sample_header, compiled_stat_of_larger_df[0][0].sample_header)
         self.assertEqual(test_output_dd.x_header, compiled_stat_of_larger_df[0][0].x_header)
+        
+    def test_find_HR_and_LR_df(self):
+        f_HR = os.path.join('csv_files', 'test_input_dd_2.csv')
+        f_LR = os.path.join('csv_files', 'test_input_dd_1.csv')
+        df_HR,df_LR=find_HR_and_LR_df(f_HR,f_LR)
+        assert_frame_equal(df_HR_test,df_HR.df)
+        assert_frame_equal(df_LR_test,df_LR.df)
+        self.assertEqual(df_HR.file_path,f_HR)
+        self.assertEqual(df_LR.file_path,f_LR)
+        self.assertEqual(os.path.basename(f_HR).split('.')[0], df_HR.base)
+        self.assertEqual(process_header_data(df_HR_test, HeaderType.SAMPLE),df_HR.sample_headers) 
+        
+    def test_resample_HR_by_LR(self):
+        f_HR = os.path.join('csv_files', 'test_input_dd_2.csv')
+        f_LR = os.path.join('csv_files', 'test_input_dd_1.csv')
+        result=resample_HR_by_LR(f_HR,f_LR)
+        expected_result=load_csv(os.path.join('csv_files', 'resample_HR_by_LR_test.csv'))
+        assert_frame_equal(expected_result,result)
          
     def test_correlate_stats(self):
         df = DataFrame([y, y, x, y, x, x, x, y]).transpose()

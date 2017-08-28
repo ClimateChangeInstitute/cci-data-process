@@ -72,7 +72,8 @@ def setup_argument_parser(program_version_message, program_license):
                         "--double-interval",
                         dest="interval_files",
                         action="store",
-                        nargs=2,
+                        nargs=4,
+                        metavar=('file_1', 'file_2', 'CREATE_PDF', 'CREATE_CSV'),
                         help="resample %(dest)s to the higher resolution of the two files")
 
     parser.add_argument("-f",
@@ -180,8 +181,8 @@ USAGE
             if args.inc_amt:
                 logging.warning("Specified increment amount %d is not used "
                              "when resampling by depth intervals.", inc_amt)
-            resample_HR_by_LR(args.interval_files[0],
-                                      args.interval_files[1])    
+            file_1, file_2, create_pdf, create_csv, = args.interval_files
+            resample_HR_by_LR(file_1, file_2 ,bool(create_pdf), bool(create_csv))    
         
         if args.year_file:
             

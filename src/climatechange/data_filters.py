@@ -19,7 +19,7 @@ from climatechange.headers import process_header_data, HeaderType
 import numpy as np
 
 
-def replace(s:Series, val:float64=np.nan, num_std:float=2) -> Series:
+def replace(s:Series, val:float64=np.nan, num_std:float=3) -> Series:
     '''
     Replace any values greater than or less than the number of specified 
     standard deviations with :py:data:`np.nan`.  Modifications occur in-place.
@@ -66,7 +66,7 @@ class Filter:
 filter_map = {}
 
  
-def replace_outliers(df:DataFrame, val:float64=np.nan, num_std:float=2) -> DataFrame:
+def replace_outliers(df:DataFrame, val:float64=np.nan, num_std:float=3) -> DataFrame:
     '''
     Replace the outliers in the data on a column based calculation.  The mean 
     and standard deviation for each column is calculated to use.
@@ -82,7 +82,7 @@ def replace_outliers(df:DataFrame, val:float64=np.nan, num_std:float=2) -> DataF
 filter_map['replace_outlers'] = Filter('replace_outliers',
                                        [('df', DataFrame, None),
                                         ('val', float64, np.nan),
-                                        ('num_std', float, 2.0)],
+                                        ('num_std', float, 3.0)],
                                        replace_outliers)
 
 

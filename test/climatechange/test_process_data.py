@@ -52,12 +52,14 @@ class Test(unittest.TestCase):
         self.assertEqual('/tmp/depth_file2.csv', depth_file2)
 
         # -di or --double-interval
-        args = parser.parse_args(['-di','/tmp/interval_file1.csv','/tmp/interval_file2.csv'])
+        args = parser.parse_args(['-di','/tmp/interval_file1.csv','/tmp/interval_file2.csv','True','True'])
         
-        interval_file1, interval_file2 = args.interval_files
+        interval_file1, interval_file2, create_pdf, create_csv = args.interval_files
         
         self.assertEqual('/tmp/interval_file1.csv', interval_file1)
         self.assertEqual('/tmp/interval_file2.csv', interval_file2)
+        self.assertEqual('True', create_pdf)
+        self.assertEqual('True', create_csv)
 
         # -f or --filter 
         args = parser.parse_args(['-f', 'replace_outliers'])

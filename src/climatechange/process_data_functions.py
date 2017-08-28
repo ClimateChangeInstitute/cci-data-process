@@ -455,7 +455,7 @@ def plot_linregress_of_samples(d1:CompiledStat,
     
 
 
-def resample_HR_by_LR(f1:str, f2:str):
+def resample_HR_by_LR(f1:str, f2:str, createPDF=False, createCSV=False):
     '''
     
     Double Resampler by Depth Intervals
@@ -481,43 +481,44 @@ def resample_HR_by_LR(f1:str, f2:str):
     :param f2:
     '''
     f_HR,f_LR=find_HR_and_LR_df(f1,f2)
-
     pdf_folder = os.path.join(os.path.dirname(f_HR.file_path), 'Resample_HR_by_LR')
-    
-    print(os.path.dirname(f_HR.base))
-    if not os.path.exists(pdf_folder):
-        os.makedirs(pdf_folder)
-        
-    find_gaps(f_HR.df, f_LR.df, pdf_folder, f_HR.base)
-
-    csv_filename = os.path.join(pdf_folder,'%s_vs_ %s__stat_correlation.csv' % (f_HR.base,f_LR.base))
-    pdf_corr_stats = os.path.join(pdf_folder,'%s_vs_ %s__plots.pdf' % (f_HR.base,f_LR.base))
     
     compiled_stats_of_df_HR = compiled_stats_HR_by_LR(f_HR.df, f_LR.df)
     
-    corr_allstats=[]
-
-    with PdfPages(pdf_corr_stats) as pdf_cs:
-        for cs_list in compiled_stats_of_df_HR:
-                # list of compiled stat objects with depth and header names
-            for cs in cs_list:
-                # compiled_stat_object with df, depth name, and sample name
-                for sh_LR in f_LR.sample_headers:
-
-                    if (sh_LR.hclass==cs.sample_header.hclass) | (sh_LR.hclass=='Dust') | (sh_LR.hclass=='Conductivity') \
+    if createPDF:
+        if not os.path.exists(pdf_folder):
+            os.makedirs(pdf_folder)
+        pdf_corr_stats = os.path.join(pdf_folder,'%s_vs_ %s__plots.pdf' % (f_HR.base,f_LR.base))
+        with PdfPages(pdf_corr_stats) as pdf_cs:
+            for cs_list in compiled_stats_of_df_HR:
+                for cs in cs_list:
+                    for sh_LR in f_LR.sample_headers:
+                        if (sh_LR.hclass==cs.sample_header.hclass) | (sh_LR.hclass=='Dust') | (sh_LR.hclass=='Conductivity') \
+                            | (cs.sample_header.hclass=='Dust') | (cs.sample_header.hclass=='Conductivity'):
+                            for stat_header in cs.df.columns[2:5]:
+                                if not stat_header=='Stdv':
+                                    plot_corr_stats(cs,f_LR.df,sh_LR,stat_header,pdf_cs)
+                                    pyplot.close()
+        
+    
+    corr_allstats=[]  
+    for cs_list in compiled_stats_of_df_HR:
+        for cs in cs_list:
+            for sh_LR in f_LR.sample_headers:
+                if (sh_LR.hclass==cs.sample_header.hclass) | (sh_LR.hclass=='Dust') | (sh_LR.hclass=='Conductivity') \
                         | (cs.sample_header.hclass=='Dust') | (cs.sample_header.hclass=='Conductivity'):
-                        print("Processing %s" % cs.x_header.name)
-                        print("correlating %s and %s" % (cs.sample_header.hclass, sh_LR.hclass))
- 
-                        corr_allstats.append(correlate_stats(cs, f_LR.df.loc[:, sh_LR.name]))
-                        for stat_header in cs.df.columns[2:5]:
-                            if not stat_header=='Stdv':
-                                plot_corr_stats(cs,f_LR.df,sh_LR,stat_header,pdf_cs)
-                                pyplot.close()
+#                     print("Processing %s" % cs.x_header.name)
+#                     print("correlating %s and %s" % (cs.sample_header.hclass, sh_LR.hclass))
+                    corr_allstats.append(correlate_stats(cs, f_LR.df.loc[:, sh_LR.name]))
 
     df_corr_allstats = DataFrame(corr_allstats, columns=['depth', 'sample_1', 'sample_2', 'r_value:Mean', 'r_value:Median','r_value:Max','r_value:Min'])    
-
-    write_data_to_csv_files(df_corr_allstats, csv_filename)
+    
+    if createCSV:
+        find_gaps(f_HR.df, f_LR.df, pdf_folder, f_HR.base)
+        csv_filename = os.path.join(pdf_folder,'%s_vs_ %s__stat_correlation.csv' % (f_HR.base,f_LR.base))
+        write_data_to_csv_files(df_corr_allstats, csv_filename)
+    
+    return df_corr_allstats
     
     
 def find_HR_and_LR_df(f1:str,f2:str)->Tuple[DataFile,DataFile]:
@@ -528,7 +529,6 @@ def find_HR_and_LR_df(f1:str,f2:str)->Tuple[DataFile,DataFile]:
     dh_1 = process_header_data(df1, HeaderType.DEPTH)
     dh_2 = process_header_data(df2, HeaderType.DEPTH)
     
-    #     df_HR, df_LR = (df1, df2) if df1.shape[0] > df2.shape[0] else (df2, df1)
     for depth1 in dh_1:
         for depth2 in dh_2:
             if depth1.name==depth2.name:
@@ -539,12 +539,11 @@ def find_HR_and_LR_df(f1:str,f2:str)->Tuple[DataFile,DataFile]:
                 f_HR,f_LR = (f1, f2) if (df1[depth1.name].iloc[-1]-df1[depth1.name].iloc[0]/df1.shape[0]) < \
                     (df2[depth2.name].iloc[-1]-df2[depth2.name].iloc[0]/df2.shape[0]) else (f2, f1)
             break
-#         depth_range_HR=[min(df_HR[depth1.name]),max(df_HR[depth1.name])]
-#         print(depth_range_HR)
-#         depth_range_LR=[min(df_LR[depth1.name]),max(df_LR[depth1.name])]
-#         print(depth_range_LR)
-  
-    return DataFile(df_HR,f_HR),DataFile(df_LR,f_LR)
+
+        df_LR=df_LR[(df_LR[depth1.name]>=min(df_HR[depth1.name])) & (df_LR[depth1.name] <=max(df_HR[depth1.name]))]
+        df_HR=df_HR[(df_HR[depth1.name]>=min(df_LR[depth1.name])) & (df_HR[depth1.name] <=max(df_LR[depth1.name]))]
+
+    return DataFile(df_HR.reset_index(drop=True),f_HR),DataFile(df_LR.reset_index(drop=True),f_LR)
     
     
 def load_and_store_header_file(path:str):
