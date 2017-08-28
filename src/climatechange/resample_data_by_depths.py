@@ -53,7 +53,7 @@ def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> 
                 tmp.append(j)
                 prev = j + 1
         if not tmp:
-            logging.warn('no values between [%f,%f)', range_list[i], range_list[i + 1])
+            logging.warning('no values between [%f,%f)', range_list[i], range_list[i + 1])
             gaps.append([range_list[i], range_list[i + 1]])
         else: 
             result.append(tmp)
@@ -65,7 +65,7 @@ def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> 
         if e >= range_list[range_list_size-1]:
             tmp.append(j)
     if not tmp:
-        logging.warn('no values > %f',range_list[range_list_size-1])
+        logging.warning('no values > %f',range_list[range_list_size-1])
     else:
         result.append(tmp)
         top_range.append(range_list[range_list_size-1])

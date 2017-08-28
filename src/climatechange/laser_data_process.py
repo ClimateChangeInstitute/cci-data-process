@@ -103,16 +103,17 @@ def load_input_file(input_file:str, depth_age_file:str) -> List[LaserFile]:  # g
     """
     result = []
     input_folder = os.path.dirname(input_file)
-    for line in open(input_file, 'r') :
-        if not line.startswith(("#", '"')):
-            columns = line.split()
-            result.append(readFile(os.path.join(input_folder, columns[0]),
-                                   float(columns[1]),
-                                   float(columns[2]),
-                                   float(columns[3]),
-                                   float(columns[4]),
-                                   float(columns[5]),
-                                   depth_age_file))
+    with open(input_file, 'r') as f:
+        for line in f:
+            if not line.startswith(("#", '"')):
+                columns = line.split()
+                result.append(readFile(os.path.join(input_folder, columns[0]),
+                                       float(columns[1]),
+                                       float(columns[2]),
+                                       float(columns[3]),
+                                       float(columns[4]),
+                                       float(columns[5]),
+                                       depth_age_file))
     return result
 
     

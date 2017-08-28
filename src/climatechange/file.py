@@ -10,7 +10,6 @@ from pip.utils import appdirs
 import pkg_resources
 import sys
 from typing import Mapping, IO, Any, Callable, Sequence
-import warnings
 
 from pandas.core.frame import DataFrame
 
@@ -50,11 +49,11 @@ def load_dictionary(file:IO[str], obj_hook:Callable=None) -> Mapping[str, Any]:
         elif isinstance(array, Mapping):
             pass # do nothing
         else:
-            logging.warn("Loaded an unknown dictionary file type.", file=sys.stderr)
+            logging.warning("Loaded an unknown dictionary file type.", file=sys.stderr)
     except ValueError:
         contents = file.read()
         if len(contents) > 0:  # File was not empty and still could not read
-            warnings.warn("Warning unable to parse file %s" % file)
+            logging.warning("Warning unable to parse file %s" % file)
     
     return result
     

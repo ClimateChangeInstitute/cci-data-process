@@ -36,7 +36,7 @@ __updated__ = '2017-08-25'
 
 def setup_argument_parser(program_version_message, program_license):
     '''
-    Create and setup an argument parser.  Make sure that any arguments added to 
+    Create and set up an argument parser.  Make sure that any arguments added to 
     the parser are added to the test framework.
     
     :param program_version_message: Program version
@@ -142,7 +142,7 @@ USAGE
         
         inc_amt = float(args.inc_amt)
         
-        if len(sys.argv) == 1:  # No arguments provided. Abort!
+        if len(argv) <= 1:  # No arguments provided. Abort!
             parser.print_help()
             sys.exit(0)
         
@@ -177,7 +177,7 @@ USAGE
             
         if args.interval_files:
             if args.inc_amt:
-                logging.warn("Specified increment amount %d is not used "
+                logging.warning("Specified increment amount %d is not used "
                              "when resampling by depth intervals.", inc_amt)
             resample_HR_by_LR(args.interval_files[0],
                                       args.interval_files[1])    
@@ -213,5 +213,5 @@ USAGE
         return 2
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(['-d']))
     
