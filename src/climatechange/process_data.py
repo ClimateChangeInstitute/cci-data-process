@@ -215,5 +215,5 @@ USAGE
         return 2
 
 if __name__ == "__main__":
-    sys.exit(main(['-d']))
+    sys.exit(main())
     
