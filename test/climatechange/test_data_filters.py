@@ -12,7 +12,7 @@ from pandas import DataFrame
 from pandas.util.testing import assert_frame_equal
 
 from climatechange.data_filters import normalize_min_max_scaler, \
-    replace_outliers, savgol_smooth_filter, filter_function
+    replace_outliers, savgol_smooth_filter, filter_function, filters_to_string
 from climatechange.laser_data_process import readFile, clean_LAICPMS_data
 
 
@@ -34,6 +34,19 @@ class Test(unittest.TestCase):
 
     def tearDown(self):
         pass
+
+    def test_filters_to_string(self):
+        
+        def f1(df:DataFrame, x:int=1)->DataFrame:
+            pass
+        
+        filters = {'f1': f1}
+        
+        result = filters_to_string(filters)
+        
+        self.assertEqual("f1(df:DataFrame, x:int=1)\n", result)
+        
+        # TODO: Add a few more tests
     
     def test_adding_filter_function(self):
         
@@ -42,7 +55,7 @@ class Test(unittest.TestCase):
             pass # Do nothing
         
         self.assertTrue('test_filter' in filter_function.all)
-    
+        
     def test_replace_outliers(self):
          
         column_names = ['depth (m we)', 'Ca (ppb)']
@@ -55,7 +68,7 @@ class Test(unittest.TestCase):
          
         result = replace_outliers(input_df)
         assert_frame_equal(output_result, result)
-#     
+     
     def test_normalize_min_max_scaler(self):
         df = clean_LAICPMS_data(laser_file)
         min_Al_index = numpy.argmin(df.loc[:, 'Al27'].values.tolist())

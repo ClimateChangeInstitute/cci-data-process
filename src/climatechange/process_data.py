@@ -15,7 +15,7 @@ are written to CSV files along with PDFs containing plotted data.
 
 :contact: andrei.kurbotov@maine.edu
 '''
-from argparse import ArgumentParser
+from argparse import ArgumentParser, RawTextHelpFormatter
 from argparse import RawDescriptionHelpFormatter
 import os
 import sys
@@ -45,7 +45,7 @@ def setup_argument_parser(program_version_message, program_license):
     :return: Fully setup argument parser
     '''
     parser = ArgumentParser(description=program_license,
-                            formatter_class=RawDescriptionHelpFormatter)
+                            formatter_class=RawTextHelpFormatter)#RawDescriptionHelpFormatter)
     
     # Order lexicographically using the short option for sanity!
     parser.add_argument("-c",

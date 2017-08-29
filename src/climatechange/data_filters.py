@@ -16,6 +16,8 @@ from scipy.signal import savgol_filter, medfilt, spline_filter, gauss_spline, wi
 
 from climatechange.headers import process_header_data, HeaderType
 import numpy as np
+from typing import Mapping, Callable
+import inspect
 
 
 def replace(s:Series, val:float64=np.nan, num_std:float=3) -> Series:
@@ -37,6 +39,23 @@ def replace(s:Series, val:float64=np.nan, num_std:float=3) -> Series:
 ############## PLACE DATA FILTER FUNCTIONS AFTER THIS LINE ###################
 ##############################################################################
 
+
+def filter_func_to_string(label:str, f:Callable) -> str:
+    
+    # These are only the parameters after the DataFrame.
+    # The first parameter should be a data frame.
+    params = [str(p).replace('pandas.core.frame.','') for p in inspect.signature(f).parameters.values()]
+    
+    return label + '(' + ', '.join(params) + ')'
+    
+
+def filters_to_string(ff:Mapping[str, Callable]) -> str:  # @ReservedAssignment
+    result_str = ''
+    for label, f in ff.items():
+        result_str += filter_func_to_string(label, f)
+        result_str += '\n'
+    return result_str
+
 def filter_registry():
     '''
     Create the filter function filter_decorator and registry
@@ -49,11 +68,12 @@ def filter_registry():
         
         :param label: The name used for the filter function in the registry
         '''
-        def registrar(func): # actually processes the function
+        def registrar(func):  # actually processes the function
             registry[label] = func
             return func
         return registrar
     filter_decorator.all = registry
+    filter_decorator.help = lambda:filters_to_string(registry)
     return filter_decorator
 filter_function = filter_registry()
 

@@ -23,8 +23,6 @@ class Test(unittest.TestCase):
         pvm = "program_version_message"
         parser = setup_argument_parser(pvm, "program_license")
         
-#         sys.argv = sys.argv[0] + ['-c','/tmp','/tmp/depth_age_file.csv','True','True','KCC']
-        
         # -c or --combine-laser
         args = parser.parse_args(['-c','/tmp','/tmp/depth_age_file.csv','True','True','KCC'])
         
