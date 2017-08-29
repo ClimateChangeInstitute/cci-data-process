@@ -26,6 +26,7 @@ from climatechange.process_data_functions import resample_by_years, \
 import logging
 import textwrap
 from climatechange.laser_data_process import combine_laser_data_by_directory
+from climatechange.data_filters import filter_function
 
 
 __all__ = []
@@ -81,7 +82,9 @@ def setup_argument_parser(program_version_message, program_license):
                         dest="filters",
                         action="append",
                         nargs='+',
-                        help="Apply filters to processed data.  Multiple filters with optional parameters may be specified.")
+                        help="Apply filters to processed data.  "
+                        "Multiple filters with optional parameters may be specified.  "
+                        "The following filter functions are available:\n" + filter_function.help())
         
     parser.add_argument("-i",
                         "--inc_amt",
@@ -140,14 +143,7 @@ USAGE
         args = parser.parse_args()
 
         verbose = args.verbose
-        
-        inc_amt = float(args.inc_amt)
-        
-        # No program arguments provided. Abort!
-        if len(argv) <= 1 and argv == sys.argv:
-            parser.print_help()
-            sys.exit(0)
-        
+
         if verbose and verbose > 0:
             logger = logging.getLogger()
             level = 'WARN'
@@ -161,6 +157,14 @@ USAGE
             logger.setLevel(level)
             
             logging.info("Using verbosity of %s for logging.", level)
+
+        
+        inc_amt = float(args.inc_amt)
+        
+        # No program arguments provided. Abort!
+        if len(argv) <= 1 and argv == sys.argv:
+            parser.print_help()
+            sys.exit(0)
 
         # We can load new headers from a file and then continue
         if args.headers_file:
@@ -207,7 +211,7 @@ USAGE
                 raise Exception("The specified depth_file must be a CSV file.")
                 
     except Exception as e:
-        if logging.getLogger().level == 'DEBUG':
+        if logging.getLevelName(logging.getLogger().level) == 'DEBUG':
             raise
         indent = len(program_name) * " "
         sys.stderr.write(program_name + ": " + repr(e) + "\n")
