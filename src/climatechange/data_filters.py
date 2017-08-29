@@ -10,7 +10,6 @@ from pandas import Series
 import pandas
 import pprint
 from sklearn import preprocessing
-from typing import List, Any, Tuple, Callable, Type
 
 from numpy import float64
 from scipy.signal import savgol_filter, medfilt, spline_filter, gauss_spline, wiener
