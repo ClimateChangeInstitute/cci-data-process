@@ -161,17 +161,21 @@ USAGE
             logger.setLevel(level)
             
             logging.info("Using verbosity of %s for logging.", level)
+
+        # We can load new headers from a file and then continue
+        if args.headers_file:
+            load_and_store_header_file(args.headers_file)
+        
+        
+        ######################################################################
+        ################ Data Processing Flags Below Here ####################
+        ####### Generally the order these are processed shouldn't matter #####
+        ######################################################################
         
         if args.combine_laser:
-            # 'directory', 'depth_age_file', 'create_pdf', 'create_csv', 'folder_prefix'
             directory, depth_age_file, create_pdf, create_csv, folder_prefix, = args.combine_laser
             combine_laser_data_by_directory(directory, depth_age_file, bool(create_pdf), bool(create_csv), folder_prefix)
             
-
-        if args.headers_file:
-            load_and_store_header_file(args.headers_file)
-            return
-        
         if args.depth_files: 
             double_resample_by_depths(args.depth_files[0],
                                       args.depth_files[1],
@@ -191,8 +195,7 @@ USAGE
             if year_file.endswith('.csv'):            
                 resample_by_years(year_file, int(inc_amt))
             else:
-                logging.error("The specified year_file must be a CSV file.", file=sys.stderr)
-                sys.exit(-1)
+                raise Exception("The specified year_file must be a CSV file.")
         
         if args.depth_file:
             
@@ -201,14 +204,11 @@ USAGE
             if depth_file.endswith('.csv'):
                 resample_by_depths(depth_file, inc_amt)
             else:
-                logging.error("The specified depth_file must be a CSV file.",
-                              file=sys.stderr)
-                sys.exit(-1)
+                raise Exception("The specified depth_file must be a CSV file.")
                 
     except Exception as e:
-        raise(e)
         if logging.getLogger().level == 'DEBUG':
-            raise(e)
+            raise
         indent = len(program_name) * " "
         sys.stderr.write(program_name + ": " + repr(e) + "\n")
         sys.stderr.write(indent + "  for help use --help\n")
