@@ -21,7 +21,7 @@ from scipy.stats._stats_mstats_common import linregress
 
 from climatechange.compiled_stat import CompiledStat
 from climatechange.data_filters import replace_outliers,\
-    adjust_data_by_background
+    adjust_data_by_background, savgol_smooth_filter, savgol_smooth_filter_stat
 from climatechange.file import load_csv
 from climatechange.headers import HeaderDictionary, HeaderType, Header, \
     load_headers, process_header_data
@@ -112,6 +112,18 @@ def round_values_to_sigfig(df:DataFrame):
     for col in range(1, 5):
         df.iloc[:, col] = [np.round(i, depth_round_amt) for i in df.iloc[:, col]]
     for col in range(5, 10):
+        df.iloc[:, col] = [np.round(i, sample_round_amt) for i in df.iloc[:, col]]
+
+    return df
+
+def round_laser_values_to_sigfig(df:DataFrame):
+    year_round_amt = 4
+    depth_round_amt = 5
+    sample_round_amt = 3
+    df.iloc[:, 0] = [np.round(i, depth_round_amt) for i in df.iloc[:, 0]]
+    for col in range(0, 1):
+        df.iloc[:, col] = [np.round(i, year_round_amt) for i in df.iloc[:, col]]
+    for col in range(2, 6):
         df.iloc[:, col] = [np.round(i, sample_round_amt) for i in df.iloc[:, col]]
 
     return df
@@ -332,6 +344,14 @@ def remove_nan_from_datasets(d1_stat:Series, d2_stat:Series) -> Tuple[Series, Se
             d2_result.append(d2_stat[i])
                      
     return Series(d1_result), Series(d2_result)
+
+def remove_nan_from_data(d1:Series) -> Series:
+    d1_result = []
+    for i in range(len(d1)):
+        if not isnan(d1[i]):
+            d1_result.append(d1[i])
+ 
+    return Series(d1_result).reset_index(drop=True)
                    
 def correlate_samples(d1:CompiledStat, d2:CompiledStat, stat_header:str='Mean') -> Tuple[float, float, float, float, float]:
     d1_stat = d1.df.loc[:, stat_header]
@@ -403,15 +423,29 @@ def correlate_dd_samples(d1:CompiledStat, d2:Series,stat_header:str='Mean') -> T
     slope, intercept, r_value, p_value, std_err = linregress(remove_nan_from_datasets(d1_stat, d2))
     return d1.x_header.name, d1.sample_header.name, d2.name, slope, intercept, r_value, p_value, std_err
 
-def correlate_stats(d1:CompiledStat, d2:Series) -> Tuple[float, float, float, List[float]]:
+def correlate_laser_stats(d1:CompiledStat, data_file:DataFile, sample_header:Header) -> Tuple[float, float, float, List[float]]:
     
     r_val=[]
+    equation=[]
+    d2=data_file.df[sample_header.name]
+    for stat_header in d1.df.columns[2:5]:
+        if not stat_header=='Stdv':
+            d1_stat = d1.df.loc[:, stat_header]
+            slope, intercept, r_value, p_value, std_err = linregress(d1_stat, d2)
+            r_val.append(round(r_value,4))
+            equation.append('y= %.5f * x + %.4f'%(slope,intercept))
+    return (d1.sample_header.hclass, sample_header.hclass)+ tuple(r_val)+tuple(equation)
+
+def correlate_stats(d1:CompiledStat, data_file:DataFile, sample_header:Header) -> Tuple[float, float, float, List[float]]:
+    
+    r_val=[]
+    d2=data_file.df[sample_header.name]
     for stat_header in d1.df.columns[2:7]:
         if not stat_header=='Stdv':
             d1_stat = d1.df.loc[:, stat_header]
-            slope, intercept, r_value, p_value, std_err = linregress(remove_nan_from_datasets(d1_stat, d2))
+            slope, intercept, r_value, p_value, std_err = linregress(d1_stat, d2)
             r_val.append(round(r_value,4))
-    return (d1.x_header.name, d1.sample_header.name, d2.name)+ tuple(r_val)
+    return (d1.x_header.name,d1.sample_header.name, sample_header.name)+ tuple(r_val)
                                                                     
 def plot_corr_stats(d1:CompiledStat,
                         d2:DataFrame,
@@ -421,9 +455,10 @@ def plot_corr_stats(d1:CompiledStat,
     
     plt.figure(figsize=(11, 8.5))
     fig,ax=plt.subplots()
+
     ax2=ax.twinx()
-    lns1=ax.semilogy(d1.df['top_'+d1.x_header.label],d1.df[stat_header],'b-',label=d1.sample_header.hclass)
-    lns2=ax2.semilogy(d2[d1.x_header.name],d2.loc[:,sample_header.name],'r-',label=sample_header.hclass)
+    lns1=ax.plot(d1.df['top_'+d1.x_header.label],d1.df[stat_header],'b.-',label=d1.sample_header.hclass)
+    lns2=ax2.plot(d2[d1.x_header.name],d2.loc[:,sample_header.name],'r.-',label=sample_header.hclass)
     ax.set_xlabel(d1.x_header.label)
     ax.set_ylabel(d1.sample_header.label)
     ax2.set_ylabel(sample_header.label)
@@ -509,8 +544,8 @@ def resample_HR_by_LR(f1:str, f2:str, createPDF=False, createCSV=False):
                         | (cs.sample_header.hclass=='Dust') | (cs.sample_header.hclass=='Conductivity'):
 #                     print("Processing %s" % cs.x_header.name)
 #                     print("correlating %s and %s" % (cs.sample_header.hclass, sh_LR.hclass))
-                    corr_allstats.append(correlate_stats(cs, f_LR.df.loc[:, sh_LR.name]))
-
+                    corr_allstats.append(correlate_stats(cs, f_LR, sh_LR,))
+    
     df_corr_allstats = DataFrame(corr_allstats, columns=['depth', 'sample_1', 'sample_2', 'r_value:Mean', 'r_value:Median','r_value:Max','r_value:Min'])    
     
     if createCSV:

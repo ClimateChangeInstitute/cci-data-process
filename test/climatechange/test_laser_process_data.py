@@ -71,7 +71,6 @@ class Test(unittest.TestCase):
     def test_clean_LAICPMS_data(self):
         df = clean_LAICPMS_data(laser_file)
         expected_result=load_csv(os.path.join('csv_files', 'clean_LAICPMS_output.csv'))
-        expected_result=clean_data(expected_result)
         self.assertEqual(df.columns[0], 'depth (m abs)')
         self.assertEqual(df.columns[1], 'year')
         assert_frame_equal(expected_result,df)

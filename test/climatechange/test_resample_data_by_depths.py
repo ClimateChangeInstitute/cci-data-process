@@ -5,7 +5,7 @@ Created on Jul 31, 2017
 '''
 import os
 from pandas import DataFrame, Series
-from pandas.util.testing import assert_frame_equal
+from pandas.util.testing import assert_frame_equal, assert_almost_equal
 import unittest
 import warnings
 
@@ -18,11 +18,12 @@ from climatechange.process_data_functions import clean_data, \
     correlate_samples, remove_nan_from_datasets, correlate_stats, \
     get_compiled_stats_by_depth, round_depth_values_to_sigfig, \
     add_units_to_stats, find_HR_and_LR_df, load_and_clean_dd_data,\
-    resample_HR_by_LR
+    resample_HR_by_LR, DataFile, correlate_laser_stats
 from climatechange.resample_data_by_depths import resampled_depths, create_range_for_depths, \
     find_index_by_increment, compiled_stats_HR_by_LR
 from climatechange.resample_stats import create_depth_headers
 import numpy as np
+from climatechange.plot import write_data_to_csv_files
 
 
 test_sample_header = Header("Cond (+ALU-S/cm)", HeaderType.SAMPLE, "Conductivity", "alu-s/cm", "Cond_(+ALU-S/cm)")
@@ -219,16 +220,21 @@ class Test(unittest.TestCase):
         f_LR = os.path.join('csv_files', 'test_input_dd_1.csv')
         result=resample_HR_by_LR(f_HR,f_LR)
         expected_result=load_csv(os.path.join('csv_files', 'resample_HR_by_LR_test.csv'))
-        assert_frame_equal(expected_result,result)
+
+        assert_frame_equal(expected_result,result,check_dtype=False)
+        
          
-    def test_correlate_stats(self):
+    def test_correlate_laser_stats(self):
         df = DataFrame([y, y, x, y, x, x, x, y]).transpose()
         df.columns = ['zero', 'one', 'Mean', 'Stdv', 'Median', 'Max', 'Min', 'six']
         d1 = CompiledStat(df, test_depth_we_header, test_sample_header)
-        d2 = Series(y, name='d2')
-        r_val = [-0.0722, -0.0722, -0.0722, -0.0722]
-        expected_result = ("depth (m we)", 'Cond (+ALU-S/cm)', 'd2') + tuple(r_val)
-        result = correlate_stats(d1, d2)
+        d2 = DataFile(DataFrame(y, columns=['Cond (+ALU-S/cm)']),'file')
+        r_val = [-0.0722, -0.0722]
+        slope=-0.1
+        intercept=3.7
+        equation=['y= %.5f * x + %.4f'%(slope,intercept),'y= %.5f * x + %.4f'%(slope,intercept)]
+        expected_result = ('Conductivity', 'Conductivity') + tuple(r_val)+ tuple(equation)
+        result = correlate_laser_stats(d1, d2, test_sample_header)
         self.assertAlmostEqual(expected_result[0], result[0])
         self.assertEqual(len(expected_result), len(result))
         self.assertEqual(expected_result[3], result[3])
