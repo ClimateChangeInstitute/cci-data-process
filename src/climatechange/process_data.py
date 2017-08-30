@@ -27,6 +27,7 @@ import logging
 import textwrap
 from climatechange.laser_data_process import combine_laser_data_by_directory
 from climatechange.data_filters import filter_function
+from climatechange.laser__correlation_process import laser_data_process
 
 
 __all__ = []
@@ -98,6 +99,14 @@ def setup_argument_parser(program_version_message, program_license):
                         action="store",
                         help="load the headers of the CSV and store them in the header dictionary.  "
                              "This file should contain rows of (name, type, class, unit, label)")
+    parser.add_argument("-lp",
+                        "--laser_data_process",
+                        dest="laser_process",
+                        action="store",
+                        nargs=6,
+                        metavar=('DIRECTORY', 'DEPTH_AGE_FILE', 'CORR_FILE', 'CREATE_PDF', 'CREATE_CSV', 'FOLDER_PREFIX'),
+                        help="process combine and correlate laser files: %(metavar)s")
+
     parser.add_argument("-v", "--verbose", dest="verbose", action="count",
                         help=textwrap.dedent(
                  """set verbosity level [default: %(default)s]\n
@@ -190,7 +199,15 @@ USAGE
                 logging.warning("Specified increment amount %d is not used "
                              "when resampling by depth intervals.", inc_amt)
             file_1, file_2, create_pdf, create_csv, = args.interval_files
-            resample_HR_by_LR(file_1, file_2 ,bool(create_pdf), bool(create_csv))    
+            resample_HR_by_LR(file_1, file_2 ,bool(create_pdf), bool(create_csv))  
+            
+        if args.laser_process:
+            if args.inc_amt:
+                logging.warning("Specified increment amount %d is not used "
+                             "when resampling by depth intervals.", inc_amt)
+            laser_directory, depth_age_file, LR_file, create_pdf, create_csv, prefix = args.laser_process
+            laser_data_process(laser_directory, depth_age_file, LR_file, bool(create_pdf), bool(create_csv), prefix)    
+  
         
         if args.year_file:
             
