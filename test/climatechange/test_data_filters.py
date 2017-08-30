@@ -12,8 +12,11 @@ from pandas import DataFrame
 from pandas.util.testing import assert_frame_equal
 
 from climatechange.data_filters import normalize_min_max_scaler, \
-    replace_outliers, savgol_smooth_filter, filter_function, filters_to_string
+    replace_outliers, savgol_smooth_filter, filter_function, filters_to_string,\
+    normalize_data
 from climatechange.laser_data_process import readFile, clean_LAICPMS_data
+from climatechange.file import load_csv
+from climatechange.process_data_functions import clean_data
 
 
 depth_age_file = os.path.join('csv_files', 'depthAge7617.txt')
@@ -102,7 +105,12 @@ class Test(unittest.TestCase):
         
         assert_frame_equal(expected_df, result_df)
 
-
+    def test_normalize_data(self):
+        input_df = load_csv(os.path.join('csv_files', 'normalize_input.csv'))
+        input_df=clean_data(input_df)
+        result = normalize_data(input_df)
+        expected_result = load_csv(os.path.join('csv_files', 'normalize_output.csv'))
+        assert_frame_equal(expected_result,result)
 
 #         mean_bg=sa
 if __name__ == "__main__":
