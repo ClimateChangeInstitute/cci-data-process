@@ -170,18 +170,10 @@ def combine_laser_data_by_input_file(input_file:str, depth_age_file:str, create_
     laser_files = load_input_file(input_file, depth_age_file)
 
     df = DataFrame()
-    
-#     if create_PDF:
-#         pdf_folder=os.path.join(os.path.dirname(os.path.dirname(input_file)),'PDF_plots')
-#         if not os.path.exists(pdf_folder):
-#             os.makedirs(pdf_folder)
-        
+
     for f in laser_files:
 
         df = df.append(f.processed_data, ignore_index=True)
-#         df_adjust_background=adjust_background(f.processed_data,f.background_info)
-#         if create_PDF:
-#             plot_laser_data_by_run(f,pdf_folder)
         
     return CombinedLaser(df,laser_files)
 

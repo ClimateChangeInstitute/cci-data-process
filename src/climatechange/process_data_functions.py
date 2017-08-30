@@ -468,6 +468,28 @@ def plot_corr_stats(d1:CompiledStat,
     ax.legend(lns, labs, loc=0)
     pdf_cs.savefig(fig)
     plt.close()
+    
+def plot_corr_stats_directory(d1:CompiledStat,
+                        d2:DataFrame,
+                        sample_header:Header,
+                        stat_header:'str',
+                        pdf_cs):
+    
+    plt.figure(figsize=(11, 8.5))
+    fig,ax=plt.subplots()
+
+    ax2=ax.twinx()
+    lns1=ax.plot(d1.df['top_'+d1.x_header.label],d1.df[stat_header],'b-',label=d1.sample_header.hclass)
+    lns2=ax2.plot(d2[d1.x_header.name],d2.loc[:,sample_header.name],'r-',label=sample_header.hclass)
+    ax.set_xlabel(d1.x_header.label)
+    ax.set_ylabel(d1.sample_header.label)
+    ax2.set_ylabel(sample_header.label)
+    plt.title('HR %s: %s vs. LR %s'% (d1.sample_header.hclass,stat_header,sample_header.hclass))
+    lns = lns1+lns2
+    labs = [l.get_label() for l in lns]
+    ax.legend(lns, labs, loc=0)
+    pdf_cs.savefig(fig)
+    plt.close()
 
 def plot_linregress_of_samples(d1:CompiledStat,
                                d2:Series,
