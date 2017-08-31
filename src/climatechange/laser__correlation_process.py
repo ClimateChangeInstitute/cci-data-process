@@ -168,9 +168,7 @@ def laser_data_process(directory:str,
         plot_laser_directory_resampled_by_LR(combined_laser_LR,LR_file,pdf_folder,'LR')
         histogram_laser_data(combined_laser_MR,LR_file,pdf_folder,'MR')
         histogram_laser_data(combined_laser_LR,LR_file,pdf_folder,'LR')
-        
-    print('done plots')  
-    
+
     if createCSV:
         csv_folder = os.path.join(directory, 'CSV_files')
         

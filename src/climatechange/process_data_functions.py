@@ -566,7 +566,7 @@ def resample_HR_by_LR(f1:str, f2:str, createPDF=False, createCSV=False):
                         | (cs.sample_header.hclass=='Dust') | (cs.sample_header.hclass=='Conductivity'):
 #                     print("Processing %s" % cs.x_header.name)
 #                     print("correlating %s and %s" % (cs.sample_header.hclass, sh_LR.hclass))
-                    corr_allstats.append(correlate_stats(cs, f_LR, sh_LR,))
+                    corr_allstats.append(correlate_stats(cs, f_LR, sh_LR))
     
     df_corr_allstats = DataFrame(corr_allstats, columns=['depth', 'sample_1', 'sample_2', 'r_value:Mean', 'r_value:Median','r_value:Max','r_value:Min'])    
     
