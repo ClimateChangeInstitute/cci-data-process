@@ -28,6 +28,7 @@ import textwrap
 from climatechange.laser_data_process import combine_laser_data_by_directory
 from climatechange.data_filters import filter_function
 from climatechange.laser__correlation_process import laser_data_process
+from climatechange.process_data_functions import plot_samples_by_depth, plot_samples_by_year
 
 
 __all__ = []
@@ -107,6 +108,21 @@ def setup_argument_parser(program_version_message, program_license):
                         nargs=6,
                         metavar=('DIRECTORY', 'DEPTH_AGE_FILE', 'CORR_FILE', 'CREATE_PDF', 'CREATE_CSV', 'FOLDER_PREFIX'),
                         help="process combine and correlate laser files: %(metavar)s")
+    
+    parser.add_argument("-pd",
+                        "--plot_depth",
+                        dest="plot_depth_files",
+                        action="store",
+                        help="%(dest)s by depth [default: %(default)s]")
+    
+    parser.add_argument("-py",
+                        "--plot_year",
+                        dest="plot_year_files",
+                        action="store",
+                        nargs=2,
+                        metavar=('FILE','INTERVAL'),
+                        help="%(dest)s by depth [default: %(default)s]")
+    
 
     parser.add_argument("-v", "--verbose", dest="verbose", action="count",
                         help=textwrap.dedent(
@@ -194,6 +210,12 @@ USAGE
             double_resample_by_depths(args.depth_files[0],
                                       args.depth_files[1],
                                       inc_amt)
+        if args.plot_depth_files:
+            plot_samples_by_depth(args.plot_depth_files[0],args.plot_depth_files[1])
+        
+        if args.plot_year_files:
+            file,interval=args.plot_year_files
+            plot_samples_by_year(file,interval)
             
         if args.interval_files:
             if args.inc_amt:

@@ -11,6 +11,7 @@ from pandas import DataFrame
 from climatechange.file import load_csv
 from climatechange.headers import Header
 import matplotlib.pyplot as plt
+import os
 
  
 def examplePDFPlot(file_name:str):
@@ -208,7 +209,8 @@ def add_compile_stats_to_pdf(f:str,
     #fix legend
     pdf.savefig(fig)
     plt.close()
- 
+    
+    
     
 
 

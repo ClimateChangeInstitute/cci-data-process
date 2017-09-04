@@ -46,7 +46,22 @@ class DataFile():
         self.df = df
         self.file_path = file_path
         self.base=os.path.basename(self.file_path).split('.')[0]
-        self.sample_headers=process_header_data(df, HeaderType.SAMPLE) 
+        self.dirname=os.path.dirname(self.file_path)
+        self.sample_headers = process_header_data(df, HeaderType.SAMPLE) 
+        self.depth_headers = process_header_data(df, HeaderType.DEPTH) 
+        self.year_headers = process_header_data(df, HeaderType.YEARS) 
+
+class DataClass():
+
+    def __init__(self, file_path:str=[]):
+        
+        self.file_path = file_path
+        self.df = clean_data(load_csv(self.file_path))
+        self.base=os.path.basename(self.file_path).split('.')[0]
+        self.dirname=os.path.dirname(self.file_path)
+        self.sample_headers = process_header_data(self.df, HeaderType.SAMPLE) 
+        self.depth_headers = process_header_data(self.df, HeaderType.DEPTH) 
+        self.year_headers = process_header_data(self.df, HeaderType.YEARS) 
 
 def is_number(s):
     try:
@@ -628,6 +643,64 @@ def load_and_store_header_file(path:str):
           "replaced %d old headers with new definitions" % (len(all_new),
                                                             len(all_replaced)))
             
+
+def plot_samples_by_year(f:str,interval:List=0):
+    
+    dc = DataClass(f)
+    pdf_file = os.path.join(dc.dirname,('plot_%s.pdf'%dc.base))
+            
+    
+    with PdfPages(pdf_file) as pdf:
+        for year in dc.year_headers:
+            for sample in dc.sample_headers:
+                plot_samples(dc,sample,year,interval,pdf)
+    os.startfile(pdf_file)
+        
+        
+def plot_samples_by_depth(f:str, interval:List=0):
+    
+    dc = DataClass(f)
+    pdf_file = os.path.join(dc.dirname,('plot_%s.pdf'%dc.base))
+    
+    with PdfPages(pdf_file) as pdf:
+        for depth in dc.depth_headers:
+            for sample in dc.sample_headers:
+                plot_samples(dc, sample, depth, interval, pdf)
+    os.startfile(pdf_file)
+        
+    
+      
+def plot_samples(dc:DataClass, sample_header:Header, x_header:Header, interval:List, pdf):
+    '''
+    
+    :param dc: DataClass Object
+    :param pdf: pdf file
+    :param x_header: name of x (depth or year) column
+    :param sample header: headers of input sample
+
+    :return: pdf file of data by sample
+    '''
+    if interval:
+        df = dc.df[dc.df[x_header.name].between(interval[0], interval[1], inclusive=False)]
+    else:
+        df=dc.df
+        
+    plt.figure(figsize=(11, 8.5))
+    fig, tg = plt.subplots(1)
+    ax = df[[x_header.name, sample_header.name]].plot(x=x_header.name, kind='line',
+                                           linestyle='-',
+                                           color='0.75',
+                                           ax=tg,zorder=-1)
+    vals = ax.get_xticks()
+    ax.set_xticklabels(['{:.0f}'.format(x) for x in vals])
+    plt.xlabel(x_header.label)
+    plt.title('%s Data' % (sample_header.hclass))
+    plt.ylabel(sample_header.label)
+    plt.legend()    
+    pdf.savefig(fig)
+    plt.close()
+ 
+    
 
     
 # def main(files):

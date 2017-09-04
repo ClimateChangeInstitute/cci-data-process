@@ -215,8 +215,37 @@ def histogram_laser_data(combined_laser:CombinedLaser,LR_file:str,pdf_folder:str
                     if not stat_header=='Stdv':
                         plot_histogram(cs,stat_header,pdf)
                         pyplot.close()
+                        
+    pdf_hist_LR = os.path.join(pdf_folder,'CFA_%s_hist_plots.pdf' % (resolution))
+    with PdfPages(pdf_hist_LR) as pdf:
+        for sample_header in f_LR.sample_headers:
+            plot_histogram_LR(f_LR.df,sample_header,pdf)
+            pyplot.close()
 
 
+def plot_histogram_LR(df:DataFrame,
+                    sample_header:Header,
+                    pdf):
+
+    plt.figure(figsize=(11, 8.5))
+    fig,ax=plt.subplots()
+
+    mu = df[sample_header.name].mean()
+    sigma = df[sample_header.name].std()
+
+    num_bins = 100
+
+    n, bins, patches = ax.hist(df[sample_header.name].dropna(), num_bins, normed=1)
+
+    y = mlab.normpdf(bins, mu, sigma)
+
+    ax.plot(bins, y, '--')
+    ax.set_xlabel('Concentration')
+    ax.set_ylabel('Probability density')
+    ax.set_title('CFA_%s_Concentration_Distribution'%(sample_header.hclass))
+    pdf.savefig(fig)
+    plt.close()
+    
 def plot_histogram(d1:CompiledStat,
                         stat_header:str,
                         pdf):
