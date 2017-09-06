@@ -18,6 +18,7 @@ from climatechange.headers import process_header_data, HeaderType
 import numpy as np
 from typing import Mapping, Callable
 import inspect
+from scipy.signal.bsplines import cubic, bspline
 
 
 def replace(s:Series, val:float64=np.nan, num_std:float=3) -> Series:
@@ -147,7 +148,7 @@ def spline_filter(df:DataFrame, val:float=5.0):
 
 # TODO: Figure out if the default val is Ok
 @filter_function("gauss_spline")
-def gauss_spline_filter(df:DataFrame, val:float=3.0):
+def gauss_spline_filter(df:DataFrame, val:float=0):
     '''
     Apply the  spline filter to the columns of the supplied data.  
     The filter is only applied to columns that appear as samples in the default 
@@ -161,7 +162,6 @@ def gauss_spline_filter(df:DataFrame, val:float=3.0):
     df[sample_header_names] = df[sample_header_names].transform(gauss_spline_filter_func)
 
     return df
-
 
 @filter_function("wiener")
 def wiener_filter(df:DataFrame):
@@ -187,42 +187,47 @@ def normalize_min_max_scaler(df:DataFrame) -> DataFrame:
     doesn't take nan values
     :param df:
     '''
-    x = df.iloc[:, 2:].values 
-    min_max_scaler = preprocessing.MinMaxScaler()
-    x_scaled = min_max_scaler.fit_transform(x)
-    df_norm = pandas.DataFrame(x_scaled, columns=df.iloc[:, 2:].columns)
-    return pandas.concat((df.iloc[:, :2], df_norm), axis=1)
+    sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
+    min_max_scaler = lambda x: preprocessing.minmax_scale(x)
+    df[sample_header_names] = df[sample_header_names].transform(min_max_scaler)
+
+    return df
 
 
-@filter_function("standardize_scaler")
-def standardize_scaler(df:DataFrame) -> DataFrame:
-    '''
-    standardize dataframe by mean and std
-    doesn't take nan values
-    :param df:
-    '''
-    x = df.iloc[:, 2:].values
-    scaler = preprocessing.StandardScaler()
-    x_scaled = scaler.fit_transform(x)
-    df_norm = pandas.DataFrame(x_scaled, columns=df.iloc[:, 2:].columns)
-    return pandas.concat((df.iloc[:, :2], df_norm), axis=1)
+# @filter_function("standardize_scaler")
+# def standardize_scaler(df:DataFrame) -> DataFrame:
+#     '''
+#     standardize dataframe by mean and std
+#     doesn't take nan values
+#     :param df:
+#     '''
+#     sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
+#     standard_scaler = lambda x: preprocessing.StandardScaler(x)
+#     df[sample_header_names] = df[sample_header_names].transform(standard_scaler)
+# 
+#     return df
+
 
 
 @filter_function("robust_scaler")
 def robust_scaler(df:DataFrame) -> DataFrame:
-    x = df.iloc[:, 2:].values
-    robust_scaler = preprocessing.RobustScaler(quantile_range=(25, 75))
-    x_scaled = robust_scaler.fit_transform(x)
-    df_norm = pandas.DataFrame(x_scaled, columns=df.iloc[:, 2:].columns)
-    return pandas.concat((df.iloc[:, :2], df_norm), axis=1)
+    
+    sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
+    rob_scaler = lambda x: preprocessing.robust_scale(x)
+    df[sample_header_names] = df[sample_header_names].transform(rob_scaler)
+
+    return df
 
 
 @filter_function("scaler")
 def scaler(df:DataFrame) -> DataFrame:
-    x = df.iloc[:, 2:].values
-    x_scaled = preprocessing.scale(x)
-    df_norm = pandas.DataFrame(x_scaled, columns=df.iloc[:, 2:].columns)
-    return pandas.concat((df.iloc[:, :2], df_norm), axis=1)
+    
+    sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
+    scaler_scaler = lambda x: preprocessing.scale(x)
+    df[sample_header_names] = df[sample_header_names].transform(scaler_scaler)
+
+    return df
+
 
 
 @filter_function("fill_missing")

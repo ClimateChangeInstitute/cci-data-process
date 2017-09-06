@@ -126,6 +126,7 @@ def laser_data_process(directory:str,
     combined_laser_LR = CombinedLaser()
     corr_stats_MR=[]
     corr_stats_LR=[]
+    
  
     for folder in sorted(os.listdir(directory)):
         if folder.startswith(prefix):
@@ -181,6 +182,11 @@ def laser_data_process(directory:str,
         write_data_to_csv_files(df_corr_stats, csv_filename)
         
     return combined_laser_MR.df,combined_laser_LR.df
+
+
+
+
+
 
 def plot_laser_directory_resampled_by_LR(combined_laser:CombinedLaser,LR_file:str,pdf_folder:str,resolution:str):
     
@@ -290,3 +296,20 @@ def load_and_clean_LR(LR_file:str, df_laser:DataFrame)->Tuple[DataFile,DataFile]
     return DataFile(df_LR.reset_index(drop=True),LR_file)
 
 
+
+def laser_filter_correlate_combine_process(directory:str,
+                                           depth_age_file:str,
+                                           LR_file:str,
+                                           createPDF=False,
+                                           createCSV=False,
+                                           prefix:str='KCC'):
+    
+    filters = [raw, processed, ]
+    
+    for filter in filters:
+     laser_data_process(directory, depth_age_file, LR_file, createPDF, createCSV, prefix)
+     
+    pass
+    
+    
+    

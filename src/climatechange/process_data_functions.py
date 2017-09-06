@@ -700,6 +700,7 @@ def plot_samples(dc:DataClass, sample_header:Header, x_header:Header, interval:L
     pdf.savefig(fig)
     plt.close()
  
+
     
 
     

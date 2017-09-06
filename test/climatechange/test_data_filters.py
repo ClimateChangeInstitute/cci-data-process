@@ -13,7 +13,8 @@ from pandas.util.testing import assert_frame_equal
 
 from climatechange.data_filters import normalize_min_max_scaler, \
     replace_outliers, savgol_smooth_filter, filter_function, filters_to_string,\
-    normalize_data
+    normalize_data, medfilt_filter, gauss_spline_filter,\
+    wiener_filter, robust_scaler
 from climatechange.laser_data_process import readFile, clean_LAICPMS_data
 from climatechange.file import load_csv
 from climatechange.process_data_functions import clean_data
@@ -27,6 +28,14 @@ laser_file = readFile(os.path.join('csv_files', '1.txt'),
                     12 ,
                     23,
                     os.path.join('csv_files', 'depthAge7617.txt'))
+test_filter_df = DataFrame([list(range(3)),
+                        list(range(6, 9)),
+                        list(range(3, 6)),
+                        list(range(6, 9)),
+                        list(range(3, 6)),
+                        list(range(0, 3))])
+test_filter_df.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
+        
 
 class Test(unittest.TestCase):
 
@@ -111,8 +120,158 @@ class Test(unittest.TestCase):
         result = normalize_data(input_df)
         expected_result = load_csv(os.path.join('csv_files', 'normalize_output.csv'))
         assert_frame_equal(expected_result,result)
+        
+        
+        
+    def test_medfilt_filter(self):
+        test_filter_df = DataFrame([list(range(3)),
+                        list(range(6, 9)),
+                        list(range(3, 6)),
+                        list(range(6, 9)),
+                        list(range(3, 6)),
+                        list(range(0, 3))])
+        test_filter_df.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
 
-#         mean_bg=sa
+        result_df = medfilt_filter(test_filter_df)
+        
+        expected_df = DataFrame([[0, 1.0, 2.],
+                                 [6, 4., 5.],
+                                 [3, 7., 8.],
+                                 [6, 4., 5.],
+                                 [3, 4., 5.],
+                                 [0, 1., 2.]])
+        expected_df.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
+
+        assert_frame_equal(expected_df, result_df)
+        
+#     def test_cubic_filter(self):
+#         test_filter_df = DataFrame([list(range(3)),
+#                         list(range(6, 9)),
+#                         list(range(3, 6)),
+#                         list(range(6, 9)),
+#                         list(range(3, 6)),
+#                         list(range(0, 3))])
+#         test_filter_df.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
+# 
+#         result_df = cubic_spline_filter(test_filter_df)
+#         print(result_df)
+#         
+#         expected_df = DataFrame([[0, 1.0, 2.],
+#                                  [6, 4., 5.],
+#                                  [3, 7., 8.],
+#                                  [6, 4., 5.],
+#                                  [3, 4., 5.],
+#                                  [0, 1., 2.]])
+#         expected_df.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
+
+        assert_frame_equal(expected_df, result_df)
+        
+#     def test_spline_filter(self):
+#         test_filter_df = DataFrame([list(range(3)),
+#                         list(range(6, 9)),
+#                         list(range(3, 6)),
+#                         list(range(6, 9)),
+#                         list(range(3, 6)),
+#                         list(range(0, 3))])
+#         test_filter_df.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
+#         result_df = spline_filter(test_filter_df)
+# 
+#         expected_df = DataFrame([[0, 1.0, 2.],
+#                                  [6, 4., 5.],
+#                                  [3, 7., 8.],
+#                                  [6, 4., 5.],
+#                                  [3, 4., 5.],
+#                                  [0, 1., 2.]])
+#         expected_df.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
+#  
+#         assert_frame_equal(expected_df, result_df)
+        
+#     def test_gauss_spline_filter(self):
+#         test_filter_df = DataFrame([list(range(3)),
+#                         list(range(6, 9)),
+#                         list(range(3, 6)),
+#                         list(range(6, 9)),
+#                         list(range(3, 6)),
+#                         list(range(0, 3))])
+#         test_filter_df.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
+#         result_df = gauss_spline_filter(test_filter_df)
+# 
+#         expected_result = DataFrame([[0,1.541803e-01,1.712789e-03],
+#                                  [6,8.295189e-33,  1.403461e-42],
+#                                  [3, 2.608574e-11,  3.576248e-17],
+#                                  [6,8.295189e-33,  1.403461e-42],
+#                                  [3,2.608574e-11,  3.576248e-17],
+#                                  [0, 1.541803e-01,  1.712789e-03]])
+#         expected_result.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
+# 
+#         assert_frame_equal(expected_result, result_df)
+    
+    def test_wiener_filter(self):
+        test_filter_df = DataFrame([list(range(3)),
+                        list(range(6, 9)),
+                        list(range(3, 6)),
+                        list(range(6, 9)),
+                        list(range(3, 6)),
+                        list(range(0, 3))])
+        test_filter_df.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
+        result_df = wiener_filter(test_filter_df)
+
+        expected_result = DataFrame([[0, 1.826873,  2.611111],
+                                 [6,4.629630,  5.351852],
+                                 [3, 6.000000,  7.000000],
+                                 [6,5.000000,  6.000000],
+                                 [3,4.000000,  5.000000],
+                                 [0, 1.666667,  2.333333]])
+        expected_result.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
+
+        assert_frame_equal(expected_result, result_df)
+        
+        
+    def test_min_max_scaler(self):
+        test_filter_df = DataFrame([list(range(3)),
+                        list(range(6, 9)),
+                        list(range(3, 6)),
+                        list(range(6, 9)),
+                        list(range(3, 6)),
+                        list(range(0, 3))])
+
+        test_filter_df.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
+        result_df = normalize_min_max_scaler(test_filter_df)
+        expected_result = DataFrame([[0,  0.0,   0.0],
+                                 [6,1.0 ,  1.0],
+                                 [3, 0.5,   0.5],
+                                 [6,1.0,   1.0],
+                                 [3,0.5,   0.5],
+                                 [0, 0.0,   0.0]])
+        expected_result.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
+
+        assert_frame_equal(expected_result, result_df)
+        
+            
+    def test_robust_scaler(self):
+        test_filter_df = DataFrame([list(range(3)),
+                        list(range(6, 9)),
+                        list(range(3, 6)),
+                        list(range(6, 9)),
+                        list(range(3, 6)),
+                        list(range(0, 3))])
+
+        test_filter_df.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
+        result_df = robust_scaler(test_filter_df)
+        expected_result = DataFrame([[0, -0.666667,  -0.666667 ],
+                                 [6,0.666667, 0.666667],
+                                 [3, 0.,   0.],
+                                 [6,0.666667,   0.666667],
+                                 [3,0.,   0.],
+                                 [0,-0.666667 ,-0.666667 ]])
+        expected_result.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
+
+        assert_frame_equal(expected_result, result_df)
+        
+    
+        
+        
+    
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
