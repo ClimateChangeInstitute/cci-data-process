@@ -22,6 +22,7 @@ from climatechange.resample_stats import compileStats,resampled_depths_by_years,
     create_range_by_year, create_depth_headers, resampled_statistics
 import numpy as np
 from climatechange.resample_data_by_depths import find_index_by_increment
+from climatechange.data_filters import default_filters
 
 
 # list of values by column, first index is column index, for each you get element of row 
@@ -54,7 +55,7 @@ input_test_zeros = load_csv(os.path.join('csv_files', 'input_test_zeros.csv'))
 input_test_zeros = clean_data(input_test_zeros)
 headers_zeros = process_header_data(input_test_zeros)
 
-laser_file = readFile(os.path.join('csv_files', '1_test.txt'), 955 , 6008.500 , 6012.500 , 12 , 23, os.path.join('csv_files', 'depthAge7617.txt'))
+laser_file = readFile(os.path.join('csv_files', '1_test.txt'), 955 , 6008.500 , 6012.500 , 12 , 23, os.path.join('csv_files', 'depthAge7617.txt'),default_filters)
 laser_file_df = clean_LAICPMS_data(laser_file)
 
 

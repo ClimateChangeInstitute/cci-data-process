@@ -16,7 +16,7 @@ from climatechange.laser_data_process import load_input_file, \
     clean_LAICPMS_data, combine_laser_data_by_directory
 from climatechange.resample_stats import compileStats
 from climatechange.data_filters import adjust_data_by_background,\
-    adjust_data_by_stats
+    adjust_data_by_stats, default_filters
 from climatechange.plot import write_data_to_csv_files
 from climatechange.file import load_csv
 from climatechange.process_data_functions import clean_data
@@ -24,7 +24,7 @@ from climatechange.laser__correlation_process import load_and_clean_LR
 
 
 depth_age_file = os.path.join('csv_files', 'depthAge7617.txt')
-laser_file = readFile(os.path.join('csv_files', '1.txt'), 955 , 6008.500 , 6012.500 , 12 , 23, os.path.join('csv_files', 'depthAge7617.txt'))
+laser_file = readFile(os.path.join('csv_files', '1.txt'), 955 , 6008.500 , 6012.500 , 12 , 23, os.path.join('csv_files', 'depthAge7617.txt'), default_filters)
 test_sample_header = Header("Cond (+ALU-S/cm)", HeaderType.SAMPLE, "Conductivity", "alu-s/cm", "Cond_(+ALU-S/cm)")
 test_depth_we_header = Header("depth (m we)", HeaderType.DEPTH, "Depth", "meters", "depth_we_(m)")
 test_depth_abs_header = Header("depth (m abs) ", HeaderType.DEPTH, "Depth", "meters", "depth_abs_(m)")
@@ -55,13 +55,15 @@ class Test(unittest.TestCase):
 
     
     def test_load_input_file(self):
-        result = load_input_file(os.path.join('csv_files', 'InputFile_1.txt'), depth_age_file)
+        result = load_input_file(os.path.join('csv_files', 'InputFile_1.txt'), depth_age_file, default_filters)
         self.assertEqual(laser_file.file_path, result[0].file_path)
         self.assertEqual(laser_file.laser_time, result[0].laser_time)
         self.assertEqual(laser_file.start_depth, result[0].start_depth)
         self.assertEqual(laser_file.end_depth, result[0].end_depth)
         self.assertEqual(laser_file.washin_time, result[0].washin_time)
         self.assertEqual(laser_file.washout_time, result[0].washout_time)
+        for key, val in laser_file.filter_data.items() :
+            print(key.__name__)
         
     def test_combine_laser_data_by_input_file(self):
         input_file = os.path.join('csv_files', 'Input_File_test.txt')

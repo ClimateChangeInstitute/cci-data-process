@@ -6,7 +6,7 @@ Created on Aug 10, 2017
 from builtins import str
 import os
 import re
-from typing import List
+from typing import List, Tuple, Callable
 
 from matplotlib.backends.backend_pdf import PdfPages
 from pandas import DataFrame, Series
@@ -14,7 +14,7 @@ import pandas
 
 from climatechange.data_filters import replace_outliers,\
     adjust_data_by_background, adjust_data_by_stats, normalize_data,\
-    savgol_smooth_filter
+    savgol_smooth_filter, default_filters
 from climatechange.headers import process_header_data, HeaderType, Header
 from climatechange.plot import write_data_to_csv_files
 from climatechange.process_data_functions import clean_data,\
@@ -26,7 +26,7 @@ import numpy as np
 
 class LaserFile:
     def __init__(self, file_path, laser_time, start_depth, end_depth,
-                 washin_time, washout_time, depth_age_file):
+                 washin_time, washout_time, depth_age_file, filters_to_apply = default_filters):
         self.file_path = file_path
         self.base=os.path.basename(self.file_path).split('.')[0]
         self.dirname=os.path.basename(os.path.dirname(self.file_path))
@@ -38,10 +38,14 @@ class LaserFile:
         self.depth_age_file = depth_age_file
         self.raw_data = load_laser_txt_file(file_path)
         self.processed_data = clean_LAICPMS_data(self)
+        self.filter_data = {}
+        for filter_tuple in filters_to_apply:
+            self.filter_data[filter_tuple[0]] = filter_tuple[0](self.processed_data)
         self.background_stats = DataFrame({i:compileStats(self.raw_data.loc[0:12, i].tolist()) for i in self.raw_data.iloc[0:13, 1:]},
                     index=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
         self.stats =DataFrame({i:compileStats(self.processed_data[i].tolist()) for i in self.processed_data.columns[2:]},
                     index=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
+        self.filters_to_apply = filters_to_apply
 #         self.normalized_data=normalize_min_max_scaler(self.processed_data)
 
     def __str__(self):
@@ -97,12 +101,12 @@ class CombinedLaser:
         
     
 def readFile(file_path, laser_time, start_depth, end_depth, washin_time,
-             washout_time, depth_age_file) -> LaserFile:
+             washout_time, depth_age_file, filters_to_apply) -> LaserFile:
                  
-    return LaserFile(file_path, laser_time, start_depth, end_depth, washin_time, washout_time, depth_age_file)
+    return LaserFile(file_path, laser_time, start_depth, end_depth, washin_time, washout_time, depth_age_file, filters_to_apply)
 
 
-def load_input_file(input_file:str, depth_age_file:str) -> List[LaserFile]:  # gets information from input file
+def load_input_file(input_file:str, depth_age_file:str,filters_to_apply:List[Tuple[Callable]]) -> List[LaserFile]:  # gets information from input file
     """
     """
     result = []
@@ -117,7 +121,8 @@ def load_input_file(input_file:str, depth_age_file:str) -> List[LaserFile]:  # g
                                        float(columns[3]),
                                        float(columns[4]),
                                        float(columns[5]),
-                                       depth_age_file))
+                                       depth_age_file,
+                                       filters_to_apply))
     return result
 
     
@@ -165,9 +170,9 @@ def plot_laser_data_by_run(f:LaserFile, pdf_folder:str) -> DataFrame:
                 plot_laser_data(f.processed_data, depth_header, sample_header, pdf)
 
 
-def combine_laser_data_by_input_file(input_file:str, depth_age_file:str, create_PDF=False) -> DataFrame:
+def combine_laser_data_by_input_file(input_file:str, depth_age_file:str, create_PDF=False, filters_to_apply = default_filters) -> DataFrame:
       
-    laser_files = load_input_file(input_file, depth_age_file)
+    laser_files = load_input_file(input_file, depth_age_file, filters_to_apply)
 
     df = DataFrame()
 
@@ -183,7 +188,8 @@ def combine_laser_data_by_directory(directory:str,
                                     depth_age_file:str,
                                     create_PDF=False,
                                     create_CSV=False,
-                                    prefix:str='KCC'):
+                                    prefix:str='KCC',
+                                    filters_to_apply = default_filters):
     '''
     Combine the laser data in the specified `directory`.  The folders with the 
     specified `prefix` in `directory` are processed in lexicographical order.
@@ -209,10 +215,11 @@ def combine_laser_data_by_directory(directory:str,
             for file in sorted(os.listdir(os.path.join(directory, folder))):
                 if file.startswith(input_1):
                     combined_laser_1 = combined_laser_1.append(combine_laser_data_by_input_file(os.path.join(directory, folder, file),
-                                                                    depth_age_file, create_PDF))
+                                                                    depth_age_file, create_PDF,filters_to_apply))
+                    
                 elif file.startswith(input_2):
                     combined_laser_2 = combined_laser_2.append(combine_laser_data_by_input_file(os.path.join(directory, folder, file),
-                                                                    depth_age_file, create_PDF), ignore_index=True)
+                                                                    depth_age_file, create_PDF, filters_to_apply), ignore_index=True)
     
     if create_PDF:
         pdf_folder = os.path.join(directory, 'PDF_plots')

@@ -14,7 +14,7 @@ from pandas.util.testing import assert_frame_equal
 from climatechange.data_filters import normalize_min_max_scaler, \
     replace_outliers, savgol_smooth_filter, filter_function, filters_to_string,\
     normalize_data, medfilt_filter, gauss_spline_filter,\
-    wiener_filter, robust_scaler
+    wiener_filter, robust_scaler, default_filters
 from climatechange.laser_data_process import readFile, clean_LAICPMS_data
 from climatechange.file import load_csv
 from climatechange.process_data_functions import clean_data
@@ -27,7 +27,7 @@ laser_file = readFile(os.path.join('csv_files', '1.txt'),
                     6012.500 ,
                     12 ,
                     23,
-                    os.path.join('csv_files', 'depthAge7617.txt'))
+                    os.path.join('csv_files', 'depthAge7617.txt'), default_filters)
 test_filter_df = DataFrame([list(range(3)),
                         list(range(6, 9)),
                         list(range(3, 6)),

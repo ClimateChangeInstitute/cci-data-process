@@ -27,6 +27,7 @@ from matplotlib import pyplot
 from climatechange.file import load_csv
 from climatechange.compiled_stat import CompiledStat
 import matplotlib.mlab as mlab
+from climatechange.data_filters import default_filters
 
 
 
@@ -104,7 +105,7 @@ def laser_data_process(directory:str,
                        LR_file:str,
                        createPDF=False,
                        createCSV=False,
-                       prefix:str='KCC'):
+                       prefix:str='KCC',filters_to_apply = default_filters):
     '''
         Combine the laser data in the specified `directory`.  The folders with the 
     specified `prefix` in `directory` are processed in lexicographical order.
@@ -297,19 +298,19 @@ def load_and_clean_LR(LR_file:str, df_laser:DataFrame)->Tuple[DataFile,DataFile]
 
 
 
-def laser_filter_correlate_combine_process(directory:str,
-                                           depth_age_file:str,
-                                           LR_file:str,
-                                           createPDF=False,
-                                           createCSV=False,
-                                           prefix:str='KCC'):
-    
-    filters = [raw, processed, ]
-    
-    for filter in filters:
-     laser_data_process(directory, depth_age_file, LR_file, createPDF, createCSV, prefix)
-     
-    pass
-    
-    
+# def laser_filter_correlate_combine_process(directory:str,
+#                                            depth_age_file:str,
+#                                            LR_file:str,
+#                                            createPDF=False,
+#                                            createCSV=False,
+#                                            prefix:str='KCC'):
+#     
+#     filters = [raw, processed, ]
+#     
+#     for filter in filters:
+#      laser_data_process(directory, depth_age_file, LR_file, createPDF, createCSV, prefix)
+#      
+#     pass
+#     
+#     
     

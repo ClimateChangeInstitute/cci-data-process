@@ -286,7 +286,13 @@ def savgol_smooth_filter_stat(df:DataFrame):
 
     return df
 
-    
+
+def processed_data(df:DataFrame):
+    return df    
+
+default_filters = [(processed_data,),(replace_outliers,)]   
+     
+
 if __name__ == '__main__':
     filter_functions = list(filter_function.all.keys())
     filter_functions.sort()
