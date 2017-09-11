@@ -213,7 +213,7 @@ def normalize_min_max_scaler(df:DataFrame) -> DataFrame:
 def robust_scaler(df:DataFrame) -> DataFrame:
     
     sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
-    rob_scaler = lambda x: preprocessing.robust_scale(x)
+    rob_scaler = lambda x: preprocessing.robust_scale(x.to_frame()).flatten()
     df[sample_header_names] = df[sample_header_names].transform(rob_scaler)
 
     return df
