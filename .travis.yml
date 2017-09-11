@@ -15,3 +15,8 @@ script:
 
 after_success:
   - (cd test; codecov)
+
+notifications:
+  email:
+    - mark.royer@maine.edu
+    - heather.clifford@maine.edu
