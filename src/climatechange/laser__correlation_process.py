@@ -105,7 +105,8 @@ def laser_data_process(directory:str,
                        LR_file:str,
                        createPDF=False,
                        createCSV=False,
-                       prefix:str='KCC',filters_to_apply = default_filters):
+                       prefix:str='KCC',
+                       filters_to_apply = default_filters):
     '''
         Combine the laser data in the specified `directory`.  The folders with the 
     specified `prefix` in `directory` are processed in lexicographical order.
@@ -298,19 +299,200 @@ def load_and_clean_LR(LR_file:str, df_laser:DataFrame)->Tuple[DataFile,DataFile]
 
 
 
-# def laser_filter_correlate_combine_process(directory:str,
-#                                            depth_age_file:str,
-#                                            LR_file:str,
-#                                            createPDF=False,
-#                                            createCSV=False,
-#                                            prefix:str='KCC'):
+# def laser_processor(directory:str,
+#                        depth_age_file:str,
+#                        LR_file:str,
+#                        createPDF=False,
+#                        createCSV=False,
+#                        prefix:str='KCC',
+#                        filters_to_apply = default_filters):
 #     
-#     filters = [raw, processed, ]
 #     
-#     for filter in filters:
-#      laser_data_process(directory, depth_age_file, LR_file, createPDF, createCSV, prefix)
-#      
+#     
+#  
+#     
+#     #combined and correlate processed data
+#     
+#     
+# 
+#     
 #     pass
+# 
+# def laser_processed_data(directory:str,
+#                        depth_age_file:str,
+#                        LR_file:str,
+#                        createPDF=False,
+#                        createCSV=False,
+#                        prefix:str='KCC',
+#                        filters_to_apply = default_filters):
+#      
+#     laser_files = create_laser_files(directory, depth_age_file, filters_to_apply, prefix)
+#      
+#     combined_laser_MR = CombinedLaser()
+#     corr_stats_MR = []
+#     for laser
+#     for laser_files in laser_files_MR:
+#          combined_laser_MR = combined_laser_MR.append(combined_laser_processed_data(laser_files))
+#          
+#          corr_stats_MR.extend(process_laser_processed_data_by_input_file(laser_files, LR_file,createPDF))
+#                                
+#     for laser_files in laser_files_LR:
+#          combined_laser_LR = combined_laser_LR.append(combined_laser_processed_data(laser_files))
+#          corr_stats_LR.extend(process_laser_processed_data_by_input_file(laser_files, LR_file,createPDF)
+#                                
+#           
+#          
+#  
+#     input_MR = 'InputFile_1'
+#     input_LR = 'InputFile_2'
+#     combined_laser_MR = CombinedLaser()
+#     combined_laser_LR = CombinedLaser()
+#     corr_stats_MR=[]
+#     corr_stats_LR=[]
+#      
+#  
+#     df_MR = DataFrame(corr_stats_MR)   
+#     df_LR = DataFrame(corr_stats_LR)
+#     all_dfs = [df_MR,df_LR]
+#  
+#  
+#     for df in all_dfs:
+#         df.columns = ['core ID','filename','top_depth_m_(abs)','end_depth_m_(abs)','length_m_(abs)', 'laser_sample', 'LR_sample', 'r_value:Mean', 'r_value:Median','linear equation:Mean','linear equation:Median']
+#  
+#     df_corr_stats=pandas.concat(all_dfs).reset_index(drop=True)
+#     if createPDF:
+#         pdf_folder = os.path.join(directory, 'PDF_plots')
+#         if not os.path.exists(pdf_folder):
+#             os.makedirs(pdf_folder)  
+#         plot_laser_directory_resampled_by_LR(combined_laser_MR,LR_file,pdf_folder,'MR')
+#         plot_laser_directory_resampled_by_LR(combined_laser_LR,LR_file,pdf_folder,'LR')
+#         histogram_laser_data(combined_laser_MR,LR_file,pdf_folder,'MR')
+#         histogram_laser_data(combined_laser_LR,LR_file,pdf_folder,'LR')
+#  
+#     if createCSV:
+#         csv_folder = os.path.join(directory, 'CSV_files')
+#          
+#         if not os.path.exists(csv_folder):
+#             os.makedirs(csv_folder)
+#              
+#         write_data_to_csv_files(combined_laser_MR.df, os.path.join(csv_folder, ('%s_laser_MR_%s.csv'%(prefix,os.path.basename(directory)))))
+#         write_data_to_csv_files(combined_laser_LR.df, os.path.join(csv_folder, ('%s_laser_LR_%s.csv'%(prefix,os.path.basename(directory)))))           
+#         csv_filename = os.path.join(csv_folder,'%s_and %s__statistical_correlation.csv' % (os.path.basename(directory),os.path.basename(LR_file).split('.')[0]))
+#         write_data_to_csv_files(df_corr_stats, csv_filename)
+#          
+#     return df_corr_stats
+#  
+#  
+#  
+# # def laser_filtered_data(directory:str,
+# #                        depth_age_file:str,
+# #                        LR_file:str,
+# #                        createPDF=False,
+# #                        createCSV=False,
+# #                        prefix:str='KCC',
+# #                        filters_to_apply = default_filters):
+# #     pass
+# 
+# def create_laser_files(directory:str, depth_age_file:str, filters_to_apply = default_filters, prefix:str='KCC'):
 #     
+#     laser_files_MR = []
+#     laser_files_LR = []
+#     input_MR = 'InputFile_1'
+#     input_LR = 'InputFile_2'
 #     
+#     for folder in sorted(os.listdir(directory)):
+#         if folder.startswith(prefix):
+#             for file in sorted(os.listdir(os.path.join(directory, folder))):
+#                 if file.startswith(input_MR):
+#                     laser_files_MR = laser_files_MR .append(create_laser_files_by_input_file(os.path.join(directory, folder, file), depth_age_file, filters_to_apply))
+#                 elif file.startswith(input_LR):
+#                     laser_files_LR = laser_files_MR .append(create_laser_files_by_input_file(os.path.join(directory, folder, file), depth_age_file, filters_to_apply))
+#                     
+#     return [laser_files_MR, laser_files_LR]
+#                     
+#                     
+# def create_laser_files_by_input_file(input_file:str, depth_age_file:str, filters_to_apply = default_filters) -> DataFrame:
+#       
+#     laser_files = load_input_file(input_file, depth_age_file, filters_to_apply)
+#     
+#     return laser_files
+# 
+# 
+# def combined_laser_processed_data(laser_files:LaserFile):
+#     
+#     df = DataFrame()
+# 
+#     for f in laser_files:
+# 
+#         df = df.append(f.processed_data, ignore_index=True)
+#         
+#     return CombinedLaser(df,laser_files)
+# 
+# 
+# def process_laser_processed_data_by_input_file(laser_files, LR_file:str,createPDF) -> DataFrame:
+#       
+#     corr_stats=[]
+#     
+#     for f in laser_files:
+# 
+#         corr_stats.extend(resample_laser_processed_data_by_LR(f, LR_file,createPDF))
+# 
+#     return corr_stats
+# 
+# def resample_laser_processed_data_by_LR(f:LaserFile, LR_file:str,createPDF):
+#     '''
+#     
+#     Resample laser data by lower resolution
+# 
+#     a. Input: two datasets with corresponding years, depths, samples
+#     b. $ PYTHONPATH=. python climatechange/process_data.py -di ../test/csv_files/small.csv
+#         ../test/csv_files/small2.csv
+# 
+#     i. Take depth intervals of one dataset and resample second dataset by first dataset
+#     depth intervals
+#     b. Output: correlation between raw data and statistics of the same samples in both datasets
+#     
+#     '''
+#     f_LR=load_and_clean_LR(LR_file,f.processed_data)
+#     
+#     compiled_stats_of_df_laser = compiled_stats_HR_by_LR(f.processed_data, f_LR.df)
+#     
+# #     if createCSV:
+# #         find_gaps(f.processed_data, f_LR.df, pdf_folder, f.base)
+#     pdf_folder = os.path.join(os.path.dirname(os.path.dirname(f.file_path)), 'PDF_plots')
+#     
+#     if createPDF:
+#         if not os.path.exists(pdf_folder):
+#             os.makedirs(pdf_folder)
+#         pdf_corr_stats = os.path.join(pdf_folder,'%s-%s_vs_ %s__plots.pdf' % (f.dirname,f.base,f_LR.base))
+#         with PdfPages(pdf_corr_stats) as pdf_cs:
+#             for cs_list in compiled_stats_of_df_laser:
+#                 for cs in cs_list:
+#                     for sh_LR in f_LR.sample_headers:
+#                         if (sh_LR.hclass==cs.sample_header.hclass) | (sh_LR.hclass=='Dust') | (sh_LR.hclass=='Conductivity') \
+#                             | (cs.sample_header.hclass=='Dust') | (cs.sample_header.hclass=='Conductivity'):
+#                             for stat_header in cs.df.columns[2:5]:
+#                                 if not stat_header=='Stdv':
+#                                     plot_corr_stats(cs,f_LR.df,sh_LR,stat_header,pdf_cs)
+#                                     pyplot.close()
+#         
+#     
+#     corr_stats=[]  
+#     for cs_list in compiled_stats_of_df_laser:
+#         for cs in cs_list:
+#             for sh_LR in f_LR.sample_headers:
+#                 if (sh_LR.hclass==cs.sample_header.hclass) | (sh_LR.hclass=='Dust') | (sh_LR.hclass=='Conductivity') \
+#                         | (cs.sample_header.hclass=='Dust') | (cs.sample_header.hclass=='Conductivity'):
+# 
+# 
+#                     corr_stats.append((f.dirname,
+#                                        f.base,
+#                                        round((f.start_depth/100),4),
+#                                        round((f.end_depth/100),4),
+#                                        (round((f.end_depth/100),4)-round((f.start_depth/100),4)))+correlate_laser_stats(cs, f_LR,sh_LR))
+# 
+#     return corr_stats
+#     
+# #     
     
+

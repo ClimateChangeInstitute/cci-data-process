@@ -6,7 +6,7 @@ Created on Aug 10, 2017
 from builtins import str
 import os
 import re
-from typing import List, Tuple, Callable
+from typing import List, Tuple, Callable, Any
 
 from matplotlib.backends.backend_pdf import PdfPages
 from pandas import DataFrame, Series
@@ -46,13 +46,17 @@ class LaserFile:
         self.stats =DataFrame({i:compileStats(self.processed_data[i].tolist()) for i in self.processed_data.columns[2:]},
                     index=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
         self.filters_to_apply = filters_to_apply
-#         self.normalized_data=normalize_min_max_scaler(self.processed_data)
+
+
 
     def __str__(self):
         return self.file_path
     
     def __repr__(self):
         return self.__str__()
+    
+    
+    
     
 class CombinedLaser:
     def __init__(self, df:DataFrame=DataFrame(), laser_files:List[LaserFile]=[]):
@@ -65,6 +69,20 @@ class CombinedLaser:
         result_df = self.df.append(cl.df,ignore_index=ignore_index)
         result_laser_files = self.laser_files + cl.laser_files
         return CombinedLaser(result_df, result_laser_files)
+    
+    
+class CombinedData:
+    def __init__(self, df:DataFrame=DataFrame(), source_objects:List[Any]=[]):
+        self.df = df
+        self.laser_files = source_objects
+        
+    def append(self,cl:'CombinedData', ignore_index=True):
+        
+        result_df = self.df.append(cl.df,ignore_index=ignore_index)
+        result_source_objects = self.source_objects + cl.source_objects
+        return CombinedData(result_df, result_source_objects)
+    
+
     
 # class FilterData():
 #     def __init__(self, combined_laser:CombinedLaser):
@@ -183,6 +201,16 @@ def combine_laser_data_by_input_file(input_file:str, depth_age_file:str, create_
     return CombinedLaser(df,laser_files)
 
 
+def combine_data(dataframes:List[DataFrame],data_source:List[Any]) -> CombinedData:
+      
+    df = DataFrame()
+
+    for d in dataframes:
+        df = df.append(d, ignore_index=True)
+        
+    return CombinedData(df,data_source)
+
+
 
 def combine_laser_data_by_directory(directory:str,
                                     depth_age_file:str,
@@ -239,6 +267,72 @@ def combine_laser_data_by_directory(directory:str,
     return combined_laser_1.df,combined_laser_2.df
     # plot each sample by depth
                     
+                    
+                    
+                    
+def combine_laser_data_by_directory_2(directory:str,
+                                    depth_age_file:str,
+                                    create_PDF=False,
+                                    create_CSV=False,
+                                    prefix:str='KCC',
+                                    filters_to_apply = default_filters):
+    '''
+    Combine the laser data in the specified `directory`.  The folders with the 
+    specified `prefix` in `directory` are processed in lexicographical order.
+    
+    :param directory: The root directory to process
+    :param depth_age_file: The path to the depth age file
+    :param create_PDF: If specified as `True`, PDFs will be generated 
+    :param filtered_data: If specified as `True`, data will be filtered.  
+        Currently this involves removing data points that are beyond 2 standard 
+        deviations.
+    :param create_CSV: If specified as `True`, CSV files will be generated for 
+        the  data
+    :param prefix: The prefix of the folders containing laser data to be 
+        processed
+    '''
+    input_1 = 'InputFile_1'
+    input_2 = 'InputFile_2'
+    combined_laser_1 = CombinedLaser()
+    combined_laser_2 = CombinedLaser()
+ 
+    for folder in sorted(os.listdir(directory)):
+        if folder.startswith(prefix):
+            for file in sorted(os.listdir(os.path.join(directory, folder))):
+                if file.startswith(input_1):
+                    
+                    input_file = os.path.join(directory, folder, file)
+                    laser_files = load_input_file(input_file, depth_age_file, filters_to_apply)
+                    
+                    combined_laser_processed_data = combine_data([l.processed_data for l in laser_files], laser_files)
+                    combined_laser_1 = combined_laser_1.append(combined_laser_processed_data)
+                    
+                    combined_laser_filtered_data = []
+                    if laser_files:
+                        for func in laser_files[0].filter_data.keys() :
+                            combined_laser_filtered_data = combined_laser_filtered_data.append(combine_data(to_filter_list(laser_files, func), laser_files))
+                    
+                    
+                elif file.startswith(input_2):
+                    combined_laser_2 = combined_laser_2.append(combine_laser_data_by_input_file(os.path.join(directory, folder, file),
+                                                                    depth_age_file, create_PDF, filters_to_apply), ignore_index=True)
+    
+    if create_PDF:
+        pdf_folder = os.path.join(directory, 'PDF_plots')
+        if not os.path.exists(pdf_folder):
+            os.makedirs(pdf_folder)  
+        plot_laser_data_by_directory(combined_laser_1.df,prefix, pdf_folder)
+        plot_laser_data_by_directory(combined_laser_2.df,prefix, pdf_folder)
+    
+    if create_CSV:
+        csv_folder = os.path.join(directory, 'CSV_files')
+        if not os.path.exists(csv_folder):
+            os.makedirs(csv_folder)
+            #change names
+        write_data_to_csv_files(combined_laser_1.df, os.path.join(csv_folder, ('%s_laser_MR_%s_filter.csv'%(prefix,os.path.basename(directory)))))
+        write_data_to_csv_files(combined_laser_2.df, os.path.join(csv_folder, ('%s_laser_LR_%s_filter.csv'%(prefix,os.path.basename(directory)))))           
+
+    return combined_laser_1.df,combined_laser_2.df
     
 def plot_laser_data_by_directory(df:DataFrame,prefix:str, pdf_folder):
 
@@ -254,7 +348,16 @@ def plot_laser_data_by_directory(df:DataFrame,prefix:str, pdf_folder):
             for sample_header in sample_headers:
                 plot_laser_data(df, depth_header, sample_header, pdf)
                 
-                
+def to_filter_list(lf:List[LaserFile], func:Callable):
+    
+    list = []
+    
+    for l in lf:
+        if l.filter_data[func]:
+            list.append(l.filter_data[func])
+    
+    return list
+    
 # def plot_filtered_laser_data_by_directory(df:DataFrame, pdf_folder):
 # 
 #     pdf_filename = os.path.join(pdf_folder, 'all_filtered_data_1.pdf')
