@@ -49,7 +49,7 @@ class LaserFile:
         self.sample_headers = process_header_data(self.processed_data, HeaderType.SAMPLE) 
         self.depth_headers = process_header_data(self.processed_data, HeaderType.DEPTH) 
         self.year_headers = process_header_data(self.processed_data, HeaderType.YEARS) 
-        self.savgol = savgol_smooth_filter(self.processed_data.dropna(how='any').reset_index(drop = True))
+#         self.savgol = savgol_smooth_filter(self.processed_data.dropna(how='any').reset_index(drop = True))
 
 
 
@@ -200,7 +200,7 @@ def combine_laser_data_by_input_file(input_file:str, depth_age_file:str, create_
 
     for f in laser_files:
 
-        df = df.append(f.savgol, ignore_index=True)
+        df = df.append(f.processed_data, ignore_index=True)
         
     return CombinedLaser(df,laser_files)
 
@@ -361,20 +361,6 @@ def to_filter_list(lf:List[LaserFile], func:Callable):
             list.append(l.filter_data[func])
     
     return list
-    
-# def plot_filtered_laser_data_by_directory(df:DataFrame, pdf_folder):
-# 
-#     pdf_filename = os.path.join(pdf_folder, 'all_filtered_data_1.pdf')
-#     if os.path.exists(pdf_filename):
-#         pdf_filename = os.path.join(pdf_folder, 'all_filtered_data_2.pdf')
-#             
-#     sample_headers = process_header_data(df, HeaderType.SAMPLE)
-#     depth_headers = process_header_data(df, HeaderType.DEPTH)
-#     
-#     with PdfPages(pdf_filename) as pdf:
-#         for depth_header in depth_headers:
-#             for sample_header in sample_headers:
-#                 plot_laser_data(df, depth_header, sample_header, pdf)
 
 
 
@@ -401,19 +387,6 @@ def clean_LAICPMS_data(f:LaserFile) -> DataFrame:
     df = replace_outliers(df)
     df = normalize_data(df)
     df = df.round(5)
-    
-    return df
-
-def filtered_laser_data(laser_file) -> DataFrame:
-    '''
-    Filter the given data by removing data points that are outside of 2 
-    standard deviations of the mean and replacing them with :data:`np.nan`. 
-    Modification occur in-place.
-     
-    :param df: The data to be processed.
-    :return: The modified data
-    '''
-    df=adjust_data_by_stats(laser_file.processed_data,laser_file.stats)
     
     return df
 

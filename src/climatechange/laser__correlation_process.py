@@ -109,15 +109,16 @@ def resample_laser_by_LR(f:LaserFile, LR_file:str, createPDF):
     b. Output: correlation between raw data and statistics of the same samples in both datasets
     
     '''
-    f_LR=load_and_clean_LR(LR_file,f.savgol)
+    f_LR=load_and_clean_LR(LR_file,f.processed_data)
     
-    compiled_stats_of_df_laser = compiled_stats_HR_by_LR(f.savgol, f_LR.df)
+    compiled_stats_of_df_laser = compiled_stats_HR_by_LR(f.processed_data, f_LR.df)
     
 #     if createCSV:
 #         find_gaps(f.processed_data, f_LR.df, pdf_folder, f.base)
-    pdf_folder = os.path.join(os.path.dirname(os.path.dirname(f.file_path)), 'PDF_plots')
+#     pdf_folder = os.path.join(os.path.dirname(os.path.dirname(f.file_path)), 'PDF_plots')
     
     if createPDF:
+        pdf_folder = os.path.join(os.path.dirname(os.path.dirname(f.file_path)), 'PDF_plots')
         if not os.path.exists(pdf_folder):
             os.makedirs(pdf_folder)
         pdf_corr_stats = os.path.join(pdf_folder,'%s-%s_vs_ %s__plots_savgol.pdf' % (f.dirname,f.base,f_LR.base))
@@ -186,11 +187,11 @@ def laser_data_process(directory:str,
                 if file.startswith(input_MR):
                     combined_laser_MR = combined_laser_MR.append(combine_laser_data_by_input_file(os.path.join(directory, folder, file),
                                                                                                   depth_age_file,
-                                                                                                  createPDF))
+                                                                                                  createPDF,filters_to_apply))
                     
                     corr_stats_MR.extend(process_laser_data_by_input_file(os.path.join(directory, folder, file),
                                                                                           depth_age_file,
-                                                                                          LR_file,createPDF))
+                                                                                          LR_file,createPDF,filters_to_apply))
 
 
                     
@@ -198,10 +199,10 @@ def laser_data_process(directory:str,
                     
                     combined_laser_LR = combined_laser_LR.append(combine_laser_data_by_input_file(os.path.join(directory, folder, file),
                                                                                                   depth_age_file,
-                                                                                                  createPDF), ignore_index=True)
+                                                                                                  createPDF,filters_to_apply))
                     corr_stats_LR.extend(process_laser_data_by_input_file(os.path.join(directory, folder, file),
                                                                                           depth_age_file,
-                                                                                          LR_file, createPDF))
+                                                                                          LR_file, createPDF,filters_to_apply))
     
  
     df_MR = DataFrame(corr_stats_MR)   
