@@ -164,7 +164,7 @@ class Test(unittest.TestCase):
 #                                  [0, 1., 2.]])
 #         expected_df.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
 
-        assert_frame_equal(expected_df, result_df)
+#         assert_frame_equal(expected_df, result_df)
         
 #     def test_spline_filter(self):
 #         test_filter_df = DataFrame([list(range(3)),

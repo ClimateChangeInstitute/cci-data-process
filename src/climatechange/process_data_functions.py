@@ -62,6 +62,7 @@ class DataClass():
         self.sample_headers = process_header_data(self.df, HeaderType.SAMPLE) 
         self.depth_headers = process_header_data(self.df, HeaderType.DEPTH) 
         self.year_headers = process_header_data(self.df, HeaderType.YEARS) 
+        
 
 def is_number(s):
     try:
@@ -446,6 +447,9 @@ def correlate_laser_stats(d1:CompiledStat, data_file:DataFile, sample_header:Hea
     for stat_header in d1.df.columns[2:5]:
         if not stat_header=='Stdv':
             d1_stat = d1.df.loc[:, stat_header]
+            if len(d1_stat)!= len(d2):
+                print(d1_stat)
+                print(d2)
             slope, intercept, r_value, p_value, std_err = linregress(d1_stat, d2)
             r_val.append(round(r_value,4))
             equation.append('y= %.5f * x + %.4f'%(slope,intercept))
@@ -616,6 +620,23 @@ def find_HR_and_LR_df(f1:str,f2:str)->Tuple[DataFile,DataFile]:
         df_HR=df_HR[(df_HR[depth1.name]>=min(df_LR[depth1.name])) & (df_HR[depth1.name] <=max(df_LR[depth1.name]))]
 
     return DataFile(df_HR.reset_index(drop=True),f_HR),DataFile(df_LR.reset_index(drop=True),f_LR)
+
+
+    
+def to_same_length(df1:DataFrame,df2:DataFrame)->Tuple[DataFile,DataFile]:
+    
+
+    dh_1 = process_header_data(df1, HeaderType.DEPTH)
+    dh_2 = process_header_data(df2, HeaderType.DEPTH)
+    
+    for depth1 in dh_1:
+        for depth2 in dh_2:
+            if depth1.name==depth2.name:
+
+                df2=df2[(df2[depth1.name]>=min(df1[depth1.name])) & (df2[depth1.name] <=max(df1[depth1.name]))]
+#                 df1=df1[(df1[depth1.name]>=min(df2[depth1.name])) & (df1[depth1.name] <=max(df2[depth1.name]))]
+
+    return df1,df2.reset_index(drop=True)
     
     
 def load_and_store_header_file(path:str):
@@ -644,33 +665,37 @@ def load_and_store_header_file(path:str):
                                                             len(all_replaced)))
             
 
-def plot_samples_by_year(f:str,interval:List=0):
+def plot_samples_by_year(f:str, interval:List=[]):
     
     dc = DataClass(f)
-    pdf_file = os.path.join(dc.dirname,('plot_%s.pdf'%dc.base))
-            
-    
+    if not interval == []:
+        pdf_file = os.path.join(dc.dirname,('plot_%s_year_%.0f-%.0f.pdf'%(dc.base,interval[0],interval[1])))
+    else:
+        pdf_file = os.path.join(dc.dirname,('plot_%s_year.pdf'%(dc.base)))
     with PdfPages(pdf_file) as pdf:
         for year in dc.year_headers:
             for sample in dc.sample_headers:
-                plot_samples(dc,sample,year,interval,pdf)
+                plot_samples(dc,sample,year,pdf, interval)
     os.startfile(pdf_file)
         
         
-def plot_samples_by_depth(f:str, interval:List=0):
+def plot_samples_by_depth(f:str, interval:List=[]):
     
     dc = DataClass(f)
-    pdf_file = os.path.join(dc.dirname,('plot_%s.pdf'%dc.base))
-    
+    if not interval == []:
+        pdf_file = os.path.join(dc.dirname,('plot_%s_depth_%.3f-%.3f.pdf'%(dc.base,interval[0],interval[1])))
+    else:
+        pdf_file = os.path.join(dc.dirname,('plot_%s_depth.pdf'%(dc.base)))
+        
     with PdfPages(pdf_file) as pdf:
         for depth in dc.depth_headers:
             for sample in dc.sample_headers:
-                plot_samples(dc, sample, depth, interval, pdf)
+                plot_samples(dc, sample, depth, pdf, interval)
     os.startfile(pdf_file)
         
     
       
-def plot_samples(dc:DataClass, sample_header:Header, x_header:Header, interval:List, pdf):
+def plot_samples(dc:DataClass, sample_header:Header, x_header:Header, pdf, interval:List=[]):
     '''
     
     :param dc: DataClass Object
@@ -680,16 +705,18 @@ def plot_samples(dc:DataClass, sample_header:Header, x_header:Header, interval:L
 
     :return: pdf file of data by sample
     '''
-    if interval:
-        df = dc.df[dc.df[x_header.name].between(interval[0], interval[1], inclusive=False)]
+   
+    if not interval == []:
+        df = dc.df[(dc.df[x_header.name] >= interval[0]) & (dc.df[x_header.name] <= interval[1])]
     else:
-        df=dc.df
+        df = dc.df
+        
         
     plt.figure(figsize=(11, 8.5))
     fig, tg = plt.subplots(1)
     ax = df[[x_header.name, sample_header.name]].plot(x=x_header.name, kind='line',
                                            linestyle='-',
-                                           color='0.75',
+                                           color='b',
                                            ax=tg,zorder=-1)
     vals = ax.get_xticks()
     ax.set_xticklabels(['{:.0f}'.format(x) for x in vals])
@@ -699,6 +726,9 @@ def plot_samples(dc:DataClass, sample_header:Header, x_header:Header, interval:L
     plt.legend()    
     pdf.savefig(fig)
     plt.close()
+    
+    
+
  
 
     

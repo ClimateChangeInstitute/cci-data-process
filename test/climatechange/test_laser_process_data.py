@@ -20,7 +20,8 @@ from climatechange.data_filters import adjust_data_by_background,\
 from climatechange.plot import write_data_to_csv_files
 from climatechange.file import load_csv
 from climatechange.process_data_functions import clean_data
-from climatechange.laser__correlation_process import load_and_clean_LR
+from climatechange.laser__correlation_process import load_and_clean_LR,\
+    filtered_df, DFClass
 
 
 depth_age_file = os.path.join('csv_files', 'depthAge7617.txt')
@@ -125,6 +126,12 @@ class Test(unittest.TestCase):
         expected_result=clean_data(expected_result)
         assert_frame_equal(expected_result,result.df)
         self.assertEqual(LR_file,result.file_path)
+    
+    def test_filtered_df(self):
+        result = filtered_df(laser_file)
+        expected_result = [DFClass(val,key) for key, val in laser_file.filter_data.items()]
+        self.assertEqual(result[0].name, 'processed_data')
+        assert_frame_equal(laser_file.processed_data,result[0].df)
         
 #         
 #         

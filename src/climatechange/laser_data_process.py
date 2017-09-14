@@ -40,12 +40,16 @@ class LaserFile:
         self.processed_data = clean_LAICPMS_data(self)
         self.filter_data = {}
         for filter_tuple in filters_to_apply:
-            self.filter_data[filter_tuple[0]] = filter_tuple[0](self.processed_data)
+            self.filter_data[filter_tuple[0]] = filter_tuple[0](self.processed_data.dropna(how='any').reset_index(drop = True))
         self.background_stats = DataFrame({i:compileStats(self.raw_data.loc[0:12, i].tolist()) for i in self.raw_data.iloc[0:13, 1:]},
                     index=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
         self.stats =DataFrame({i:compileStats(self.processed_data[i].tolist()) for i in self.processed_data.columns[2:]},
                     index=['Mean', 'Stdv', 'Median', 'Max', 'Min', 'Count'])
         self.filters_to_apply = filters_to_apply
+        self.sample_headers = process_header_data(self.processed_data, HeaderType.SAMPLE) 
+        self.depth_headers = process_header_data(self.processed_data, HeaderType.DEPTH) 
+        self.year_headers = process_header_data(self.processed_data, HeaderType.YEARS) 
+        self.savgol = savgol_smooth_filter(self.processed_data.dropna(how='any').reset_index(drop = True))
 
 
 
@@ -124,7 +128,7 @@ def readFile(file_path, laser_time, start_depth, end_depth, washin_time,
     return LaserFile(file_path, laser_time, start_depth, end_depth, washin_time, washout_time, depth_age_file, filters_to_apply)
 
 
-def load_input_file(input_file:str, depth_age_file:str,filters_to_apply:List[Tuple[Callable]]) -> List[LaserFile]:  # gets information from input file
+def load_input_file(input_file:str, depth_age_file:str, filters_to_apply:List[Tuple[Callable]]) -> List[LaserFile]:  # gets information from input file
     """
     """
     result = []
@@ -196,7 +200,7 @@ def combine_laser_data_by_input_file(input_file:str, depth_age_file:str, create_
 
     for f in laser_files:
 
-        df = df.append(f.processed_data, ignore_index=True)
+        df = df.append(f.savgol, ignore_index=True)
         
     return CombinedLaser(df,laser_files)
 

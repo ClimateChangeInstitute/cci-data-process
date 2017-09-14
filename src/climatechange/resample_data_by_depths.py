@@ -16,6 +16,7 @@ import numpy as np
 import logging
 from climatechange.plot import write_data_to_csv_files
 import os
+# from climatechange.process_data_functions import DataFile, DFClass
 
 
 def create_range_for_depths(list_to_inc:List[float], inc_amt: float=0.01) -> List[float]:
@@ -39,6 +40,9 @@ def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> 
     :param list_to_inc:
     :param inc_amt:
     '''
+   
+#     print('range_list%s'%len(range_list))
+    
     logging.debug("find_index_by_increment: range_list=%s", range_list)
     result = []
     top_range = []
@@ -58,7 +62,7 @@ def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> 
         else: 
             result.append(tmp)
             top_range.append(range_list[i])
-        
+
     tmp = []
     for j in range(prev, len(list_to_inc)):
         e = list_to_inc[j]
@@ -69,8 +73,46 @@ def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> 
     else:
         result.append(tmp)
         top_range.append(range_list[range_list_size-1])
-       
+#     print('result%s'%len(result))
+#     print('toprange%s'%len(top_range))   
     return result, top_range
+
+def index_by_increment(list_to_inc:List[float], range_list:List[float]) -> Tuple[List[List[int]],List[float]]:
+    '''
+
+    :param list_to_inc:
+    :param inc_amt:
+    '''
+    logging.debug("find_index_by_increment: range_list=%s", range_list)
+    result = []
+
+    gaps=[]
+    range_list_size = len(range_list)
+    prev = 0
+    for i in range(range_list_size - 1):
+        tmp = []
+        for j in range(prev, len(list_to_inc)):
+            e = list_to_inc[j]
+            if e >= range_list[i] and e < range_list[i + 1]:
+                tmp.append(j)
+                prev = j + 1
+        if not tmp:
+            logging.warning('no values between [%f,%f)', range_list[i], range_list[i + 1])
+            gaps.append([range_list[i], range_list[i + 1]])
+        else: 
+            result.append(tmp)
+        
+    tmp = []
+    for j in range(prev, len(list_to_inc)):
+        e = list_to_inc[j]
+        if e >= range_list[range_list_size-1]:
+            tmp.append(j)
+    if not tmp:
+        logging.warning('no values > %f',range_list[range_list_size-1])
+    else:
+        result.append(tmp)
+       
+    return result
 
 
 def find_gaps(df_HR:DataFrame, df_LR:DataFrame, pdf_folder:str,file:str) -> Tuple[List[List[int]],List[float]]:
@@ -137,7 +179,6 @@ def compiled_stats_HR_by_LR(df_HR:DataFrame, df_LR:DataFrame) -> List[List[Compi
     depth_headers_HR = process_header_data(df_HR, HeaderType.DEPTH)
     depth_headers_LR = process_header_data(df_LR, HeaderType.DEPTH)
     sample_headers_HR = process_header_data(df_HR, HeaderType.SAMPLE)
-
     result_list = []
     for dh_HR in depth_headers_HR:
         for dh_LR in depth_headers_LR:
@@ -154,4 +195,6 @@ def compiled_stats_HR_by_LR(df_HR:DataFrame, df_LR:DataFrame) -> List[List[Compi
                     depth_samples.append(comp_stat)
         result_list.append(depth_samples)
     return result_list
+
+
 

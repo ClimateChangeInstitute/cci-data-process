@@ -27,7 +27,8 @@ import logging
 import textwrap
 from climatechange.laser_data_process import combine_laser_data_by_directory
 from climatechange.data_filters import filter_function
-from climatechange.laser__correlation_process import laser_data_process
+from climatechange.laser__correlation_process import laser_data_process,\
+    laser_correlate_process
 from climatechange.process_data_functions import plot_samples_by_depth, plot_samples_by_year
 
 
@@ -94,6 +95,15 @@ def setup_argument_parser(program_version_message, program_license):
                         action="store",
                         default=1,
                         help="the size of the resampling increment [default: %(default)s]")
+    
+    parser.add_argument("-int",
+                        "--interval",
+                        dest="interval",
+                        action="store",
+                        nargs=2,
+                        metavar=('top_interval','bottom_interval'),
+                        help="the interval to be plotted [default: %(default)s]")
+    
     parser.add_argument("-l",
                         "--load",
                         dest="headers_file",
@@ -109,6 +119,14 @@ def setup_argument_parser(program_version_message, program_license):
                         metavar=('DIRECTORY', 'DEPTH_AGE_FILE', 'CORR_FILE', 'CREATE_PDF', 'CREATE_CSV', 'FOLDER_PREFIX'),
                         help="process combine and correlate laser files: %(metavar)s")
     
+    parser.add_argument("-lcp",
+                        "--laser_correlate_process",
+                        dest="laser_correlate_process",
+                        action="store",
+                        nargs=4,
+                        metavar=('DIRECTORY', 'DEPTH_AGE_FILE', 'CORR_FILE', 'FOLDER_PREFIX'),
+                        help="process combine and correlate laser files: %(metavar)s")
+    
     parser.add_argument("-pd",
                         "--plot_depth",
                         dest="plot_depth_files",
@@ -119,9 +137,7 @@ def setup_argument_parser(program_version_message, program_license):
                         "--plot_year",
                         dest="plot_year_files",
                         action="store",
-                        nargs=2,
-                        metavar=('FILE','INTERVAL'),
-                        help="%(dest)s by depth [default: %(default)s]")
+                        help="%(dest)s by year [default: %(default)s]")
     
 
     parser.add_argument("-v", "--verbose", dest="verbose", action="count",
@@ -187,6 +203,10 @@ USAGE
         
         inc_amt = float(args.inc_amt)
         
+        
+        if args.interval:
+            interval = [float(args.interval[0]),float(args.interval[1])]
+        
         # No program arguments provided. Abort!
         if len(argv) <= 1 and argv == sys.argv:
             parser.print_help()
@@ -211,11 +231,18 @@ USAGE
                                       args.depth_files[1],
                                       inc_amt)
         if args.plot_depth_files:
-            plot_samples_by_depth(args.plot_depth_files[0],args.plot_depth_files[1])
+            file = args.plot_depth_files
+            if args.interval:
+                plot_samples_by_depth(file,interval)
+            else:
+                plot_samples_by_depth(file)
         
         if args.plot_year_files:
-            file,interval=args.plot_year_files
-            plot_samples_by_year(file,interval)
+            file = args.plot_year_files
+            if args.interval:
+                plot_samples_by_year(file,interval)
+            else:
+                plot_samples_by_year(file)
             
         if args.interval_files:
             if args.inc_amt:
@@ -229,7 +256,14 @@ USAGE
                 logging.warning("Specified increment amount %d is not used "
                              "when resampling by depth intervals.", inc_amt)
             laser_directory, depth_age_file, LR_file, create_pdf, create_csv, prefix = args.laser_process
-            laser_data_process(laser_directory, depth_age_file, LR_file, bool(create_pdf), bool(create_csv), prefix)    
+            laser_data_process(laser_directory, depth_age_file, LR_file, bool(create_pdf), bool(create_csv), prefix)
+            
+        if args.laser_correlate_process:
+            if args.inc_amt:
+                logging.warning("Specified increment amount %d is not used "
+                             "when resampling by depth intervals.", inc_amt)
+            laser_directory, depth_age_file,LR_file, prefix = args.laser_correlate_process
+            laser_correlate_process(laser_directory, depth_age_file, LR_file, prefix)      
   
         
         if args.year_file:

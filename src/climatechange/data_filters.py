@@ -290,7 +290,7 @@ def savgol_smooth_filter_stat(df:DataFrame):
 def processed_data(df:DataFrame):
     return df    
 
-default_filters = [(processed_data,),(replace_outliers,)]   
+default_filters = [(processed_data,),(savgol_smooth_filter,),(wiener_filter,),(robust_scaler,),(medfilt_filter,),(replace_outliers,)]   
      
 
 if __name__ == '__main__':
