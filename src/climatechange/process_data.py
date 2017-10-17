@@ -27,7 +27,7 @@ import logging
 import textwrap
 
 from climatechange.process_data_functions import plot_samples_by_depth, plot_samples_by_year
-from climatechange.laser import raw_LAICPMS_data
+from climatechange.laser import raw_data
 
 
 
@@ -116,9 +116,9 @@ def setup_argument_parser(program_version_message, program_license):
                         action="store",
                         help="%(dest)s by year [default: %(default)s]")\
                         
-    parser.add_argument("-rl",
-                        "--raw_LAICPMS_directory",
-                        dest="raw_directory",
+    parser.add_argument("-l_raw",
+                        "--raw_laser_data",
+                        dest="raw_laser_data",
                         action="store",
                         nargs=3,
                         metavar=('DIRECTORY', 'DEPTH_AGE_FILE', 'FOLDER_PREFIX'),
@@ -237,7 +237,7 @@ USAGE
                 
         if args.raw_directory:
             directory, depth_age_file, prefix = args.raw_directory
-            raw_LAICPMS_data(directory, depth_age_file, prefix)
+            raw_data(directory, depth_age_file, prefix)
             
 #         if args.filter_directory:
 #             directory, depth_age_file,LR_file, prefix = args.filter_directory
