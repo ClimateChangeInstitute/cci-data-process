@@ -25,11 +25,10 @@ from climatechange.process_data_functions import resample_by_years, \
     resample_HR_by_LR
 import logging
 import textwrap
-from climatechange.laser_data_process import combine_laser_data_by_directory
-from climatechange.data_filters import filter_function
-from climatechange.laser__correlation_process import laser_data_process,\
-    laser_correlate_process
+
 from climatechange.process_data_functions import plot_samples_by_depth, plot_samples_by_year
+from climatechange.laser import raw_LAICPMS_data
+
 
 
 __all__ = []
@@ -51,13 +50,6 @@ def setup_argument_parser(program_version_message, program_license):
                             formatter_class=RawTextHelpFormatter)#RawDescriptionHelpFormatter)
     
     # Order lexicographically using the short option for sanity!
-    parser.add_argument("-c",
-                        "--combine-laser",
-                        dest="combine_laser",
-                        action="store",
-                        nargs=5,
-                        metavar=('DIRECTORY', 'DEPTH_AGE_FILE', 'CREATE_PDF', 'CREATE_CSV', 'FOLDER_PREFIX'),
-                        help="process and combine laser files: %(metavar)s")
 
     parser.add_argument("-d",
                         "--depth",
@@ -80,15 +72,15 @@ def setup_argument_parser(program_version_message, program_license):
                         metavar=('file_1', 'file_2', 'CREATE_PDF', 'CREATE_CSV'),
                         help="resample %(dest)s to the higher resolution of the two files")
 
-    parser.add_argument("-f",
-                        "--filter",
-                        dest="filters",
-                        action="append",
-                        nargs='+',
-                        help="Apply filters to processed data.  "
-                        "Multiple filters with optional parameters may be specified.  "
-                        "The following filter functions are available:\n" + filter_function.help())
-        
+#     parser.add_argument("-f",
+#                         "--filter",
+#                         dest="filters",
+#                         action="append",
+#                         nargs='+',
+#                         help="Apply filters to processed data.  "
+#                         "Multiple filters with optional parameters may be specified.  "
+#                         "The following filter functions are available:\n" + filter_function.help())
+#         
     parser.add_argument("-i",
                         "--inc_amt",
                         dest="inc_amt",
@@ -111,21 +103,6 @@ def setup_argument_parser(program_version_message, program_license):
                         help="load the headers of the CSV and store them in the header dictionary.  "
                              "This file should contain rows of (name, type, class, unit, label)")
     
-    parser.add_argument("-lp",
-                        "--laser_data_process",
-                        dest="laser_process",
-                        action="store",
-                        nargs=6,
-                        metavar=('DIRECTORY', 'DEPTH_AGE_FILE', 'CORR_FILE', 'CREATE_PDF', 'CREATE_CSV', 'FOLDER_PREFIX'),
-                        help="process combine and correlate laser files: %(metavar)s")
-    
-    parser.add_argument("-lcp",
-                        "--laser_correlate_process",
-                        dest="laser_correlate_process",
-                        action="store",
-                        nargs=4,
-                        metavar=('DIRECTORY', 'DEPTH_AGE_FILE', 'CORR_FILE', 'FOLDER_PREFIX'),
-                        help="process combine and correlate laser files: %(metavar)s")
     
     parser.add_argument("-pd",
                         "--plot_depth",
@@ -137,7 +114,24 @@ def setup_argument_parser(program_version_message, program_license):
                         "--plot_year",
                         dest="plot_year_files",
                         action="store",
-                        help="%(dest)s by year [default: %(default)s]")
+                        help="%(dest)s by year [default: %(default)s]")\
+                        
+    parser.add_argument("-rl",
+                        "--raw_LAICPMS_directory",
+                        dest="raw_directory",
+                        action="store",
+                        nargs=3,
+                        metavar=('DIRECTORY', 'DEPTH_AGE_FILE', 'FOLDER_PREFIX'),
+                        help="compiles %(dest) [default: %(default)s]")
+    
+#     parser.add_argument("-f",
+#                         "--filter_LAICPMS_directory",
+#                         dest="filter_directory",
+#                         action="store",
+#                         nargs=4,
+#                         metavar=('DIRECTORY', 'DEPTH_AGE_FILE','CORR_FILE', 'FOLDER_PREFIX'),
+#                         help="compiles %(dest) [default: %(default)s]")
+    
     
 
     parser.add_argument("-v", "--verbose", dest="verbose", action="count",
@@ -222,10 +216,7 @@ USAGE
         ####### Generally the order these are processed shouldn't matter #####
         ######################################################################
         
-        if args.combine_laser:
-            directory, depth_age_file, create_pdf, create_csv, folder_prefix, = args.combine_laser
-            combine_laser_data_by_directory(directory, depth_age_file, bool(create_pdf), bool(create_csv), folder_prefix)
-            
+
         if args.depth_files: 
             double_resample_by_depths(args.depth_files[0],
                                       args.depth_files[1],
@@ -243,28 +234,22 @@ USAGE
                 plot_samples_by_year(file,interval)
             else:
                 plot_samples_by_year(file)
+                
+        if args.raw_directory:
+            directory, depth_age_file, prefix = args.raw_directory
+            raw_LAICPMS_data(directory, depth_age_file, prefix)
             
+#         if args.filter_directory:
+#             directory, depth_age_file,LR_file, prefix = args.filter_directory
+#             append_filter_LAICPMS_directory(directory, depth_age_file,LR_file, prefix)
+#             
+#             
         if args.interval_files:
             if args.inc_amt:
                 logging.warning("Specified increment amount %d is not used "
                              "when resampling by depth intervals.", inc_amt)
             file_1, file_2, create_pdf, create_csv, = args.interval_files
             resample_HR_by_LR(file_1, file_2 ,bool(create_pdf), bool(create_csv))  
-            
-        if args.laser_process:
-            if args.inc_amt:
-                logging.warning("Specified increment amount %d is not used "
-                             "when resampling by depth intervals.", inc_amt)
-            laser_directory, depth_age_file, LR_file, create_pdf, create_csv, prefix = args.laser_process
-            laser_data_process(laser_directory, depth_age_file, LR_file, bool(create_pdf), bool(create_csv), prefix)
-            
-        if args.laser_correlate_process:
-            if args.inc_amt:
-                logging.warning("Specified increment amount %d is not used "
-                             "when resampling by depth intervals.", inc_amt)
-            laser_directory, depth_age_file,LR_file, prefix = args.laser_correlate_process
-            laser_correlate_process(laser_directory, depth_age_file, LR_file, prefix)      
-  
         
         if args.year_file:
             

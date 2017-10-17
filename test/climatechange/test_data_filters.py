@@ -13,21 +13,20 @@ from pandas.util.testing import assert_frame_equal
 
 from climatechange.data_filters import normalize_min_max_scaler, \
     replace_outliers, savgol_smooth_filter, filter_function, filters_to_string,\
-    normalize_data, medfilt_filter, gauss_spline_filter,\
+    normalize_data, medfilt_filter,\
     wiener_filter, robust_scaler, default_filters
-from climatechange.laser_data_process import readFile, clean_LAICPMS_data
 from climatechange.file import load_csv
 from climatechange.process_data_functions import clean_data
+from climatechange.laser import read_input, process_data
 
 
 depth_age_file = os.path.join('csv_files', 'depthAge7617.txt')
-laser_file = readFile(os.path.join('csv_files', '1.txt'),
+laser_file = read_input(os.path.join('csv_files', '1.txt'),
                     955 ,
                     6008.500 ,
                     6012.500 ,
                     12 ,
-                    23,
-                    os.path.join('csv_files', 'depthAge7617.txt'), default_filters)
+                    23)
 test_filter_df = DataFrame([list(range(3)),
                         list(range(6, 9)),
                         list(range(3, 6)),
@@ -82,7 +81,7 @@ class Test(unittest.TestCase):
         assert_frame_equal(output_result, result)
      
     def test_normalize_min_max_scaler(self):
-        df = clean_LAICPMS_data(laser_file)
+        df = process_data(laser_file,depth_age_file)
         min_Al_index = numpy.argmin(df.loc[:, 'Al27'].values.tolist())
         min_S_index = numpy.argmin(df.loc[:, 'S32'].values.tolist())
         df = normalize_min_max_scaler(df)
@@ -92,27 +91,27 @@ class Test(unittest.TestCase):
         self.assertEqual('year', df.iloc[:, :2].columns[1])
 
 
-    def test_savgol_smooth_filter(self):
-        
-        df = DataFrame([list(range(3)),
-                        list(range(6, 9)),
-                        list(range(3, 6)),
-                        list(range(6, 9)),
-                        list(range(3, 6)),
-                        list(range(0, 3))])
-        df.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
-        
-        expected_df = DataFrame([[0, 1.385714, 2.385714],
-                                 [6, 5.457143, 6.457143],
-                                 [3, 6.314286, 7.314286],
-                                 [6, 5.457143, 6.457143],
-                                 [3, 5.028571, 6.028571],
-                                 [0, 0.742857, 1.742857]])
-        expected_df.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
-      
-        result_df = savgol_smooth_filter(df)
-        
-        assert_frame_equal(expected_df, result_df)
+#     def test_savgol_smooth_filter(self):
+#         
+#         df = DataFrame([list(range(3)),
+#                         list(range(6, 9)),
+#                         list(range(3, 6)),
+#                         list(range(6, 9)),
+#                         list(range(3, 6)),
+#                         list(range(0, 3))])
+#         df.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
+#         
+#         expected_df = DataFrame([[0, 1.385714, 2.385714],
+#                                  [6, 5.457143, 6.457143],
+#                                  [3, 6.314286, 7.314286],
+#                                  [6, 5.457143, 6.457143],
+#                                  [3, 5.028571, 6.028571],
+#                                  [0, 0.742857, 1.742857]])
+#         expected_df.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
+#       
+#         result_df = savgol_smooth_filter(df)
+#         
+#         assert_frame_equal(expected_df, result_df)
 
     def test_normalize_data(self):
         input_df = load_csv(os.path.join('csv_files', 'normalize_input.csv'))

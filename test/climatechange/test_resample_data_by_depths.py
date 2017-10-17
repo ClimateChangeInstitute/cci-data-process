@@ -15,7 +15,7 @@ from climatechange.compiled_stat import CompiledStat
 from climatechange.file import load_csv
 from climatechange.headers import HeaderType, Header, process_header_data
 from climatechange.process_data_functions import clean_data, \
-    correlate_samples, remove_nan_from_datasets, correlate_stats, \
+    correlate_samples, remove_nan_from_datasets, \
     get_compiled_stats_by_depth, round_depth_values_to_sigfig, \
     add_units_to_stats, find_HR_and_LR_df, load_and_clean_dd_data,\
     resample_HR_by_LR, DataFile, correlate_laser_stats
@@ -23,7 +23,7 @@ from climatechange.resample_data_by_depths import resampled_depths, create_range
     find_index_by_increment, compiled_stats_HR_by_LR
 from climatechange.resample_stats import create_depth_headers
 import numpy as np
-from climatechange.plot import write_data_to_csv_files
+
 
 
 test_sample_header = Header("Cond (+ALU-S/cm)", HeaderType.SAMPLE, "Conductivity", "alu-s/cm", "Cond_(+ALU-S/cm)")

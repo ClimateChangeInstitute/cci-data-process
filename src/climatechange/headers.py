@@ -331,3 +331,44 @@ def process_header_data(df:DataFrame,
         return [h for h in parsedHeaders if h.htype is header_type]
     else:
         return parsedHeaders
+
+def process_header_str(header:str,
+                        header_type:HeaderType=None,
+                        header_dict:HeaderDictionary=default_dictionary) -> List[Header]:
+    '''
+    Use the default dictionary to process the data column headers.  If a 
+    :class:`HeaderType` is specified, only the matching types are returned 
+    in the result.  See :class:`Header` for additional information.
+    
+    :param df: Data containing column headers to process
+    :param header_type: The type of headers to return 
+    :param header_dict: Optional header dictionary to use instead of the default
+    :return: The processed column headers
+    '''
+    
+    parsedHeaders = header_dict.parse_headers([header])
+    
+    unknown_headers = [h for h in parsedHeaders if h.htype == HeaderType.UNKNOWN ]
+    if unknown_headers:
+        logging.error("The following unknown headers were found.")
+        for h in unknown_headers:
+            logging.error(h.name)
+        logging.error(textwrap.dedent("""
+        Please import the headers by using a CSV file containing rows of the 
+        following format:
+        
+        name1, type1, class1, unit1, label1
+        name2, type2, class2, unit2, label2
+        name3, type3, class3, unit3, label3
+        ...
+        
+        Run the program again using the -l flag to import the header information.
+        For example,
+        
+        PYTHONPATH=src python climatechange/process_data.py -l your_csv_file.csv
+        """))
+            
+    if header_type:
+        return [h for h in parsedHeaders if h.htype is header_type]
+    else:
+        return parsedHeaders

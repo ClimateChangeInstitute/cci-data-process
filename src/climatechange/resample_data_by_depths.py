@@ -14,9 +14,24 @@ from climatechange.headers import Header, HeaderType, process_header_data
 from climatechange.resample_stats import compileStats, create_depth_headers
 import numpy as np
 import logging
-from climatechange.plot import write_data_to_csv_files
-import os
+
+
 # from climatechange.process_data_functions import DataFile, DFClass
+
+class DFClass():
+    
+    def __init__(self, df:DataFrame,key):
+        
+
+        self.df = df
+        self.name = key.__name__
+        self.sample_headers = process_header_data(self.df, HeaderType.SAMPLE)
+            
+        self.sample_headers_name = [sample.name for sample in self.sample_headers] 
+        self.depth_headers = process_header_data(self.df, HeaderType.DEPTH) 
+        self.year_headers = process_header_data(self.df, HeaderType.YEARS) 
+    
+
 
 
 def create_range_for_depths(list_to_inc:List[float], inc_amt: float=0.01) -> List[float]:
@@ -40,7 +55,6 @@ def find_index_by_increment(list_to_inc:List[float], range_list:List[float]) -> 
     :param list_to_inc:
     :param inc_amt:
     '''
-   
 #     print('range_list%s'%len(range_list))
     
     logging.debug("find_index_by_increment: range_list=%s", range_list)
@@ -115,36 +129,33 @@ def index_by_increment(list_to_inc:List[float], range_list:List[float]) -> Tuple
     return result
 
 
-def find_gaps(df_HR:DataFrame, df_LR:DataFrame, pdf_folder:str,file:str) -> Tuple[List[List[int]],List[float]]:
-    '''
 
-    :param list_to_inc:
-    :param inc_amt:
-    '''
-    depth_headers_HR = process_header_data(df_HR, HeaderType.DEPTH)
-    depth_headers_LR = process_header_data(df_LR, HeaderType.DEPTH)
+                
 
-    
-    for dh_HR in depth_headers_HR:
-        for dh_LR in depth_headers_LR:
-            if dh_HR == dh_LR:
-                csv_gaps=os.path.join(pdf_folder,'%s_%s_gaps.csv'%(file,dh_LR.label))
-                list_to_inc=df_HR.loc[:, dh_HR.name].tolist()
-                range_list=df_LR.loc[:, dh_LR.name].tolist()
-                gaps=[]
-                range_list_size = len(range_list)
-                prev = 0
-                for i in range(range_list_size - 1):
-                    tmp = []
-                    for j in range(prev, len(list_to_inc)):
-                        e = list_to_inc[j]
-                        if e >= range_list[i] and e < range_list[i + 1]:
-                            tmp.append(j)
-                            prev = j + 1
-                    if not tmp:
-                        gaps.append([range_list[i], range_list[i + 1]])
-                        
-                write_data_to_csv_files(DataFrame(gaps,columns=[('gap_start'),('gap_end')]),csv_gaps)
+# def find_gaps(list_to_inc:List[float], range_list:List[float]) -> List[float]:
+#     '''
+# 
+#     :param list_to_inc:
+#     :param inc_amt:
+#     '''
+#    
+# 
+#     gaps=[]
+#     range_list_size = len(range_list)
+#     prev = 0
+#     for i in range(range_list_size - 1):
+#         tmp = []
+#         for j in range(prev, len(list_to_inc)):
+#             e = list_to_inc[j]
+#             if e >= range_list[i] and e < range_list[i + 1]:
+#                 tmp.append(j)
+#                 prev = j + 1
+#         if not tmp:
+#             logging.warning('no values between [%f,%f)', range_list[i], range_list[i + 1])
+#             gaps.append([range_list[i], range_list[i + 1]])
+# 
+#     return gaps
+
 
 def resampled_depths(top_range:List[float], depth_header:Header, inc_amt):
 
@@ -176,6 +187,7 @@ def compiled_stats_HR_by_LR(df_HR:DataFrame, df_LR:DataFrame) -> List[List[Compi
     :return: A list of list of CompiledStat containing the resampled statistics for the
     specified sample and depth by the depth interval from df2.
     '''
+       
     depth_headers_HR = process_header_data(df_HR, HeaderType.DEPTH)
     depth_headers_LR = process_header_data(df_LR, HeaderType.DEPTH)
     sample_headers_HR = process_header_data(df_HR, HeaderType.SAMPLE)
@@ -183,6 +195,8 @@ def compiled_stats_HR_by_LR(df_HR:DataFrame, df_LR:DataFrame) -> List[List[Compi
     for dh_HR in depth_headers_HR:
         for dh_LR in depth_headers_LR:
             if dh_HR == dh_LR:
+                if df_LR.loc[:, dh_LR.name].tolist() == []:
+                    print(df_LR)
                 index,top_range = find_index_by_increment(df_HR.loc[:, dh_HR.name].tolist(), df_LR.loc[:, dh_LR.name].tolist())
                 depth_df = create_top_bottom_depth_dataframe(df_LR, dh_LR)
                 depth_samples = []
@@ -195,6 +209,4 @@ def compiled_stats_HR_by_LR(df_HR:DataFrame, df_LR:DataFrame) -> List[List[Compi
                     depth_samples.append(comp_stat)
         result_list.append(depth_samples)
     return result_list
-
-
 

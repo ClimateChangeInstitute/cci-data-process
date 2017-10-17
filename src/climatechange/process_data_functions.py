@@ -21,7 +21,7 @@ from scipy.stats._stats_mstats_common import linregress
 
 from climatechange.compiled_stat import CompiledStat
 from climatechange.data_filters import replace_outliers,\
-    adjust_data_by_background, savgol_smooth_filter, savgol_smooth_filter_stat
+    adjust_data_by_background, savgol_smooth_filter
 from climatechange.file import load_csv
 from climatechange.headers import HeaderDictionary, HeaderType, Header, \
     load_headers, process_header_data
@@ -30,7 +30,7 @@ from climatechange.plot import write_data_to_csv_files, \
 from climatechange.readme_output import create_readme_output_file, \
     write_readmefile_to_txtfile, template
 from climatechange.resample_data_by_depths import compiled_stats_HR_by_LR, \
-    find_index_by_increment,create_range_for_depths, resampled_depths, find_gaps
+    find_index_by_increment,create_range_for_depths, resampled_depths
 from climatechange.resample_stats import create_range_by_year,\
     resampled_depths_by_years, resampled_statistics
 
@@ -59,10 +59,17 @@ class DataClass():
         self.df = clean_data(load_csv(self.file_path))
         self.base=os.path.basename(self.file_path).split('.')[0]
         self.dirname=os.path.dirname(self.file_path)
-        self.sample_headers = process_header_data(self.df, HeaderType.SAMPLE) 
+        self.sample_headers = process_header_data(self.df, HeaderType.SAMPLE)
+        self.sample_headers_name = [sample.name for sample in self.sample_headers] 
         self.depth_headers = process_header_data(self.df, HeaderType.DEPTH) 
-        self.year_headers = process_header_data(self.df, HeaderType.YEARS) 
-        
+        self.depth_headers_name = [sample.name for sample in self.depth_headers] 
+        self.year_headers = process_header_data(self.df, HeaderType.YEARS)
+        self.sample_df =self.df[self.sample_headers_name]
+        for name in self.depth_headers_name:
+            self.sample_df[name] = pandas.Series(self.df[name])
+            self.sample_df = self.sample_df.set_index([name])
+            break
+            
 
 def is_number(s):
     try:
@@ -358,6 +365,18 @@ def remove_nan_from_datasets(d1_stat:Series, d2_stat:Series) -> Tuple[Series, Se
         if not isnan(d1_stat[i]) and not isnan(d2_stat[i]):
             d1_result.append(d1_stat[i])
             d2_result.append(d2_stat[i])
+            
+    return Series(d1_result), Series(d2_result)
+            
+            
+def remove_nan_from_data_and_namecolumn(d1_stat:Series, d2_stat:Series) -> Tuple[Series, Series]:
+    d2_result = []
+    d1_result = []
+    for i in range(len(d1_stat)):
+        if not isnan(d1_stat[i]):
+            d1_result.append(d1_stat[i])
+            d2_result.append(d2_stat[i])
+                     
                      
     return Series(d1_result), Series(d2_result)
 
@@ -557,14 +576,14 @@ def resample_HR_by_LR(f1:str, f2:str, createPDF=False, createCSV=False):
     :param f2:
     '''
     f_HR,f_LR=find_HR_and_LR_df(f1,f2)
-    pdf_folder = os.path.join(os.path.dirname(f_HR.file_path), 'Resample_HR_by_LR')
+    csv_folder = os.path.join(os.path.dirname(f_HR.file_path), 'Resample_HR_by_LR')
     
     compiled_stats_of_df_HR = compiled_stats_HR_by_LR(f_HR.df, f_LR.df)
     
     if createPDF:
-        if not os.path.exists(pdf_folder):
-            os.makedirs(pdf_folder)
-        pdf_corr_stats = os.path.join(pdf_folder,'%s_vs_ %s__plots.pdf' % (f_HR.base,f_LR.base))
+        if not os.path.exists(csv_folder):
+            os.makedirs(csv_folder)
+        pdf_corr_stats = os.path.join(csv_folder,'%s_vs_ %s__plots.pdf' % (f_HR.base,f_LR.base))
         with PdfPages(pdf_corr_stats) as pdf_cs:
             for cs_list in compiled_stats_of_df_HR:
                 for cs in cs_list:
@@ -590,8 +609,8 @@ def resample_HR_by_LR(f1:str, f2:str, createPDF=False, createCSV=False):
     df_corr_allstats = DataFrame(corr_allstats, columns=['depth', 'sample_1', 'sample_2', 'r_value:Mean', 'r_value:Median','r_value:Max','r_value:Min'])    
     
     if createCSV:
-        find_gaps(f_HR.df, f_LR.df, pdf_folder, f_HR.base)
-        csv_filename = os.path.join(pdf_folder,'%s_vs_ %s__stat_correlation.csv' % (f_HR.base,f_LR.base))
+#         find_gaps(f_HR.df, f_LR.df, csv_folder, f_HR.base)
+        csv_filename = os.path.join(csv_folder,'%s_vs_ %s__stat_correlation.csv' % (f_HR.base,f_LR.base))
         write_data_to_csv_files(df_corr_allstats, csv_filename)
     
     return df_corr_allstats
@@ -623,21 +642,7 @@ def find_HR_and_LR_df(f1:str,f2:str)->Tuple[DataFile,DataFile]:
 
 
     
-def to_same_length(df1:DataFrame,df2:DataFrame)->Tuple[DataFile,DataFile]:
-    
 
-    dh_1 = process_header_data(df1, HeaderType.DEPTH)
-    dh_2 = process_header_data(df2, HeaderType.DEPTH)
-    
-    for depth1 in dh_1:
-        for depth2 in dh_2:
-            if depth1.name==depth2.name:
-
-                df2=df2[(df2[depth1.name]>=min(df1[depth1.name])) & (df2[depth1.name] <=max(df1[depth1.name]))]
-#                 df1=df1[(df1[depth1.name]>=min(df2[depth1.name])) & (df1[depth1.name] <=max(df2[depth1.name]))]
-
-    return df1,df2.reset_index(drop=True)
-    
     
 def load_and_store_header_file(path:str):
     print("Adding headers from %s to header dictionary." % path) 

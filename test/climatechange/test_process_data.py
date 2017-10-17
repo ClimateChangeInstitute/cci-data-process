@@ -24,15 +24,15 @@ class Test(unittest.TestCase):
         parser = setup_argument_parser(pvm, "program_license")
         
         # -c or --combine-laser
-        args = parser.parse_args(['-c','/tmp','/tmp/depth_age_file.csv','True','True','KCC'])
-        
-        directory, depth_age_file, create_pdf, create_csv, folder_prefix, = args.combine_laser
-        
-        self.assertEqual('/tmp', directory)
-        self.assertEqual('/tmp/depth_age_file.csv', depth_age_file)
-        self.assertEqual('True', create_pdf)
-        self.assertEqual('True', create_csv)
-        self.assertEqual('KCC', folder_prefix)
+#         args = parser.parse_args(['-c','/tmp','/tmp/depth_age_file.csv','True','True','KCC'])
+#         
+#         directory, depth_age_file, create_pdf, create_csv, folder_prefix, = args.combine_laser
+#         
+#         self.assertEqual('/tmp', directory)
+#         self.assertEqual('/tmp/depth_age_file.csv', depth_age_file)
+#         self.assertEqual('True', create_pdf)
+#         self.assertEqual('True', create_csv)
+#         self.assertEqual('KCC', folder_prefix)
 
         # -d or --depth
         args = parser.parse_args(['-d','/tmp/depth_file.csv'])
@@ -60,30 +60,30 @@ class Test(unittest.TestCase):
         self.assertEqual('True', create_csv)
 
         # -f or --filter 
-        args = parser.parse_args(['-f', 'replace_outliers'])
+#         args = parser.parse_args(['-f', 'replace_outliers'])
          
-        #:var filters: List[List[str]]
-        filters = args.filters 
-        self.assertEqual('replace_outliers', filters[0][0])
+#         #:var filters: List[List[str]]
+#         filters = args.filters 
+#         self.assertEqual('replace_outliers', filters[0][0])
 
         # One filter with arguments
-        args = parser.parse_args(['-f', 'replace_outliers', '0', '2'])
-        
-        filters = args.filters
-        self.assertEqual('replace_outliers', filters[0][0])
-        self.assertEqual('0', filters[0][1])
-        self.assertEqual('2', filters[0][2])
-
-        # Two filters with arguments
-        args = parser.parse_args(['-f', 'replace_outliers', '0', '2',
-                                  '--filter', 'medfilt', 'val=3'])
-        
-        filters = args.filters
-        self.assertEqual('replace_outliers', filters[0][0])
-        self.assertEqual('0', filters[0][1])
-        self.assertEqual('2', filters[0][2])
-        self.assertEqual('medfilt', filters[1][0])
-        self.assertEqual('val=3', filters[1][1])
+#         args = parser.parse_args(['-f', 'replace_outliers', '0', '2'])
+#         
+#         filters = args.filters
+#         self.assertEqual('replace_outliers', filters[0][0])
+#         self.assertEqual('0', filters[0][1])
+#         self.assertEqual('2', filters[0][2])
+# 
+#         # Two filters with arguments
+#         args = parser.parse_args(['-f', 'replace_outliers', '0', '2',
+#                                   '--filter', 'medfilt', 'val=3'])
+#         
+#         filters = args.filters
+#         self.assertEqual('replace_outliers', filters[0][0])
+#         self.assertEqual('0', filters[0][1])
+#         self.assertEqual('2', filters[0][2])
+#         self.assertEqual('medfilt', filters[1][0])
+#         self.assertEqual('val=3', filters[1][1])
 
 
         # -i or --inc_amt

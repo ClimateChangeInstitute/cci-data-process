@@ -15,14 +15,14 @@ from pandas.util.testing import assert_frame_equal
 
 from climatechange.file import load_csv
 from climatechange.headers import HeaderType, Header, process_header_data
-from climatechange.laser_data_process import clean_LAICPMS_data, readFile
 from climatechange.process_data_functions import clean_data, \
     load_and_clean_dd_data, get_compiled_stats_by_year, round_values_to_sigfig
 from climatechange.resample_stats import compileStats,resampled_depths_by_years, \
     create_range_by_year, create_depth_headers, resampled_statistics
 import numpy as np
 from climatechange.resample_data_by_depths import find_index_by_increment
-from climatechange.data_filters import default_filters
+
+from climatechange.laser import read_input
 
 
 # list of values by column, first index is column index, for each you get element of row 
@@ -37,7 +37,6 @@ test_input = [[7, 5, 7], [3, 5, 4], [6, 4, 9]]
 test_output = [[6.333333333333333, 0.94280904158206336, 7.0, 7, 5, 3],
                [4.0, 0.81649658092772603, 4.0, 5, 3, 3],
                [6.333333333333333, 2.0548046676563256, 6.0, 9, 4, 3]]
-
 
 test_depth_we_header = Header("depth (m we)", HeaderType.DEPTH, "Depth", "meters", "depth_we_(m)")
 test_sample_header = Header("Cond (+ALU-S/cm)", HeaderType.SAMPLE, "Conductivity", "alu-s/cm", "Cond_(+ALU-S/cm)")
@@ -54,9 +53,9 @@ depth_columns = DataFrame([input_test_zeros_and_numbers.loc[:, c].values.tolist(
 input_test_zeros = load_csv(os.path.join('csv_files', 'input_test_zeros.csv'))
 input_test_zeros = clean_data(input_test_zeros)
 headers_zeros = process_header_data(input_test_zeros)
+depth_age_file = os.path.join('data', 'depthAge7617.txt')
+laser_file = read_input(os.path.join('csv_files', '1_test.txt'), 955 , 6008.500 , 6012.500 , 12 , 23)
 
-laser_file = readFile(os.path.join('csv_files', '1_test.txt'), 955 , 6008.500 , 6012.500 , 12 , 23, os.path.join('csv_files', 'depthAge7617.txt'),default_filters)
-laser_file_df = clean_LAICPMS_data(laser_file)
 
 
 class Test(unittest.TestCase):

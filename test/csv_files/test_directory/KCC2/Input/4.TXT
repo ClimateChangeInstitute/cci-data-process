@@ -1,5 +1,5 @@
-Trace for Mass:	Al27(MR)	Si28(MR)	Ca44(MR)	Fe56(MR)	S32(MR)
-Resolution:	Medium	Medium	Medium	Medium	Medium
+Trace for Mass:	Na23(LR)	Mg25(LR)	Cu63(LR)	Pb208(LR)	Sn118(LR)
+Resolution:	Low	Low	Low	Low	Low
 					
 Time	Intensity	Intensity	Intensity	Intensity	Intensity
 [sec]	[cps]	[cps]	[cps]	[cps]	[cps]
