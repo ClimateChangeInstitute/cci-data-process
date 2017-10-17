@@ -20,8 +20,6 @@ from pandas import DataFrame, Series
 from scipy.stats._stats_mstats_common import linregress
 
 from climatechange.compiled_stat import CompiledStat
-from climatechange.data_filters import replace_outliers,\
-    adjust_data_by_background, savgol_smooth_filter
 from climatechange.file import load_csv
 from climatechange.headers import HeaderDictionary, HeaderType, Header, \
     load_headers, process_header_data

@@ -17,7 +17,7 @@ from climatechange.data_filters import normalize_min_max_scaler, \
     wiener_filter, robust_scaler, default_filters
 from climatechange.file import load_csv
 from climatechange.process_data_functions import clean_data
-from climatechange.laser import read_input, process_data
+from climatechange.laser import read_input, process_laser_data
 
 
 depth_age_file = os.path.join('csv_files', 'depthAge7617.txt')
@@ -81,7 +81,7 @@ class Test(unittest.TestCase):
         assert_frame_equal(output_result, result)
      
     def test_normalize_min_max_scaler(self):
-        df = process_data(laser_file,depth_age_file)
+        df = process_laser_data(laser_file,depth_age_file)
         min_Al_index = numpy.argmin(df.loc[:, 'Al27'].values.tolist())
         min_S_index = numpy.argmin(df.loc[:, 'S32'].values.tolist())
         df = normalize_min_max_scaler(df)

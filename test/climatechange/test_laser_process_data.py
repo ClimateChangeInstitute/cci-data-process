@@ -15,8 +15,8 @@ from climatechange.headers import Header, HeaderType
 
 from climatechange.file import load_csv
 from climatechange.process_data_functions import clean_data
-from climatechange.laser import load_txt_file, read_input, load_input,\
-    raw_LAICPMS_data, process_data
+from climatechange.laser import load_txt_file, read_input, load_input, process_laser_data,\
+    raw_data
 
 
 
@@ -72,7 +72,7 @@ class Test(unittest.TestCase):
             
     def test_combine_laser_data_by_directory(self):
         directory = os.path.join('csv_files', 'test_directory')
-        df_1,df_2 = raw_LAICPMS_data(directory, depth_age_file,False)
+        df_1,df_2 = raw_data(directory, depth_age_file,'KCC',False)
         self.assertEqual(2972, df_1.shape[0])
         self.assertEqual(6, df_1.shape[1])
         self.assertEqual(2972, df_2.shape[0])

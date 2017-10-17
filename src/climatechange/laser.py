@@ -106,7 +106,7 @@ def add_year_column(df:DataFrame, depth_age_file:str) -> DataFrame:
     df.insert(1, 'year', year_series)
     return df
 
-def process_data(f:LaserInput,depth_age_file) -> DataFrame:  
+def process_laser_data(f:LaserInput,depth_age_file) -> DataFrame:  
     df = clean_data(f.raw_data)
     df = df[(df['Time'] > f.washin_time) & (df['Time'] < f.laser_time - f.washout_time)]
     df = df.reset_index(drop=True)
@@ -137,14 +137,14 @@ def raw_data(directory,depth_age_file,prefix = 'KCC', csv = True):
                             laser_files = load_input(os.path.join(directory,folder,input_folder,file))
                             for f in laser_files:
                                 df = df.append(f.info,ignore_index=True)
-                                dfMR = dfMR.append(process_data(f,depth_age_file),ignore_index=True)
+                                dfMR = dfMR.append(process_laser_data(f,depth_age_file),ignore_index=True)
 
                         elif (file.startswith('InputFile_2')) |(file.startswith('Input') & file.endswith('2')) | (file.startswith('Input') & file.endswith('LR')) | \
                             (file.startswith('Input') & file.endswith('2.txt')) | (file.startswith('Input') & file.endswith('LR.txt')) :
                             
                             laser_files = load_input(os.path.join(directory,folder,input_folder,file))
                             for f in laser_files:
-                                dfLR = dfLR.append(process_data(f,depth_age_file),ignore_index=True)
+                                dfLR = dfLR.append(process_laser_data(f,depth_age_file),ignore_index=True)
                                 
     dfMR = dfMR.set_index(['depth (m abs)'])
     dfLR = dfLR.set_index(['depth (m abs)'])
