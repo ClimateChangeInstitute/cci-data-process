@@ -6,9 +6,10 @@ Created on Jul 12, 2017
 import os
 import unittest
 
-from climatechange.file import load_dictionary, load_csv, data_dir, save_dictionary
+from climatechange.file import load_dictionary, data_dir, save_dictionary
 from climatechange.headers import HeaderEncoder, to_headers, HeaderType, Header,process_header_data
 from climatechange.readme_output import create_readme_output_file
+from climatechange.common_functions import load_csv
 
 
 class Test(unittest.TestCase):
@@ -71,7 +72,7 @@ class Test(unittest.TestCase):
         os.remove(file_path)
 
     def testReadCSVFile(self):
-        frame = load_csv(os.path.join('csv_files', 'small.csv'))
+        frame = load_csv(os.path.join('csv_files','input', 'small.csv'))
         
         self.assertEqual('Dat210617', frame.columns[0], 'First column should be Dat210617')
         
@@ -106,7 +107,7 @@ Years: {years}
 Depths: {depths}
 Samples: {samples}
 """
-        file=os.path.join('csv_files', 'small.csv')
+        file=os.path.join('csv_files','input', 'small.csv')
         df = load_csv(file)
         f='small.csv'
         headers = process_header_data(df)

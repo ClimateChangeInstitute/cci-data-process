@@ -3,123 +3,92 @@ Created on Jul 17, 2017
 
 @author: Mark Royer
 '''
-import datetime
+
 
 from matplotlib.backends.backend_pdf import PdfPages
-from pandas import DataFrame
 
-from climatechange.file import load_csv
+
+
 from climatechange.headers import Header
 import matplotlib.pyplot as plt
 import os
-
- 
-def examplePDFPlot(file_name:str):
-    '''
-    Just a simple example of how to generated multiple page PDF from DataFrames
-    '''
-      
-    df = load_csv('../../test/csv_files/small.csv')
-      
-    with PdfPages(file_name) as pdf:
-      
-        ys = ['Cond (+ALU-S/cm)', 'Na (ppb)', 'Ca (ppb)', 'Dust (part/ml)', 'NH4 (ppb)', 'NO3 (ppb)']
-          
-        xaxisLabel = 'depth (m we) '
-          
-#         df_indexed:DataFrame = df.set_index(xaxisLabel)
-                  
-        for i in range(len(ys)):
-            fig = plt.figure(figsize=(11, 8.5))
-              
-            fig, tg = plt.subplots(1)
-#             ax = df_indexed.plot(x=df_indexed.index.name, y=ys[i], kind='bar', ax=tg)
-#             
-#             vals = ax.get_xticks()
-#             ax.set_xticklabels(['{:.2f}'.format(x) for x in vals])
-              
-            ax = df[['depth (m we) ', ys[i]]].plot(x='depth (m we) ', kind='bar', ax=tg, color='C%d' % (i))
-                          
-            ax = df[[ys[i]]].plot(kind='line', linestyle='-', marker='o', ax=ax, color='C%d' % (i + 1))
-              
-            vals = ax.get_xticks()
-            ax.set_xticklabels(['{:.1f}'.format(x) for x in vals])
-              
-#             df_indexed.plot(x=df_indexed.index.name, y=ys[i], color='red', ax=tg)
-#             plt.plot(df_indexed[ys[i]], '-o', color='C%d' % (i))
-            plt.title('The title of plot %d' % (i + 1))
-            plt.xlabel('x axis %s' % xaxisLabel)
-            plt.ylabel(ys[i])
-            plt.legend()
-          
-            pdf.savefig(fig)
-            plt.close()
-              
-                  
-        # Meta data for the PdfPages
-        d = pdf.infodict()
-        d['Title'] = 'CCI Plot'
-        d['Author'] = u'Some author'
-        d['Subject'] = 'CCI Data Parser output'
-        d['Keywords'] = 'CCI UMaine'
-        d['CreationDate'] = datetime.datetime.today()
-        d['ModDate'] = datetime.datetime.utcnow()
-          
-  
-
-def write_data_to_csv_files(df:DataFrame, file_path:str):
-    df.to_csv(file_path,index=False)
+from climatechange.common_functions import DataClass
+from typing import List
 
 
-def add_compile_stats_to_pdf(f:str,
-                             df:DataFrame,
-                             df_resampled_stats:DataFrame,
-                             pdf,
-                             x_header:Header,
-                             sample_header:Header,
-                             inc_amt:float,
-                             label_name:str,
-                             stat_header:str='Mean') -> str:
+def plot_samples_by_year(f:str, interval:List=[]):
+    
+    dc = DataClass(f)
+    if not interval == []:
+        pdf_file = os.path.join(dc.dirname,('plot_%s_year_%.0f-%.0f.pdf'%(dc.base,interval[0],interval[1])))
+    else:
+        pdf_file = os.path.join(dc.dirname,('plot_%s_year.pdf'%(dc.base)))
+    with PdfPages(pdf_file) as pdf:
+        for year in dc.year_headers:
+            for sample in dc.sample_headers:
+                plot_samples(dc,sample,year,pdf, interval)
+    os.startfile(pdf_file)
+        
+        
+def plot_samples_by_depth(f:str, interval:List=[]):
+    
+    dc = DataClass(f)
+    if not interval == []:
+        pdf_file = os.path.join(dc.dirname,('plot_%s_depth_%.3f-%.3f.pdf'%(dc.base,interval[0],interval[1])))
+    else:
+        pdf_file = os.path.join(dc.dirname,('plot_%s_depth.pdf'%(dc.base)))
+        
+    with PdfPages(pdf_file) as pdf:
+        for depth in dc.depth_headers:
+            for sample in dc.sample_headers:
+                plot_samples(dc, sample, depth, pdf, interval)
+    os.startfile(pdf_file)
+        
+    
+     
+def plot_samples(dc:DataClass, sample_header:Header, x_header:Header, pdf, interval:List=[]):
     '''
     
-    :param f: input file path
-    :param df: dataframe of input file
+    :param dc: DataClass Object
     :param pdf: pdf file
     :param x_header: name of x (depth or year) column
-    :param headers: headers of input dataframe
-    :param stat_header: header of statistic to plot
-    
-    :return: csv files with statistics resampled of stat_header, 
-        pdf files of statistics with raw data
+    :param sample header: headers of input sample
+
+    :return: pdf file of data by sample
     '''
-#     df_name=df_resampled_stats.columns[0]
+   
+    if not interval == []:
+        df = dc.df[(dc.df[x_header.name] >= interval[0]) & (dc.df[x_header.name] <= interval[1])]
+    else:
+        df = dc.df
+        
+        
     plt.figure(figsize=(11, 8.5))
     fig, tg = plt.subplots(1)
-#     ax = df_resampled_stats[[df_name, stat_header]].plot(x=df_name, kind='line',color='r', ax=tg)
     ax = df[[x_header.name, sample_header.name]].plot(x=x_header.name, kind='line',
                                            linestyle='-',
-                                           color='0.75',
+                                           color='b',
                                            ax=tg,zorder=-1)
     vals = ax.get_xticks()
-    if label_name=='Depth':
-        x_str='{:.%sf}' %str(inc_amt)[::-1].find('.')
-        ax.set_xticklabels([x_str.format(x) for x in vals])
-        plt.xlabel(x_header.label)
-        plt.title('Raw %s Data vs. Resampled %s inc. %s Resolution %s' % (sample_header.hclass,inc_amt,label_name,stat_header))
-        #add class name instead of sample_header name
-    else:
-        ax.set_xticklabels(['{:.0f}'.format(x) for x in vals])
-        plt.xlabel(x_header.label)
-        plt.title('Raw %s Data vs. Resampled %s %s Resolution %s' % (sample_header.hclass,inc_amt,label_name,stat_header))
-    
+    ax.set_xticklabels(['{:.0f}'.format(x) for x in vals])
+    plt.xlabel(x_header.label)
+    plt.title('%s Data' % (sample_header.hclass))
     plt.ylabel(sample_header.label)
-    plt.legend(['Resampled %s'%stat_header,'Raw %s Data'%sample_header.hclass])    
-    #fix legend
+    plt.legend()    
     pdf.savefig(fig)
     plt.close()
-    
-    
-    
+
+                  
+#         # Meta data for the PdfPages
+#         d = pdf.infodict()
+#         d['Title'] = 'CCI Plot'
+#         d['Author'] = u'Some author'
+#         d['Subject'] = 'CCI Data Parser output'
+#         d['Keywords'] = 'CCI UMaine'
+#         d['CreationDate'] = datetime.datetime.today()
+#         d['ModDate'] = datetime.datetime.utcnow()
+#           
+#   
 
 
  

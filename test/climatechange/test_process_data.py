@@ -35,29 +35,28 @@ class Test(unittest.TestCase):
 #         self.assertEqual('KCC', folder_prefix)
 
         # -d or --depth
-        args = parser.parse_args(['-d','/tmp/depth_file.csv'])
+        args = parser.parse_args(['-d','/tmp/depth_file.csv',['mean']])
         
-        depth_file = args.depth_file
+        depth_file,stat = args.depth_file
         
         self.assertEqual('/tmp/depth_file.csv', depth_file)
+        self.assertEqual(['mean'], stat)
 
         # -dd or --depth-depth
-        args = parser.parse_args(['-dd','/tmp/depth_file1.csv','/tmp/depth_file2.csv'])
-        
-        depth_file1, depth_file2 = args.depth_files
-        
-        self.assertEqual('/tmp/depth_file1.csv', depth_file1)
-        self.assertEqual('/tmp/depth_file2.csv', depth_file2)
+#         args = parser.parse_args(['-dd','/tmp/depth_file1.csv','/tmp/depth_file2.csv'])
+#         
+#         depth_file1, depth_file2 = args.depth_files
+#         
+#         self.assertEqual('/tmp/depth_file1.csv', depth_file1)
+#         self.assertEqual('/tmp/depth_file2.csv', depth_file2)
 
         # -di or --double-interval
-        args = parser.parse_args(['-di','/tmp/interval_file1.csv','/tmp/interval_file2.csv','True','True'])
+        args = parser.parse_args(['-by','/tmp/interval_file1.csv','/tmp/interval_file2.csv'])
         
-        interval_file1, interval_file2, create_pdf, create_csv = args.interval_files
+        interval_file1, interval_file2 = args.interval_files
         
         self.assertEqual('/tmp/interval_file1.csv', interval_file1)
         self.assertEqual('/tmp/interval_file2.csv', interval_file2)
-        self.assertEqual('True', create_pdf)
-        self.assertEqual('True', create_csv)
 
         # -f or --filter 
 #         args = parser.parse_args(['-f', 'replace_outliers'])
@@ -107,9 +106,9 @@ class Test(unittest.TestCase):
         self.assertEqual(2, args.verbose)
 
         # -y or --year
-        args = parser.parse_args(['-y','/tmp/year_file.csv'])
+        args = parser.parse_args(['-y','/tmp/year_file.csv','Mean'])
         
-        year_file = args.year_file
+        year_file,stat_header = args.year_file
         year_inc_amt = int(args.inc_amt) # should have a default value of 1
         self.assertEqual('/tmp/year_file.csv', year_file)
         self.assertEqual(1, year_inc_amt)

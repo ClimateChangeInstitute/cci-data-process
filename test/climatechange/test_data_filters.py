@@ -15,9 +15,8 @@ from climatechange.data_filters import normalize_min_max_scaler, \
     replace_outliers, savgol_smooth_filter, filter_function, filters_to_string,\
     normalize_data, medfilt_filter,\
     wiener_filter, robust_scaler, default_filters
-from climatechange.file import load_csv
-from climatechange.process_data_functions import clean_data
 from climatechange.laser import read_input, process_laser_data
+from climatechange.common_functions import load_csv, clean_data
 
 
 depth_age_file = os.path.join('csv_files', 'depthAge7617.txt')

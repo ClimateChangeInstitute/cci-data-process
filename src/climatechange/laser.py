@@ -5,16 +5,17 @@ Created on Oct 5, 2017
 '''
 from pandas.core.frame import DataFrame
 import os
-from typing import List, Tuple
+from typing import List
 import re
 
-from climatechange.process_data_functions import clean_data
+
 
 
 
 import pandas
 import numpy
 from pandas import Series
+from climatechange.common_functions import to_csv, clean_data
 
 class LaserInput:
     def __init__(self, file_path, laser_time, start_depth, end_depth,
@@ -48,13 +49,13 @@ def load_txt_file(file_path:str) -> DataFrame:
     with open(file_path) as f:
         for i, line in enumerate(f):
             if i == 0:
-                header = line.split("\t")
-                header[0] = "Time"
-                for i in range(1, len(header)):
-                    header[i] = re.sub("\(.*\)", "", header[i]).strip()
+                depth_header = line.split("\t")
+                depth_header[0] = "Time"
+                for i in range(1, len(depth_header)):
+                    depth_header[i] = re.sub("\(.*\)", "", depth_header[i]).strip()
             elif i > 5:
                 rows.append(line.split())
-    return DataFrame(rows, columns=header)
+    return DataFrame(rows, columns=depth_header)
 
 def load_input(input_file:str) -> List[LaserInput]:  # gets information from input file
     """
@@ -80,14 +81,6 @@ def load_input(input_file:str) -> List[LaserInput]:  # gets information from inp
 # 
 #     return df[s1.name]
 
-def to_csv(directory,df,filename):  
-    csv_folder = os.path.join(directory, 'csv_files')
-    if not os.path.exists(csv_folder):
-            os.makedirs(csv_folder)  
-            
-
-    df.to_csv(os.path.join(csv_folder,filename))
-    os.startfile(os.path.join(csv_folder,filename))
 
 def add_depth_column(df:DataFrame, start_depth:float, end_depth:float) -> DataFrame:
     """
@@ -133,7 +126,6 @@ def raw_data(directory,depth_age_file,prefix = 'KCC', csv = True):
                     for file in sorted(os.listdir(os.path.join(directory,folder,input_folder))):
                         if (file.startswith('InputFile_1')) |(file.startswith('Input') & file.endswith('1')) | (file.startswith('Input') & file.endswith('MR')) | \
                             (file.startswith('Input') & file.endswith('1.txt')) | (file.startswith('Input') & file.endswith('MR.txt')) :
-#                             print(file)
                             laser_files = load_input(os.path.join(directory,folder,input_folder,file))
                             for f in laser_files:
                                 df = df.append(f.info,ignore_index=True)

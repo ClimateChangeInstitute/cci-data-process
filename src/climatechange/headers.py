@@ -4,18 +4,22 @@ Created on Jul 12, 2017
 :author: Mark Royer
 '''
 from enum import Enum
-import json
+
 import logging
-import os
 import re
 import textwrap
-from typing import Mapping, List, Any, Sequence, IO
+import json
+import os
+from typing import Mapping, IO, Any, Sequence, List
+
+
+
 
 import pandas
 
-from climatechange.file import load_dict_by_package, data_dir, load_dictionary, \
-    save_dictionary
 from pandas import DataFrame
+from climatechange.file import save_dictionary, load_dict_by_package,\
+    load_dictionary, data_dir
 
 
 class HeaderType(Enum):
@@ -29,6 +33,10 @@ class HeaderType(Enum):
     DEPTH = 'Depth'
     SAMPLE = 'Sample'
     UNKNOWN = 'Unknown'
+    
+#     def __init__(self):
+# 
+#         self.header_label = self.
     
 class HeaderEncoder(json.JSONEncoder):
     '''
@@ -48,14 +56,14 @@ class HeaderEncoder(json.JSONEncoder):
 
 class Header(object):
     '''
-    A header parsed by the system.  This object contains the raw header, the 
-    type of header, the class of the unit (which is basically a subcategory), 
+    A depth_header parsed by the system.  This object contains the raw depth_header, the 
+    type of depth_header, the class of the unit (which is basically a subcategory), 
     the unit, and a label used for plotting.
     
-    :ivar str: The raw header value, for example, "Dat210617"
+    :ivar str: The raw depth_header value, for example, "Dat210617"
     :ivar htype: The type of the column data as determined from the 
         header_dict.json file
-    :ivar hclass: The class/subcategory of the header, for example, "Years"
+    :ivar hclass: The class/subcategory of the depth_header, for example, "Years"
     :ivar unit: The unit of the, for example, "CE"
     :ivar label: The label used for plotting the data, for example, 
         "Year_Dat210617_CE" 
@@ -64,6 +72,8 @@ class Header(object):
     name: str
     
     htype: HeaderType = HeaderType.UNKNOWN
+    
+    label_type: str
     
     hclass: str
     
@@ -87,15 +97,15 @@ class Header(object):
     @staticmethod
     def parse_header(rawHeader:str, regexp:str=r"\s*(.*?)\s*\(\s*(.*?)\s*\)") -> Sequence[str]:
         '''
-        Parses a header string into a 2-tuple of the header name and unit.
+        Parses a depth_header string into a 2-tuple of the depth_header name and unit.
         
-        :param rawHeader: A header possibly with unit specified between 
+        :param rawHeader: A depth_header possibly with unit specified between 
             parentheses
         :param regexp: If supplied, a regular expression for parsing the raw 
-            header.  The regular expression should contain two capture groups.
-        :return: A 2-tuple containing the header and possibly the unit
+            depth_header.  The regular expression should contain two capture groups.
+        :return: A 2-tuple containing the depth_header and possibly the unit
         '''
-        # Match anything between 'header (unit)' and remove white space
+        # Match anything between 'depth_header (unit)' and remove white space
         match = re.match(regexp, rawHeader)
         
         if match:
@@ -130,17 +140,17 @@ class Header(object):
 
 def to_headers(d:Mapping[str, str]) -> Header:
     '''
-    Use this function to specify how a header should be loaded.
+    Use this function to specify how a depth_header should be loaded.
     
-    :param d: A dictionary of header information
-    :return: A fully instantiated header object
+    :param d: A dictionary of depth_header information
+    :return: A fully instantiated depth_header object
     '''
     return Header(d['name'], HeaderType(d['type']), d['class'], d['unit'], d['label'])
           
 
 class HeaderDictionary(object):
     '''
-    Stores and retrieves header values.  Also contains mappings from headers 
+    Stores and retrieves depth_header values.  Also contains mappings from headers 
     to default values.
     '''
     
@@ -167,9 +177,9 @@ class HeaderDictionary(object):
         if os.path.isfile(self.header_file_path):
             with open(self.header_file_path, 'r') as f:
                 hdict = load_dictionary(f, obj_hook=to_headers) 
-        else:  # Load default header file from package
+        else:  # Load default depth_header file from package
             hdict = load_dict_by_package(self.header_file_name, obj_hook=to_headers)
-            # Copy default header file to user data directory
+            # Copy default depth_header file to user data directory
             save_dictionary(hdict, self.header_file_path, enc_cls=HeaderEncoder)
             
         return hdict
@@ -177,9 +187,9 @@ class HeaderDictionary(object):
 
     def get_header_dict(self) -> Mapping[str, Header]:
         '''
-        Returns the **already** loaded header dictionary.
+        Returns the **already** loaded depth_header dictionary.
         
-        :return: The known header mappings
+        :return: The known depth_header mappings
         '''
         return self.header_dictionary
             
@@ -195,7 +205,7 @@ class HeaderDictionary(object):
         
     def parse_headers(self, rawHeaders:List[str]) -> List[Header]:
         '''
-        Convert a list of raw header names into a list containing header 
+        Convert a list of raw depth_header names into a list containing depth_header 
         objects.  For example, the headers
         
         .. code-block:: python
@@ -229,8 +239,8 @@ class HeaderDictionary(object):
         The result is generated by performing lookups on the dictionary of 
         headers. 
         
-        :param rawHeaders: A list of header names with unit information 
-        :return: A list of parsed headers.  If the header is not known, its 
+        :param rawHeaders: A list of depth_header names with unit information 
+        :return: A list of parsed headers.  If the depth_header is not known, its 
             value is :py:attr:`HeaderType.UNKNOWN`.
         '''
         
@@ -244,17 +254,17 @@ class HeaderDictionary(object):
 
     def add_header(self, h:Header) -> Header:
         '''
-        Adds the given header to the dictionary. This is only the in memory 
+        Adds the given depth_header to the dictionary. This is only the in memory 
         dictionary, if you want the dictionary persisted, you must save the 
-        dictionary to disk. Throws a ValueError if the given header is an 
+        dictionary to disk. Throws a ValueError if the given depth_header is an 
         Unknown type.
         
-        :param h: The new header to add
-        :return: None or the previous value if a header with the same name 
+        :param h: The new depth_header to add
+        :return: None or the previous value if a depth_header with the same name 
             already existed
         '''
         if h.htype is HeaderType.UNKNOWN:
-            raise ValueError("Unwilling to add unknown header type")
+            raise ValueError("Unwilling to add unknown depth_header type")
             
         previous = self.header_dictionary.get(h.name)
         self.header_dictionary[h.name] = h
@@ -278,7 +288,7 @@ def load_headers(file_name:IO[str]) -> List[Header]:
     Loads headers into a list from a CSV file.  Each row should contain name,
     type, class, unit, and label data.
     
-    :param file_name: The name of a CSV file containing header information
+    :param file_name: The name of a CSV file containing depth_header information
     :return: A list containing the headers
     '''
     df = pandas.read_csv(file_name, sep=',')
@@ -301,7 +311,7 @@ def process_header_data(df:DataFrame,
     
     :param df: Data containing column headers to process
     :param header_type: The type of headers to return 
-    :param header_dict: Optional header dictionary to use instead of the default
+    :param header_dict: Optional depth_header dictionary to use instead of the default
     :return: The processed column headers
     '''
     
@@ -321,7 +331,7 @@ def process_header_data(df:DataFrame,
         name3, type3, class3, unit3, label3
         ...
         
-        Run the program again using the -l flag to import the header information.
+        Run the program again using the -l flag to import the depth_header information.
         For example,
         
         PYTHONPATH=src python climatechange/process_data.py -l your_csv_file.csv
@@ -332,7 +342,7 @@ def process_header_data(df:DataFrame,
     else:
         return parsedHeaders
 
-def process_header_str(header:str,
+def process_header_str(depth_header:str,
                         header_type:HeaderType=None,
                         header_dict:HeaderDictionary=default_dictionary) -> List[Header]:
     '''
@@ -342,11 +352,11 @@ def process_header_str(header:str,
     
     :param df: Data containing column headers to process
     :param header_type: The type of headers to return 
-    :param header_dict: Optional header dictionary to use instead of the default
+    :param header_dict: Optional depth_header dictionary to use instead of the default
     :return: The processed column headers
     '''
     
-    parsedHeaders = header_dict.parse_headers([header])
+    parsedHeaders = header_dict.parse_headers([depth_header])
     
     unknown_headers = [h for h in parsedHeaders if h.htype == HeaderType.UNKNOWN ]
     if unknown_headers:
@@ -362,7 +372,7 @@ def process_header_str(header:str,
         name3, type3, class3, unit3, label3
         ...
         
-        Run the program again using the -l flag to import the header information.
+        Run the program again using the -l flag to import the depth_header information.
         For example,
         
         PYTHONPATH=src python climatechange/process_data.py -l your_csv_file.csv
@@ -372,3 +382,33 @@ def process_header_str(header:str,
         return [h for h in parsedHeaders if h.htype is header_type]
     else:
         return parsedHeaders
+    
+    
+    
+def load_and_store_header_file(path:str):
+    print("Adding headers from %s to header dictionary." % path) 
+    new_headers = load_headers(path)
+    
+    hd = HeaderDictionary()
+    
+    all_new = []
+    all_replaced = []
+    for h in new_headers:
+        old_h = hd.add_header(h)
+        if old_h:
+            print("Replaced existing header")
+            print("Old header: %s" % old_h)
+            all_replaced.append(old_h)
+        else:
+            all_new.append(h)
+        print("New header: %s" % h)
+    
+    hd.save_dictionary()
+    
+    print("Finished importing new headers")
+    print("Imported %d new headers and "
+          "replaced %d old headers with new definitions" % (len(all_new),
+                                                            len(all_replaced)))
+            
+
+ 

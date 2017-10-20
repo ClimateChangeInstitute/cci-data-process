@@ -20,14 +20,14 @@ from argparse import RawDescriptionHelpFormatter
 import os
 import sys
 
-from climatechange.process_data_functions import resample_by_years, \
-    resample_by_depths, load_and_store_header_file, double_resample_by_depths, \
-    resample_HR_by_LR
+
 import logging
 import textwrap
 
-from climatechange.process_data_functions import plot_samples_by_depth, plot_samples_by_year
+from climatechange.plot import plot_samples_by_depth, plot_samples_by_year
 from climatechange.laser import raw_data
+from climatechange.resample import resample, resample_by
+from climatechange.headers import load_and_store_header_file
 
 
 
@@ -55,22 +55,24 @@ def setup_argument_parser(program_version_message, program_license):
                         "--depth",
                         dest="depth_file",
                         action="store",
+                        nargs=2,
+                        metavar=('CSV_FILE', 'STATISTIC'),
                         help="resample %(dest)s by depth [default: %(default)s]")
     
-    parser.add_argument("-dd",
-                        "--double-depth",
-                        dest="depth_files",
-                        action="store",
-                        nargs=2,
-                        help="resample %(dest)s by depth")
+#     parser.add_argument("-dd",
+#                         "--double-depth",
+#                         dest="depth_files",
+#                         action="store",
+#                         nargs=2,
+#                         help="resample %(dest)s by depth")
     
-    parser.add_argument("-di",
-                        "--double-interval",
+    parser.add_argument("-by",
+                        "--resample_by",
                         dest="interval_files",
                         action="store",
-                        nargs=4,
-                        metavar=('file_1', 'file_2', 'CREATE_PDF', 'CREATE_CSV'),
-                        help="resample %(dest)s to the higher resolution of the two files")
+                        nargs=2,
+                        metavar=('file_1', 'file_2'),
+                        help="resample %(dest)s to the lower resolution of the two files")
 
 #     parser.add_argument("-f",
 #                         "--filter",
@@ -147,6 +149,8 @@ def setup_argument_parser(program_version_message, program_license):
                         "--year",
                         dest="year_file",
                         action="store",
+                        nargs=2,
+                        metavar=('CSV_FILE', 'STATISTIC'),
                         help="resample %(dest)s by years and depth [default: %(default)s]")
     return parser
 
@@ -217,10 +221,10 @@ USAGE
         ######################################################################
         
 
-        if args.depth_files: 
-            double_resample_by_depths(args.depth_files[0],
-                                      args.depth_files[1],
-                                      inc_amt)
+#         if args.depth_files: 
+#             double_resample_by_depths(args.depth_files[0],
+#                                       args.depth_files[1],
+#                                       inc_amt)
         if args.plot_depth_files:
             file = args.plot_depth_files
             if args.interval:
@@ -235,37 +239,33 @@ USAGE
             else:
                 plot_samples_by_year(file)
                 
-        if args.raw_directory:
-            directory, depth_age_file, prefix = args.raw_directory
+        if args.raw_laser_data:
+            directory, depth_age_file, prefix = args.raw_laser_data
             raw_data(directory, depth_age_file, prefix)
             
-#         if args.filter_directory:
-#             directory, depth_age_file,LR_file, prefix = args.filter_directory
-#             append_filter_LAICPMS_directory(directory, depth_age_file,LR_file, prefix)
-#             
 #             
         if args.interval_files:
             if args.inc_amt:
                 logging.warning("Specified increment amount %d is not used "
                              "when resampling by depth intervals.", inc_amt)
-            file_1, file_2, create_pdf, create_csv, = args.interval_files
-            resample_HR_by_LR(file_1, file_2 ,bool(create_pdf), bool(create_csv))  
+            resample_by(args.interval_files)  
         
         if args.year_file:
             
-            year_file = args.year_file
+            year_file,stat_header = args.year_file
             
-            if year_file.endswith('.csv'):            
-                resample_by_years(year_file, int(inc_amt))
+            if year_file.endswith('.csv'): 
+          
+                resample('year',year_file,stat_header, int(inc_amt))
             else:
                 raise Exception("The specified year_file must be a CSV file.")
         
         if args.depth_file:
             
-            depth_file = args.depth_file
+            depth_file,stat_header = args.depth_file
             
             if depth_file.endswith('.csv'):
-                resample_by_depths(depth_file, inc_amt)
+                resample('depth',depth_file, stat_header,inc_amt)
             else:
                 raise Exception("The specified depth_file must be a CSV file.")
                 

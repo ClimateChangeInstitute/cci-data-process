@@ -7,16 +7,11 @@ import os
 import unittest
 
 from pandas import DataFrame
-from pandas.util.testing import assert_frame_equal, assert_almost_equal,\
-    assert_series_equal
+from pandas.util.testing import assert_frame_equal
 
 from climatechange.headers import Header, HeaderType
 
-
-from climatechange.file import load_csv
-from climatechange.process_data_functions import clean_data
-from climatechange.laser import load_txt_file, read_input, load_input, process_laser_data,\
-    raw_data
+from climatechange.laser import load_txt_file, read_input, load_input, raw_data
 
 
 
