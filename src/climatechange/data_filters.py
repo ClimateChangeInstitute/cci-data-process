@@ -234,36 +234,36 @@ def scaler(df:DataFrame) -> DataFrame:
 
 
 
-@filter_function("fill_missing")
-def fill_missing_values(df:DataFrame) -> DataFrame:
-    
-    x = df.iloc[:, 2:].values
-    imp = preprocessing.Imputer(missing_values='NaN', strategy='mean', axis=0)
-    x_fill = imp.fit_transform(x)
-    df_norm = pandas.DataFrame(x_fill, columns=df.iloc[:, 2:].columns)
-    return pandas.concat((df.iloc[:, :2], df_norm), axis=1)
-
-
-
-def adjust_data_by_background(df:DataFrame,
-                                 background_stats:DataFrame,
-                                 stat:str='Mean') -> DataFrame:
-    df = df.copy()
-
-    for col in background_stats:
-            df[col] = df[col] - background_stats.loc[stat, col]
-    
-    return df
-
-def adjust_data_by_stats(df:DataFrame,
-                            df_stats:DataFrame,
-                            stat:str='Mean') -> DataFrame: 
-    df = df.copy()
-
-    for col in df_stats:
-            df[col] = df[col] - df_stats.loc[stat, col]
-    
-    return df   
+# @filter_function("fill_missing")
+# def fill_missing_values(df:DataFrame) -> DataFrame:
+#     
+#     x = df.iloc[:, 2:].values
+#     imp = preprocessing.Imputer(missing_values='NaN', strategy='mean', axis=0)
+#     x_fill = imp.fit_transform(x)
+#     df_norm = pandas.DataFrame(x_fill, columns=df.iloc[:, 2:].columns)
+#     return pandas.concat((df.iloc[:, :2], df_norm), axis=1)
+# 
+# 
+# 
+# def adjust_data_by_background(df:DataFrame,
+#                                  background_stats:DataFrame,
+#                                  stat:str='Mean') -> DataFrame:
+#     df = df.copy()
+# 
+#     for col in background_stats:
+#             df[col] = df[col] - background_stats.loc[stat, col]
+#     
+#     return df
+# 
+# def adjust_data_by_stats(df:DataFrame,
+#                             df_stats:DataFrame,
+#                             stat:str='Mean') -> DataFrame: 
+#     df = df.copy()
+# 
+#     for col in df_stats:
+#             df[col] = df[col] - df_stats.loc[stat, col]
+#     
+#     return df   
     
 def normalize_data(df:DataFrame):
     

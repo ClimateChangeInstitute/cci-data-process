@@ -48,19 +48,19 @@ class DataClass():
 
         self.dx =self.df_multi.xs('Sample',axis=1).describe().T
 
-class DFClass():
-    
-    def __init__(self, df:DataFrame,key):
-        
-
-        self.df = df
-        self.name = key.__name__
-        self.sample_headers = process_header_data(self.df, HeaderType.SAMPLE)
-            
-        self.sample_headers_name = [sample.name for sample in self.sample_headers] 
-        self.depth_headers = process_header_data(self.df, HeaderType.DEPTH) 
-        self.year_headers = process_header_data(self.df, HeaderType.YEARS) 
-    
+# class DFClass():
+#     
+#     def __init__(self, df:DataFrame,key):
+#         
+# 
+#         self.df = df
+#         self.name = key.__name__
+#         self.sample_headers = process_header_data(self.df, HeaderType.SAMPLE)
+#             
+#         self.sample_headers_name = [sample.name for sample in self.sample_headers] 
+#         self.depth_headers = process_header_data(self.df, HeaderType.DEPTH) 
+#         self.year_headers = process_header_data(self.df, HeaderType.YEARS) 
+#     
 
    
 def is_number(s):
@@ -117,14 +117,14 @@ def to_csv(directory:str,df:DataFrame,filename:str='output_file.csv',idx = True)
     df.to_csv(os.path.join(csv_folder,filename),index = idx)
     os.startfile(os.path.join(csv_folder,filename))
     
-def to_pdf(directory:str,fig,filename:str):  
-    folder = os.path.join(directory, 'pdf_files')
-    if not os.path.exists(folder):
-            os.makedirs(folder)  
-
-    with PdfPages(os.path.join(folder,filename)) as pdf:
-        pdf.savefig(fig)
-    os.startfile(os.path.join(folder,filename))
+# def to_pdf(directory:str,fig,filename:str):  
+#     folder = os.path.join(directory, 'pdf_files')
+#     if not os.path.exists(folder):
+#             os.makedirs(folder)  
+# 
+#     with PdfPages(os.path.join(folder,filename)) as pdf:
+#         pdf.savefig(fig)
+#     os.startfile(os.path.join(folder,filename))
     
     
 def index_by_increment(list_to_inc:List[float], range_list:List[float]) -> Tuple[List[List[int]],List[float]]:
@@ -164,59 +164,59 @@ def index_by_increment(list_to_inc:List[float], range_list:List[float]) -> Tuple
        
     return result
 
-def remove_nan_from_datasets(d1_stat:Series, d2_stat:Series) -> Tuple[Series, Series]:
-    d2_result = []
-    d1_result = []
-    for i in range(len(d1_stat)):
-        if not isnan(d1_stat[i]) and not isnan(d2_stat[i]):
-            d1_result.append(d1_stat[i])
-            d2_result.append(d2_stat[i])
-            
-    return Series(d1_result), Series(d2_result)
-            
-            
-def remove_nan_from_data_and_namecolumn(d1_stat:Series, d2_stat:Series) -> Tuple[Series, Series]:
-    d2_result = []
-    d1_result = []
-    for i in range(len(d1_stat)):
-        if not isnan(d1_stat[i]):
-            d1_result.append(d1_stat[i])
-            d2_result.append(d2_stat[i])
-                     
-                     
-    return Series(d1_result), Series(d2_result)
-
-def remove_nan_from_data(d1:Series) -> Series:
-    d1_result = []
-    for i in range(len(d1)):
-        if not isnan(d1[i]):
-            d1_result.append(d1[i])
- 
-    return Series(d1_result).reset_index(drop=True)
-                   
-
-def round_values_to_sigfig(df:DataFrame):
-    year_round_amt = 0
-    depth_round_amt = 4
-    sample_round_amt = 3
-    df.iloc[:, 0] = [numpy.round(i, year_round_amt) for i in df.iloc[:, 0]]
-    for col in range(1, 5):
-        df.iloc[:, col] = [numpy.round(i, depth_round_amt) for i in df.iloc[:, col]]
-    for col in range(5, 10):
-        df.iloc[:, col] = [numpy.round(i, sample_round_amt) for i in df.iloc[:, col]]
-
-    return df
-
-def round_laser_values_to_sigfig(df:DataFrame):
-    year_round_amt = 4
-    depth_round_amt = 5
-    sample_round_amt = 3
-    df.iloc[:, 0] = [numpy.round(i, depth_round_amt) for i in df.iloc[:, 0]]
-    for col in range(0, 1):
-        df.iloc[:, col] = [numpy.round(i, year_round_amt) for i in df.iloc[:, col]]
-    for col in range(2, 6):
-        df.iloc[:, col] = [numpy.round(i, sample_round_amt) for i in df.iloc[:, col]]
-
-    return df
+# def remove_nan_from_datasets(d1_stat:Series, d2_stat:Series) -> Tuple[Series, Series]:
+#     d2_result = []
+#     d1_result = []
+#     for i in range(len(d1_stat)):
+#         if not isnan(d1_stat[i]) and not isnan(d2_stat[i]):
+#             d1_result.append(d1_stat[i])
+#             d2_result.append(d2_stat[i])
+#             
+#     return Series(d1_result), Series(d2_result)
+#             
+#             
+# def remove_nan_from_data_and_namecolumn(d1_stat:Series, d2_stat:Series) -> Tuple[Series, Series]:
+#     d2_result = []
+#     d1_result = []
+#     for i in range(len(d1_stat)):
+#         if not isnan(d1_stat[i]):
+#             d1_result.append(d1_stat[i])
+#             d2_result.append(d2_stat[i])
+#                      
+#                      
+#     return Series(d1_result), Series(d2_result)
+# 
+# def remove_nan_from_data(d1:Series) -> Series:
+#     d1_result = []
+#     for i in range(len(d1)):
+#         if not isnan(d1[i]):
+#             d1_result.append(d1[i])
+#  
+#     return Series(d1_result).reset_index(drop=True)
+#                    
+# 
+# def round_values_to_sigfig(df:DataFrame):
+#     year_round_amt = 0
+#     depth_round_amt = 4
+#     sample_round_amt = 3
+#     df.iloc[:, 0] = [numpy.round(i, year_round_amt) for i in df.iloc[:, 0]]
+#     for col in range(1, 5):
+#         df.iloc[:, col] = [numpy.round(i, depth_round_amt) for i in df.iloc[:, col]]
+#     for col in range(5, 10):
+#         df.iloc[:, col] = [numpy.round(i, sample_round_amt) for i in df.iloc[:, col]]
+# 
+#     return df
+# 
+# def round_laser_values_to_sigfig(df:DataFrame):
+#     year_round_amt = 4
+#     depth_round_amt = 5
+#     sample_round_amt = 3
+#     df.iloc[:, 0] = [numpy.round(i, depth_round_amt) for i in df.iloc[:, 0]]
+#     for col in range(0, 1):
+#         df.iloc[:, col] = [numpy.round(i, year_round_amt) for i in df.iloc[:, col]]
+#     for col in range(2, 6):
+#         df.iloc[:, col] = [numpy.round(i, sample_round_amt) for i in df.iloc[:, col]]
+# 
+#     return df
 
 

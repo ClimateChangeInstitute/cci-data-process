@@ -13,7 +13,7 @@ from climatechange.resample import resample,depth_columns, find_match, resample_
     by_years, by_depths, create_range_for_depths, create_range_by_year
 
 from climatechange.common_functions import DataClass, clean_data,\
-    load_csv
+    load_csv, to_csv
     
     
 # dc = DataClass(os.path.join('csv_files','input', 'small.csv'))
@@ -24,17 +24,23 @@ output_small_file2 = os.path.join('csv_files','output','Year_Dat210617_(CE)_resa
 output_small_filem = os.path.join('csv_files','output','Year_Dat210617_(CE)_resampled_by_1_year_resolution_for_max_std.csv')
 output_small_file_depth = os.path.join('csv_files','output','small_resample_by_0.001_depth_abs_(m)_mean.csv')
 output_small_file_01 = os.path.join('csv_files','output','small_resample_by_0.01_depth_abs_(m)_max_count.csv')
+output_small_file_stat = os.path.join('csv_files','output','small_resample_by_0.01_depth_abs_(m)_stat.csv')
+output_small_year_stat = os.path.join('csv_files','output','small_resample_by_1_year_stat.csv')
+
 input_test_zeros_and_numbers = clean_data(load_csv(os.path.join('csv_files', 'input_test_zeros_and_numbers.csv')))
 
 
 
 output_by_LR = os.path.join('csv_files','output','resample_by_LR_output.csv')
-f_HR = os.path.join('csv_files', 'test_input_dd_2.csv')
-f_LR = os.path.join('csv_files', 'test_input_dd_1.csv')
+f_HR = os.path.join('csv_files','input', 'test_input_dd_2.csv')
+f_LR = os.path.join('csv_files','input', 'test_input_dd_1.csv')
+f_empty = os.path.join('csv_files','input', 'test_input_dd_empty.csv')
 dc_LR = DataClass(f_LR)
 dc_HR = DataClass(f_HR)
 depth_header, = process_header_str('depth (m abs)')
+depth_header2, = process_header_str('depth (m we)')
 year_header,=process_header_str('Dat210617')
+year_header2,=process_header_str('Dat011216V2')
 class Test(unittest.TestCase):
 
 
@@ -50,11 +56,58 @@ class Test(unittest.TestCase):
         pass
     
     def test_resample(self):
-        df = resample('y',small_file,['mean'],1,'Dat210617',False)
-#         print(df)
+        inc_amt = 1
+        stat = ['mean']
+        df = resample('y',small_file,stat,inc_amt,None,False)
+        expected_result = clean_data(load_csv(output_small_file))
+        expected_result = expected_result.set_index('Year_Dat210617_(CE)')
+        assert_frame_equal(df[0],expected_result)
+        self.assertEqual(df[1].index.name, 'Year_Dat011216V2_(CE)')
         
-  
-    
+        df, = resample('y',small_file,stat,inc_amt,'Dat210617',False)
+        assert_frame_equal(df,expected_result)
+        
+        df, = resample('Y',small_file,stat,inc_amt,'Dat210617',False)
+        assert_frame_equal(df,expected_result)
+        
+        df, = resample('Year',small_file,stat,inc_amt,'Dat210617',False)
+        assert_frame_equal(df,expected_result)
+        
+        df, = resample('year',small_file,stat,inc_amt,'Dat210617',False)
+        assert_frame_equal(df,expected_result)
+        
+
+        
+    def test_resample_by_depth(self):
+        inc_amt =0.001
+        stat = ['mean']
+        df, = resample('d',small_file,stat,inc_amt,'depth (m abs)',False)
+        expected_result = clean_data(load_csv(output_small_file_depth))
+        expected_result = expected_result.set_index(depth_header.label)
+        assert_frame_equal(df,expected_result)
+        
+        df1 = resample('d',small_file,stat,inc_amt,None,False)
+        assert_frame_equal(df1[1],expected_result)
+        self.assertEqual(df1[0].index.name, depth_header2.label)
+        
+        df2 = resample('d',small_file,None,inc_amt,None,False)
+        expected_result2 = clean_data(load_csv(output_small_file_stat))
+        expected_result2 = expected_result2.set_index(depth_header.label)
+        assert_frame_equal(df2[1],expected_result2)
+        self.assertEqual(df2[0].index.name, depth_header2.label)
+        
+        df = resample('D',small_file,None,inc_amt,None,False)
+        assert_frame_equal(df[1],expected_result2)
+        
+        df = resample('Depth',small_file,None,inc_amt,None,False)
+        assert_frame_equal(df[1],expected_result2)
+        
+        df = resample('depth',small_file,None,inc_amt,None,False)
+        assert_frame_equal(df[1],expected_result2)
+        
+        
+        
+
     def test_depth_columns(self):
         expected_result = DataFrame([[0.59837,0.59977, 1.624, 1.628],[0.59663,0.59802,1.619,1.623],[0.59488,0.59628,1.614,1.618],[ 0.59349,0.59453,1.610,1.613]])
         expected_result.columns=['top_depth_we_(m)',  'bottom_depth_we_(m)',  'top_depth_abs_(m)','bottom_depth_abs_(m)']
@@ -78,6 +131,13 @@ class Test(unittest.TestCase):
         expected_resultm = clean_data(load_csv(output_small_filem))
         expected_resultm = expected_resultm.set_index('Year_Dat210617_(CE)')
         assert_frame_equal(dfm, expected_resultm)
+    def test_by_year_stats(self):
+        
+        inc_amt = 1
+        df = by_years(dc,year_header,inc_amt)
+        expected_result = clean_data(load_csv(output_small_year_stat))
+        expected_result = expected_result.set_index(year_header.label)
+        assert_frame_equal(df, expected_result)
 
     def test_by_depths(self):
         
@@ -94,6 +154,15 @@ class Test(unittest.TestCase):
         df = by_depths(dc,depth_header,inc_amt,stat)
 
         expected_result = clean_data(load_csv(output_small_file_01))
+        expected_result = expected_result.set_index(depth_header.label)
+        assert_frame_equal(df, expected_result)
+        
+    def test_by_depths_stats(self):
+        
+        inc_amt = 0.001
+        stat = None
+        df = by_depths(dc,depth_header,inc_amt,stat)
+        expected_result = clean_data(load_csv(output_small_file_stat))
         expected_result = expected_result.set_index(depth_header.label)
         assert_frame_equal(df, expected_result)
         
@@ -135,26 +204,32 @@ class Test(unittest.TestCase):
         result = create_range_by_year(input_test_zeros_and_numbers.loc[:, 'Dat210617'].values.tolist(), inc_amt)
         self.assertEqual(expected_output, result) 
 
-
-
     def test_resample_by(self):
         depth_header, = process_header_str('depth (m abs)')
-        df =resample_by(f_HR,f_LR,['mean'],'depth (m abs)',False)
+        df, =resample_by(f_HR,f_LR,['mean'],'depth (m abs)',False)
         expected_result = load_csv(os.path.join('csv_files','output','test_input_dd_2_depth_abs_(m)_resample_by_test_input_dd_1_mean.csv')).astype(float)
         expected_result = expected_result.set_index(depth_header.label)
         assert_frame_equal(df,expected_result)
 
-        df2 =resample_by(f_HR,f_LR,['mean','std'],'depth (m abs)',False)
+        df2, =resample_by(f_HR,f_LR,['mean','std'],'depth (m abs)',False)
         expected_result2 = load_csv(os.path.join('csv_files','output','test_input_dd_2_resample_by_test_input_dd_1_depth_abs_(m)_mean_std.csv')).astype(float)
         expected_result2 = expected_result2.set_index(depth_header.label)
         assert_frame_equal(df2,expected_result2)
         
 
-        df1 =resample_by(f_HR,f_LR,None,'depth (m abs)',False)
+        df1, =resample_by(f_HR,f_LR,None,'depth (m abs)',False)
         expected_result1 = load_csv(os.path.join('csv_files','output','test_input_dd_2_depth_abs_(m)_resample_by_test_input_dd_1.csv')).astype(float)
         expected_result1 = expected_result1.set_index(depth_header.label)
         assert_frame_equal(df1,expected_result1)
-
+        
+        df1 =resample_by(f_HR,f_LR,None,None,False)
+        expected_result1 = load_csv(os.path.join('csv_files','output','test_input_dd_2_depth_abs_(m)_resample_by_test_input_dd_1.csv')).astype(float)
+        expected_result1 = expected_result1.set_index(depth_header.label)
+        assert_frame_equal(df1[0],expected_result1)
+    def test_resample_by_empty_lr(self):
+        df, =resample_by(f_HR,f_empty,None,'depth (m we)',False)
+        expected_result = DataFrame([])
+        assert_frame_equal(df,expected_result)
 
 
     def test_find_match(self):

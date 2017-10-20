@@ -52,7 +52,7 @@ def resample(by:str,f:str,stat:str='Mean', inc_amt:int=1, by_name:str =None,outp
         else:
             headers = dc.year_headers
         x=0
-    elif (by == 'depth') | (by == 'Depth')|(by == 'd')|(by == 'D'):
+    elif (by == 'depth')|(by == 'Depth')|(by == 'd')|(by == 'D'):
         if by_name:
             headers = process_header_str(by_name)
         else:
@@ -60,19 +60,21 @@ def resample(by:str,f:str,stat:str='Mean', inc_amt:int=1, by_name:str =None,outp
         x=1
     
     all_files = []
-    for depth_header in headers:
+    dfs = []
+    for h in headers:
         if x == 0:
-            df = by_years(dc, depth_header,inc_amt,stat)
+            df = by_years(dc, h,inc_amt,stat)
         else:
-            df = by_depths(dc, depth_header,inc_amt,stat)
+            df = by_depths(dc, h,inc_amt,stat)
+        dfs.append(df)
             
         if stat:
-            file ='{}_resample_by_{}_{}_{}.csv'.format(dc.base,inc_amt,depth_header.label,'_'.join(stat))
+            file ='{}_resample_by_{}_{}_{}.csv'.format(dc.base,inc_amt,h.label,'_'.join(stat))
         else:
-            file = '{}_resample_by_{}_{}_stats.csv'.format(dc.base,inc_amt,depth_header.label)
+            file = '{}_resample_by_{}_{}_stats.csv'.format(dc.base,inc_amt,h.label)
             
 
-        pdf_file= '{}_resampled_by_{}_{}_resolution_for_{}.pdf'.format(depth_header.label, inc_amt,depth_header.unit,'_'.join(stat))
+#         pdf_file= '{}_resampled_by_{}_{}_resolution_for_{}.pdf'.format(h.label, inc_amt,h.unit,'_'.join(stat))
         all_files.append(file)
         if output:
             
@@ -85,31 +87,30 @@ def resample(by:str,f:str,stat:str='Mean', inc_amt:int=1, by_name:str =None,outp
                                         'Year',
                                         stat,
                                         all_files)
-            write_readmefile_to_txtfile(readme, os.path.join(dc.dirname, '00README_resample_{}_{}_{}_resolution.txt'.format(depth_header.label,inc_amt,by)))
-            plot_resampled(df,pdf_file,dc.dirname)
+            write_readmefile_to_txtfile(readme, os.path.join(dc.dirname, '00README_resample_{}_{}_{}_resolution.txt'.format(h.label,inc_amt,by)))
             
 
-    return df
+    return dfs
 
-def plot_resampled(df:DataFrame,filename:str,directory: str):
-    
-    folder = os.path.join(directory, 'pdf_files')
-    if not os.path.exists(folder):
-            os.makedirs(folder) 
-
-    cmap = plt.get_cmap('ocean')
-    with PdfPages(os.path.join(folder,filename)) as pdf:
-
-        for i,col in enumerate(df):
-            ax = df[col].plot(figsize=(10,6),color=cmap(i / float(len(df.columns)+3)))
-            
-            ax.set_ylabel(col)
-            plt.tight_layout()
-            fig = plt.gcf()
-
-            pdf.savefig(fig)
-            plt.close()
-    os.startfile(os.path.join(folder,filename))
+# def plot_resampled(df:DataFrame,filename:str,directory: str):
+#     
+#     folder = os.path.join(directory, 'pdf_files')
+#     if not os.path.exists(folder):
+#             os.makedirs(folder) 
+# 
+#     cmap = plt.get_cmap('ocean')
+#     with PdfPages(os.path.join(folder,filename)) as pdf:
+# 
+#         for i,col in enumerate(df):
+#             ax = df[col].plot(figsize=(10,6),color=cmap(i / float(len(df.columns)+3)))
+#             
+#             ax.set_ylabel(col)
+#             plt.tight_layout()
+#             fig = plt.gcf()
+# 
+#             pdf.savefig(fig)
+#             plt.close()
+#     os.startfile(os.path.join(folder,filename))
 
 
 
@@ -181,11 +182,7 @@ def depth_columns(dc:DataClass,year_header:Header, inc_amt:int):
    
     if len(cols)==4:
         cols = [cols[0], cols[2],cols[1] , cols[3]]
-    if len(cols)==6:
-        cols = [cols[0] , cols[3] , cols[1] , cols[4] , cols[2] , cols[5]]
-    if len(cols)==8:
-        cols = [cols[0] , cols[4] , cols[1] , cols[5], cols[2],cols[6],cols[3],cols[7]]
-    if len(cols)>8:
+    if len(cols)>4:
         logging.error('need less depths')
 
 
@@ -226,21 +223,6 @@ def by_depths(dc:DataClass,depth_header:Header,inc_amt:float,stat:List[str] = No
 
 
 
-def create_range_for_depths(list_to_inc:List[float], inc_amt: float=0.01) -> List[float]:
-    '''
-
-    :param list_to_inc:
-    :param inc_amt:
-    '''
-    if str(min(list_to_inc))[::-1].find('.') > str(inc_amt)[::-1].find('.'):
-
-        r = str(min(list_to_inc))[::-1].find('.') - 1
-    else:
-        r = str(inc_amt)[::-1].find('.')
-    g = numpy.arange(numpy.round(min(list_to_inc), r), max(list_to_inc), inc_amt)
-    
-    return [round(i, r) for i in g.tolist()]
-
 
 
 def find_match(dc:DataClass,dclr:DataClass)-> List[Header]:
@@ -273,6 +255,7 @@ def resample_by(filename:str,resample_by:str,stat:List[str] = None,depth:str = N
     else:
         headers = find_match(dc, dc_by)
     
+    headers_by=[]
     resample = [] 
     for h in headers:
         hr = dc.sample_df.set_index(dc.df[h.name])
@@ -281,11 +264,12 @@ def resample_by(filename:str,resample_by:str,stat:List[str] = None,depth:str = N
         lr =lr[(lr.index >=min(hr.index)) & (lr.index <=max(hr.index))]
 
 
+
         stat_dict=[]
         for s in dc.sample_headers:
             df = DataFrame()
             if lr.empty:
-                return df
+                return [df]
             for i in range(len(lr.index.tolist())-1):
 
                 idx = hr[(hr.index >=lr.index[i]) & (hr.index < lr.index[i+1])]
@@ -309,4 +293,21 @@ def resample_by(filename:str,resample_by:str,stat:List[str] = None,depth:str = N
         stat_df.index.name=h.label
         if output:
             to_csv(dc.dirname,stat_df,file)
-    return stat_df
+            
+    headers_by.append(stat_df)
+    return headers_by
+
+def create_range_for_depths(list_to_inc:List[float], inc_amt: float=0.01) -> List[float]:
+    '''
+
+    :param list_to_inc:
+    :param inc_amt:
+    '''
+    if str(min(list_to_inc))[::-1].find('.') > str(inc_amt)[::-1].find('.'):
+
+        r = str(min(list_to_inc))[::-1].find('.') - 1
+    else:
+        r = str(inc_amt)[::-1].find('.')
+    g = numpy.arange(numpy.round(min(list_to_inc), r), max(list_to_inc), inc_amt)
+    
+    return [round(i, r) for i in g.tolist()]
