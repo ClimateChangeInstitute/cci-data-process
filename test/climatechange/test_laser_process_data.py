@@ -101,7 +101,7 @@ class Test(unittest.TestCase):
         
     def test_run_data(self):
         directory = os.path.join('csv_files', 'test_directory')
-        df_1,df_2 = run_data(directory,depth_age_file,'KCC','depth (m abs)',True)
+        df_1,df_2 = run_data(directory,depth_age_file,'KCC','depth (m abs)',False)
         self.assertEqual(4, df_1.shape[0])
         self.assertEqual(11, df_1.shape[1])
         self.assertEqual(4, df_2.shape[0])
