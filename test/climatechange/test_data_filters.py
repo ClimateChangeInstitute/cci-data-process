@@ -14,7 +14,7 @@ from pandas.util.testing import assert_frame_equal
 from climatechange.data_filters import normalize_min_max_scaler, \
     replace_outliers, savgol_smooth_filter, filter_function, filters_to_string,\
     normalize_data, medfilt_filter,\
-    wiener_filter, robust_scaler, default_filters
+    wiener_filter, robust_scaler, default_filters, _processed_data
 from climatechange.laser import read_input, process_laser_data
 from climatechange.common_functions import load_csv, clean_data
 
@@ -265,6 +265,16 @@ class Test(unittest.TestCase):
         expected_result.columns = ['depth (m we)', 'Ca (ppb)', 'Al27']
 
         assert_frame_equal(expected_result, result_df)
+        
+    def test__processed_data(self):
+        test_filter_df = DataFrame([list(range(3)),
+                        list(range(6, 9)),
+                        list(range(3, 6)),
+                        list(range(6, 9)),
+                        list(range(3, 6)),
+                        list(range(0, 3))])
+        df = _processed_data(test_filter_df)
+        assert_frame_equal(df,test_filter_df)
         
     
         

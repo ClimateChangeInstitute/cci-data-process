@@ -97,7 +97,7 @@ def replace_outliers(df:DataFrame, val:float64=np.nan, num_std:float=3) -> DataF
     return df
 
 @filter_function("savgol")
-def savgol_smooth_filter(df:DataFrame):
+def savgol_smooth_filter(df:DataFrame, window_length:int = 7):
     '''
     Apply the  Savitzky-Golay filter to the columns of the supplied data.  
     The filter is only applied to columns that appear as samples in the default 
@@ -106,35 +106,13 @@ def savgol_smooth_filter(df:DataFrame):
     :param df: The data to filter
     :return: The resampled data
     '''
-    
-    window_length = 7
+    if window_length % 2 == 0:  # window_length must be odd
+        window_length = window_length - 1
     
     sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
     savgol_func = lambda x: savgol_filter(x, window_length, 1)
     df[sample_header_names] = df[sample_header_names].transform(savgol_func)
 
-    return df
-
-@filter_function("savgol_wl")
-def savgol_smooth_filter_wl(df:DataFrame):
-    '''
-    Apply the  Savitzky-Golay filter to the columns of the supplied data.  
-    The filter is only applied to columns that appear as samples in the default 
-    header dictionary. Modifications occur in-place.
-    
-    :param df: The data to filter
-    :return: The resampled data
-    '''
-    window_length = df.shape[0]
-    if window_length % 2 == 0:  # window_length must be odd
-        window_length = window_length - 1
-    
-    
-    sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
-    savgol_func = lambda x: savgol_filter(x, window_length, 3)
-    df[sample_header_names] = df[sample_header_names].transform(savgol_func)
-    
-    
     return df
 
 
@@ -171,38 +149,6 @@ def wiener_filter(df:DataFrame):
     return df
 
 
-@filter_function("norm_min_max")
-def normalize_min_max_scaler(df:DataFrame) -> DataFrame:
-    '''
-    Normalize dataframe by min and max
-    doesn't take nan values
-    :param df:
-    '''
-    sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
-    min_max_scaler = lambda x: preprocessing.minmax_scale(x)
-    df[sample_header_names] = df[sample_header_names].transform(min_max_scaler)
-
-    return df
-
-
-@filter_function("robust_scaler")
-def robust_scaler(df:DataFrame) -> DataFrame:
-    
-    sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
-    rob_scaler = lambda x: preprocessing.robust_scale(x.to_frame()).flatten()
-    df[sample_header_names] = df[sample_header_names].transform(rob_scaler)
-
-    return df
-
-@filter_function("quantile_transform")
-def quantile_transform_scaler(df:DataFrame) -> DataFrame:
-    
-    sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
-    quant_trans = lambda x: preprocessing.quantile_transform(x.to_frame()).flatten()
-    df[sample_header_names] = df[sample_header_names].transform(quant_trans)
-
-    return df
-
 @filter_function("filtfilt")
 def filtfilt_filter(df:DataFrame) -> DataFrame:
     
@@ -223,6 +169,42 @@ def lfilter_filter(df:DataFrame) -> DataFrame:
 
     return df
 
+
+def _processed_data(df:DataFrame):
+    return df    
+
+def univariate_spline(df:DataFrame,var =45):
+
+    sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
+    depth = 'depth (m abs)'
+
+    x = df[depth]
+    xs = np.linspace(min(x), max(x),var)
+    xs_dict = {depth:pandas.Series(xs)}
+    
+    for sample_header_name in sample_header_names:
+        y = df[sample_header_name]
+        spl = UnivariateSpline(x, y)
+        new_spl = pandas.Series(spl(xs))
+        spline_xs = {sample_header_name:new_spl}
+        xs_dict.update(spline_xs)
+    spline_df = pandas.concat(xs_dict,axis=1)
+
+
+    colnames = spline_df.columns.tolist()
+
+    colnames = colnames[-1:] + colnames[:-1]
+
+    spline_df = spline_df[colnames]
+    return spline_df
+
+
+##############################################################################
+############## PLACE DATA SCALERS FUNCTIONS AFTER THIS LINE ###################
+##############################################################################
+
+
+
 @filter_function("scaler")
 def scaler(df:DataFrame) -> DataFrame:
     
@@ -232,38 +214,6 @@ def scaler(df:DataFrame) -> DataFrame:
 
     return df
 
-
-
-# @filter_function("fill_missing")
-# def fill_missing_values(df:DataFrame) -> DataFrame:
-#     
-#     x = df.iloc[:, 2:].values
-#     imp = preprocessing.Imputer(missing_values='NaN', strategy='mean', axis=0)
-#     x_fill = imp.fit_transform(x)
-#     df_norm = pandas.DataFrame(x_fill, columns=df.iloc[:, 2:].columns)
-#     return pandas.concat((df.iloc[:, :2], df_norm), axis=1)
-# 
-# 
-# 
-# def adjust_data_by_background(df:DataFrame,
-#                                  background_stats:DataFrame,
-#                                  stat:str='Mean') -> DataFrame:
-#     df = df.copy()
-# 
-#     for col in background_stats:
-#             df[col] = df[col] - background_stats.loc[stat, col]
-#     
-#     return df
-# 
-# def adjust_data_by_stats(df:DataFrame,
-#                             df_stats:DataFrame,
-#                             stat:str='Mean') -> DataFrame: 
-#     df = df.copy()
-# 
-#     for col in df_stats:
-#             df[col] = df[col] - df_stats.loc[stat, col]
-#     
-#     return df   
     
 def normalize_data(df:DataFrame):
     
@@ -271,99 +221,51 @@ def normalize_data(df:DataFrame):
     df[sample_header_names] = df[sample_header_names].transform(lambda X: (X - X.min(axis=0)) / (X.max(axis=0) - X.min(axis=0)))
     return df
 
-
-
-def _processed_data(df:DataFrame):
-    return df    
-def univariate_spline(df:DataFrame):
-
+@filter_function("robust_scaler")
+def robust_scaler(df:DataFrame) -> DataFrame:
+    
     sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
-    depth = 'depth (m abs)'
+    rob_scaler = lambda x: preprocessing.robust_scale(x.to_frame()).flatten()
+    df[sample_header_names] = df[sample_header_names].transform(rob_scaler)
 
-    x = df[depth]
-    xs = np.linspace(min(x), max(x),45)
-    xs_dict = {depth:pandas.Series(xs)}
+    return df
+
+@filter_function("quantile_transform")
+def quantile_transform_scaler(df:DataFrame) -> DataFrame:
     
-    for sample_header_name in sample_header_names:
-        y = df[sample_header_name]
-        spl = UnivariateSpline(x, y)
-        new_spl = pandas.Series(spl(xs))
-        spline_xs = {sample_header_name:new_spl}
-        xs_dict.update(spline_xs)
-    spline_df = pandas.concat(xs_dict,axis=1)
-
-
-    colnames = spline_df.columns.tolist()
-
-    colnames = colnames[-1:] + colnames[:-1]
-
-    spline_df = spline_df[colnames]
-    return spline_df
-
-def univariate_spline_60(df:DataFrame):
-
     sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
-    depth = 'depth (m abs)'
+    quant_trans = lambda x: preprocessing.quantile_transform(x.to_frame()).flatten()
+    df[sample_header_names] = df[sample_header_names].transform(quant_trans)
 
-    x = df[depth]
-    xs = np.linspace(min(x), max(x),60)
-    xs_dict = {depth:pandas.Series(xs)}
-    
-    for sample_header_name in sample_header_names:
-        y = df[sample_header_name]
-        spl = UnivariateSpline(x, y)
-        new_spl = pandas.Series(spl(xs))
-        spline_xs = {sample_header_name:new_spl}
-        xs_dict.update(spline_xs)
-    spline_df = pandas.concat(xs_dict,axis=1)
+    return df
 
 
-    colnames = spline_df.columns.tolist()
-
-    colnames = colnames[-1:] + colnames[:-1]
-
-    spline_df = spline_df[colnames]
-    
-    return spline_df
-
-def univariate_spline_50(df:DataFrame):
-
+@filter_function("norm_min_max")
+def normalize_min_max_scaler(df:DataFrame) -> DataFrame:
+    '''
+    Normalize dataframe by min and max
+    doesn't take nan values
+    :param df:
+    '''
     sample_header_names = [h.name for h in process_header_data(df, HeaderType.SAMPLE)]
-    depth = 'depth (m abs)'
+    min_max_scaler = lambda x: preprocessing.minmax_scale(x)
+    df[sample_header_names] = df[sample_header_names].transform(min_max_scaler)
 
-    x = df[depth]
-    xs = np.linspace(min(x), max(x),50)
-    xs_dict = {depth:pandas.Series(xs)}
-    
-    for sample_header_name in sample_header_names:
-        y = df[sample_header_name]
-        spl = UnivariateSpline(x, y)
-        new_spl = pandas.Series(spl(xs))
-        spline_xs = {sample_header_name:new_spl}
-        xs_dict.update(spline_xs)
-    spline_df = pandas.concat(xs_dict,axis=1)
+    return df
 
-
-    colnames = spline_df.columns.tolist()
-
-    colnames = colnames[-1:] + colnames[:-1]
-
-    spline_df = spline_df[colnames]
-    
-    return spline_df
 
 
 # default_filters = [(processed_data,),(wiener_filter,),(robust_scaler,),(medfilt_filter,)]  
 
-default_filters = [(_processed_data,),(savgol_smooth_filter,),(medfilt_filter,),(filtfilt_filter,),(univariate_spline_50,)]  
+default_filters = [(_processed_data,),(savgol_smooth_filter,),(medfilt_filter,),(filtfilt_filter,),(univariate_spline,50)]  
 # default_filters = [(processed_data,),(savgol_smooth_filter,),(savgol_smooth_filter_wl,),(wiener_filter,),(robust_scaler,),(medfilt_filter,),(scaler,),(filtfilt_filter,),(lfilter_filter,),(univariate_spline,),(univariate_spline_60,),(univariate_spline_50,)]  
 # default_filters = [(savgol_smooth_filter_wl,)]    
 # default_filters = [(univariate_spline,),(univariate_spline_60,),(univariate_spline_50,)]
 # default_filters = [(processed_data,)]
      
-
-if __name__ == '__main__':
-    filter_functions = list(filter_function.all.keys())
-    filter_functions.sort()
-    print("Registered filter functions:")
-    pprint.pprint(filter_functions)
+# 
+# if __name__ == '__main__':
+#     filter_functions = list(filter_function.all.keys())
+#     filter_functions.sort()
+#     print("Registered filter functions:")
+#     pprint.pprint(filter_functions)

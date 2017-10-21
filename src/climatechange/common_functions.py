@@ -14,6 +14,7 @@ import logging
 from typing import List, Tuple
 import numpy
 from pandas.core.series import Series
+import datetime
 
 class DataClass():
 
@@ -48,19 +49,28 @@ class DataClass():
 
         self.dx =self.df_multi.xs('Sample',axis=1).describe().T
 
-# class DFClass():
-#     
-#     def __init__(self, df:DataFrame,key):
-#         
-# 
-#         self.df = df
-#         self.name = key.__name__
-#         self.sample_headers = process_header_data(self.df, HeaderType.SAMPLE)
-#             
-#         self.sample_headers_name = [sample.name for sample in self.sample_headers] 
-#         self.depth_headers = process_header_data(self.df, HeaderType.DEPTH) 
-#         self.year_headers = process_header_data(self.df, HeaderType.YEARS) 
-#     
+class FrameClass():
+     
+    def __init__(self, df:DataFrame):
+         
+ 
+        self.df = df
+        self.sample_headers = process_header_data(self.df, HeaderType.SAMPLE)
+        self.sample_headers_name = [i.name for i in self.sample_headers]
+        self.sample_headers_label = [i.label for i in self.sample_headers] 
+        self.depth_headers = process_header_data(self.df, HeaderType.DEPTH) 
+        self.depth_headers_name = [i.name for i in self.depth_headers] 
+        self.depth_headers_label = [i.label for i in self.depth_headers] 
+        self.year_headers = process_header_data(self.df, HeaderType.YEARS)
+        self.year_headers_name = [i.name for i in self.year_headers] 
+        self.year_headers_label = [i.label for i in self.year_headers]
+        self.sample_df =self.df[self.sample_headers_name]
+        self.depth_df =self.df[self.depth_headers_name]
+        self.year_df =self.df[self.year_headers_name]
+        self.sample_year_df =self.df[self.year_headers_name + self.sample_headers_name]
+        self.year_sample_headers = self.year_headers +self.sample_headers 
+
+     
 
    
 def is_number(s):
@@ -109,23 +119,23 @@ def load_csv(file_name: str) -> DataFrame:
     return pandas.read_csv(file_name, sep=',')
 
 def to_csv(directory:str,df:DataFrame,filename:str='output_file.csv',idx = True):  
-    csv_folder = os.path.join(directory, 'csv_files')
+    csv_folder = os.path.join(directory, 'Output_Files')
     if not os.path.exists(csv_folder):
-            os.makedirs(csv_folder)  
-            
+        os.makedirs(csv_folder)  
+        
+    if  not os.path.isfile(os.path.join(directory,'Output_Files','00README.txt')):
+        with open(os.path.join(directory,'Output_Files','00README.txt'),'w') as f:
+            f.write('ReadMeFile\n\nCCI-Data-Processor\nAuthors: Mark Royer and Heather Clifford\n\nOutput Files from cci-data-processor\n\n')
+            f.write('Date Added\t\t\t\t\tFile Added\n')
+    else:
+        with open(os.path.join(directory, 'Output_Files','00README.txt'),'a') as f:
+            f.write('{}\t\t\t{}\n'.format(datetime.datetime.now().strftime("%m/%d/%Y %I:%M%p"),filename))
+        
 
     df.to_csv(os.path.join(csv_folder,filename),index = idx)
     os.startfile(os.path.join(csv_folder,filename))
     
-# def to_pdf(directory:str,fig,filename:str):  
-#     folder = os.path.join(directory, 'pdf_files')
-#     if not os.path.exists(folder):
-#             os.makedirs(folder)  
-# 
-#     with PdfPages(os.path.join(folder,filename)) as pdf:
-#         pdf.savefig(fig)
-#     os.startfile(os.path.join(folder,filename))
-    
+
     
 def index_by_increment(list_to_inc:List[float], range_list:List[float]) -> Tuple[List[List[int]],List[float]]:
     '''
@@ -163,60 +173,4 @@ def index_by_increment(list_to_inc:List[float], range_list:List[float]) -> Tuple
         result.append(tmp)
        
     return result
-
-# def remove_nan_from_datasets(d1_stat:Series, d2_stat:Series) -> Tuple[Series, Series]:
-#     d2_result = []
-#     d1_result = []
-#     for i in range(len(d1_stat)):
-#         if not isnan(d1_stat[i]) and not isnan(d2_stat[i]):
-#             d1_result.append(d1_stat[i])
-#             d2_result.append(d2_stat[i])
-#             
-#     return Series(d1_result), Series(d2_result)
-#             
-#             
-# def remove_nan_from_data_and_namecolumn(d1_stat:Series, d2_stat:Series) -> Tuple[Series, Series]:
-#     d2_result = []
-#     d1_result = []
-#     for i in range(len(d1_stat)):
-#         if not isnan(d1_stat[i]):
-#             d1_result.append(d1_stat[i])
-#             d2_result.append(d2_stat[i])
-#                      
-#                      
-#     return Series(d1_result), Series(d2_result)
-# 
-# def remove_nan_from_data(d1:Series) -> Series:
-#     d1_result = []
-#     for i in range(len(d1)):
-#         if not isnan(d1[i]):
-#             d1_result.append(d1[i])
-#  
-#     return Series(d1_result).reset_index(drop=True)
-#                    
-# 
-# def round_values_to_sigfig(df:DataFrame):
-#     year_round_amt = 0
-#     depth_round_amt = 4
-#     sample_round_amt = 3
-#     df.iloc[:, 0] = [numpy.round(i, year_round_amt) for i in df.iloc[:, 0]]
-#     for col in range(1, 5):
-#         df.iloc[:, col] = [numpy.round(i, depth_round_amt) for i in df.iloc[:, col]]
-#     for col in range(5, 10):
-#         df.iloc[:, col] = [numpy.round(i, sample_round_amt) for i in df.iloc[:, col]]
-# 
-#     return df
-# 
-# def round_laser_values_to_sigfig(df:DataFrame):
-#     year_round_amt = 4
-#     depth_round_amt = 5
-#     sample_round_amt = 3
-#     df.iloc[:, 0] = [numpy.round(i, depth_round_amt) for i in df.iloc[:, 0]]
-#     for col in range(0, 1):
-#         df.iloc[:, col] = [numpy.round(i, year_round_amt) for i in df.iloc[:, col]]
-#     for col in range(2, 6):
-#         df.iloc[:, col] = [numpy.round(i, sample_round_amt) for i in df.iloc[:, col]]
-# 
-#     return df
-
 

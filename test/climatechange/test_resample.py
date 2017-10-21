@@ -226,6 +226,8 @@ class Test(unittest.TestCase):
         expected_result1 = load_csv(os.path.join('csv_files','output','test_input_dd_2_depth_abs_(m)_resample_by_test_input_dd_1.csv')).astype(float)
         expected_result1 = expected_result1.set_index(depth_header.label)
         assert_frame_equal(df1[0],expected_result1)
+        
+        
     def test_resample_by_empty_lr(self):
         df, =resample_by(f_HR,f_empty,None,'depth (m we)',False)
         expected_result = DataFrame([])

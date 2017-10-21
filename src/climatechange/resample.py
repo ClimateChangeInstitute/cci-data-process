@@ -6,9 +6,8 @@ Created on Oct 18, 2017
 import logging
 
 from climatechange.common_functions import to_csv, DataClass
-from climatechange.resample_read_me import readme_output_file, resample_template
+from climatechange.resample_read_me import readme_output_file, resample_template,write_readmefile_to_txtfile
 import datetime
-from climatechange.readme_output import write_readmefile_to_txtfile
 import os
 from pandas import DataFrame
 from matplotlib.backends.backend_pdf import PdfPages
@@ -30,18 +29,13 @@ RESAMPLE BY YEARS
 
 def resample(by:str,f:str,stat:str='Mean', inc_amt:int=1, by_name:str =None,output = True):
     '''
-    Resampler by Years
+    Resampler by Years or Depths
     a. Input: dataset with years, depths, samples
     
     $ PYTHONPATH=. python climatechange/process_data.py -year_name ../test/csv_files/small.csv
 
-    a. Output: csv file with statistics for each sample by years
+    a. Output: csv file with statistics for each sample by years/depths
 
-    i. Pdf of statistics by years with raw data
-
-    1. Mean w/ raw or median w/ raw (by years) on same plot for each year column
-    have 1 pdf with mean or median for each sample
-    
     :param: f: This is a CSV file
     '''
     logging.info("Creating pdf for %s", f)
@@ -52,7 +46,7 @@ def resample(by:str,f:str,stat:str='Mean', inc_amt:int=1, by_name:str =None,outp
         else:
             headers = dc.year_headers
         x=0
-    elif (by == 'depth')|(by == 'Depth')|(by == 'd')|(by == 'D'):
+    elif (by == 'depth') | (by == 'Depth')|(by == 'd')|(by == 'D'):
         if by_name:
             headers = process_header_str(by_name)
         else:
@@ -84,7 +78,7 @@ def resample(by:str,f:str,stat:str='Mean', inc_amt:int=1, by_name:str =None,outp
                                         dc,
                                         str(datetime.date.today()),
                                         inc_amt,
-                                        'Year',
+                                        by,
                                         stat,
                                         all_files)
             write_readmefile_to_txtfile(readme, os.path.join(dc.dirname, '00README_resample_{}_{}_{}_resolution.txt'.format(h.label,inc_amt,by)))
@@ -112,7 +106,7 @@ def resample(by:str,f:str,stat:str='Mean', inc_amt:int=1, by_name:str =None,outp
 #             plt.close()
 #     os.startfile(os.path.join(folder,filename))
 
-
+#####################################################################################################
 
 def create_range_by_year(list_to_inc:List[float], inc_amt: int=1) -> List[float]:
     '''
@@ -221,6 +215,23 @@ def by_depths(dc:DataClass,depth_header:Header,inc_amt:float,stat:List[str] = No
 
     return stat_df
 
+def create_range_for_depths(list_to_inc:List[float], inc_amt: float=0.01) -> List[float]:
+    '''
+
+    :param list_to_inc:
+    :param inc_amt:
+    '''
+    if str(min(list_to_inc))[::-1].find('.') > str(inc_amt)[::-1].find('.'):
+
+        r = str(min(list_to_inc))[::-1].find('.') - 1
+    else:
+        r = str(inc_amt)[::-1].find('.')
+    g = numpy.arange(numpy.round(min(list_to_inc), r), max(list_to_inc), inc_amt)
+    
+    return [round(i, r) for i in g.tolist()]
+
+#####################################################################################################
+
 
 
 
@@ -257,6 +268,7 @@ def resample_by(filename:str,resample_by:str,stat:List[str] = None,depth:str = N
     
     headers_by=[]
     resample = [] 
+    all_files =[]
     for h in headers:
         hr = dc.sample_df.set_index(dc.df[h.name])
         lr = dc_by.sample_df.set_index(dc_by.df[h.name])
@@ -285,7 +297,7 @@ def resample_by(filename:str,resample_by:str,stat:List[str] = None,depth:str = N
                 df.columns = [s.label+'_'+col for col in df]
                 stat_dict.append(df)
                 file = '{}_resample_by_{}_{}.csv'.format(dc.base,dc_by.base,h.label)
-
+        all_files.append(file)
            
         stat_df =pandas.concat(stat_dict,axis=1)
         stat_df = stat_df.set_index([lr.index[:-1]])
@@ -294,20 +306,18 @@ def resample_by(filename:str,resample_by:str,stat:List[str] = None,depth:str = N
         if output:
             to_csv(dc.dirname,stat_df,file)
             
+            readme = readme_output_file(resample_template,
+                                        dc,
+                                        str(datetime.date.today()),
+                                        dc_by.base,
+                                        'depth',
+                                        stat,
+                                        all_files)
+            write_readmefile_to_txtfile(readme, os.path.join(dc.dirname, '00README_resample_{}_by_{}.txt'.format(h.label,dc_by.base)))
+            
+
+            
     headers_by.append(stat_df)
     return headers_by
 
-def create_range_for_depths(list_to_inc:List[float], inc_amt: float=0.01) -> List[float]:
-    '''
 
-    :param list_to_inc:
-    :param inc_amt:
-    '''
-    if str(min(list_to_inc))[::-1].find('.') > str(inc_amt)[::-1].find('.'):
-
-        r = str(min(list_to_inc))[::-1].find('.') - 1
-    else:
-        r = str(inc_amt)[::-1].find('.')
-    g = numpy.arange(numpy.round(min(list_to_inc), r), max(list_to_inc), inc_amt)
-    
-    return [round(i, r) for i in g.tolist()]

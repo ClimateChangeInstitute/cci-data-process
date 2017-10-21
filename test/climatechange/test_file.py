@@ -8,8 +8,9 @@ import unittest
 
 from climatechange.file import load_dictionary, data_dir, save_dictionary
 from climatechange.headers import HeaderEncoder, to_headers, HeaderType, Header,process_header_data
-from climatechange.readme_output import create_readme_output_file
-from climatechange.common_functions import load_csv
+
+from climatechange.common_functions import load_csv, DataClass, FrameClass
+from climatechange.resample_read_me import readme_output_file, readme_laser_file
 
 
 class Test(unittest.TestCase):
@@ -95,41 +96,136 @@ class Test(unittest.TestCase):
         self.assertEqual(result,output_template)
          
                 
-    def testcreate_readme_output_file_tester(self):
+                
+                
+    def test_readme_output_file_tester(self):
         input_template=\
 """
 Date ran:{run_date}
-  
+   
 Process: Resample Input Data to {inc_amt} {label_name} Resolution
-  
+   
 Input filename: {file_name}
 Years: {years}
 Depths: {depths}
 Samples: {samples}
 """
-        file=os.path.join('csv_files','input', 'small.csv')
-        df = load_csv(file)
-        f='small.csv'
-        headers = process_header_data(df)
+        f=os.path.join('csv_files','input', 'small.csv')
         run_date='2017-08-03'
         inc_amt=1
-        file_headers=['file headers']
+        file=['files']
         label_name='year'
-        stat_header='Mean'
-        num_csvfiles=12
-        year_headers = [h.name for h in headers if h.htype == HeaderType.YEARS]
-        result=create_readme_output_file(input_template,f,headers,run_date,inc_amt,label_name,year_headers,file_headers,num_csvfiles,stat_header)
+        stat_header=['mean']
+
+        result=readme_output_file(input_template,DataClass(f),run_date, inc_amt, label_name, stat_header,file)
         expected_result=\
 """
 Date ran:2017-08-03
-  
+   
 Process: Resample Input Data to 1 year Resolution
-  
+   
 Input filename: small.csv
-Years: ['Dat210617', 'Dat011216V2']
-Depths: ['depth (m we) ', 'depth (m abs)']
-Samples: ['Cond (+ALU-S/cm)', 'Na (ppb)', 'Ca (ppb)', 'Dust (part/ml)', 'NH4 (ppb)', 'NO3 (ppb)']
+Years: Dat210617, Dat011216V2
+Depths: depth (m we) , depth (m abs)
+Samples: Cond (+ALU-S/cm), Na (ppb), Ca (ppb), Dust (part/ml), NH4 (ppb), NO3 (ppb)
 """
+        self.assertEqual(result,expected_result)
+        
+        
+    def test_readme_output_laser_file(self):
+        input_laser_template=\
+"""
+ReadMeFile
+
+CCI-Data-Processor
+Authors: Mark Royer and Heather Clifford
+Date ran: {run_date}
+
+Process: Process and Compile {type} LA-ICP-MS Data
+
+Directory Folder: {directory}
+
+Prefix of Cores: {prefix}
+
+Cores in Directory = {folders}
+
+Depth Age File = {depth_age_file}
+
+***  Additional Information about Individual Cores & Runs found in file:
+         {info_file}
+
+Directory Information:
+
+    Year: {years}
+    Year Range: {year_max} - {year_min}
+
+    Depth: {depths}
+    Depth Range: {depth_min} - {depth_max}
+    
+    Resolution: {resolution}
+    
+    Samples: {samples}
+
+
+Output Files:
+
+{csv_filename}
+
+"""
+        directory=os.path.join('csv_files','test_directory')
+        dc = FrameClass(load_csv(os.path.join(directory,'csv_files','LA-ICP-MS_raw_LR.csv')))
+        dc.df =dc.df.set_index(['depth (m abs)'])
+        resolution = 'Medium'
+        prefix='KCC'
+        depth_age_file = 'depth_age_file.csv'
+        info_file ='info_file.csv'
+        run_date='2017-08-03'
+        file ='LA-ICP-MS_raw_LR.csv'
+        output_type = 'Raw'
+        
+
+        result=readme_laser_file(input_laser_template,directory,prefix,depth_age_file, dc, resolution, run_date,info_file, file,output_type)
+        
+        expected_result=\
+"""
+ReadMeFile
+
+CCI-Data-Processor
+Authors: Mark Royer and Heather Clifford
+Date ran: 2017-08-03
+
+Process: Process and Compile Raw LA-ICP-MS Data
+
+Directory Folder: test_directory
+
+Prefix of Cores: KCC
+
+Cores in Directory = KCC1, KCC2
+
+Depth Age File = depth_age_file.csv
+
+***  Additional Information about Individual Cores & Runs found in file:
+         info_file.csv
+
+Directory Information:
+
+    Year: year
+    Year Range: 676 - 654
+
+    Depth: depth (m abs)
+    Depth Range: 60.085 - 60.255
+    
+    Resolution: Medium
+    
+    Samples: Na23, Mg25, Cu63, Pb208, Sn118
+
+
+Output Files:
+
+LA-ICP-MS_raw_LR.csv
+
+"""
+
         self.assertEqual(result,expected_result)
 
 if __name__ == "__main__":
