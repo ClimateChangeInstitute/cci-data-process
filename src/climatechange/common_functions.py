@@ -22,7 +22,7 @@ class DataClass():
         
         self.file_path = file_path
         self.df = clean_data(load_csv(self.file_path))
-        self.df_multi = clean_data(load_csv(self.file_path))
+#         self.df_multi = clean_data(load_csv(self.file_path))
         
         
         self.base=os.path.basename(self.file_path).split('.')[0]
@@ -135,7 +135,6 @@ def to_csv(directory:str,df:DataFrame,filename:str='output_file.csv',idx = True)
     df.to_csv(os.path.join(csv_folder,filename),index = idx)
     os.startfile(os.path.join(csv_folder,filename))
     
-
     
 def index_by_increment(list_to_inc:List[float], range_list:List[float]) -> Tuple[List[List[int]],List[float]]:
     '''
