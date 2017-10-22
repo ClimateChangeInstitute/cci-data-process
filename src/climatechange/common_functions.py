@@ -22,7 +22,7 @@ class DataClass():
         
         self.file_path = file_path
         self.df = clean_data(load_csv(self.file_path))
-#         self.df_multi = clean_data(load_csv(self.file_path))
+        self.df_multi = clean_data(load_csv(self.file_path))
         
         
         self.base=os.path.basename(self.file_path).split('.')[0]
