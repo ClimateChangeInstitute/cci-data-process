@@ -63,14 +63,16 @@ python3.6 -m pip install sphinx sphinx-autodoc-typehints
 #+END_SRC
 
    To run code from the project execute the following.
-   (name of python can vary, could run as python or python3.6
-   
+   	- name of python can vary, could run as python or python3.6
+   	
    For Windows:
 	- cd src
-	- python3.6 climatechange/process_data.py –
+	- python3.6 climatechange/process_data.py -process
+	
    For Mac:
     -cd src 
-   	- PYTHONPATH=. python3.6 climatechange/process_data.py
+   	- PYTHONPATH=. python3.6 climatechange/process_data.py -process
+   	
 * Generating Documentation
 
   The project is documented using [[http:www.sphinx-doc.org]] style
@@ -89,21 +91,21 @@ make html
   it in [[file:doc/_build/html]].
 * Usage
 
-  |-------------------------+-----------------------------------------------+----------------------------------------------------------------------------------|
-  | Arguments               | Inputs                                        | Use                                                                              |
-  |-------------------------+-----------------------------------------------+----------------------------------------------------------------------------------|
-  |-h,  --help              |                                               | show help message and exit                                                       |
-  |-v,  --verbose           | add in addition to code                       | sets verbosity level,-v outputs INFO level, -vv outputs DEBUG level messgaes 	   |
-  |-d,  --depth^{1}         | file(csv), optional: statistic(s)             | resample input file by depth by given increment amount with statistics       	   |
-  |-y,  --year^{1}          | file(csv), optional: statistic(s)             | resample input file by year by given increment amount  with statistics           |
-  |-i,  --inc_amt^{2}       | increment to resample by for year,depth       | assigns the increment to resample input file by, assigned value is 1             |
-  |-by, --resample_by       | file(csv), file(csv) to resample by           | resample input file by lower resolution's depth intervals by mean                |
-  |-pd, --plot_depth        | file(csv), optional: interval                 | plot input file by depth column, optional input of depth interval to plot        |
-  |-py, --plot_year         | file(csv), optional: interval                 | plot input file by year column, optional input of year interval to plot          |
-  |-int,--interval^{3}      | interval to plot for year,depth               | specifies interval of year or depth to plot                                      |
-  |-rl, --raw_laser^{4}     | directory, depth_age_file(txt), folder prefix | compiles raw laser data by directory                                             |
-  |-l,  --load^{5}          | file(csv)                                     | input file contains header information for unrecognized headers                  |                                                                                                                                                                                    |                                               |                                                                              |
-  |-------------------------+-----------------------------------------------+----------------------------------------------------------------------------------|
+  |----------------------------+-----------------------------------------------+----------------------------------------------------------------------------------|
+  | Arguments                  | Inputs                                        | Use                                                                              |
+  |----------------------------+-----------------------------------------------+----------------------------------------------------------------------------------|
+  |-h,  --help                 |                                               | show help message and exit                                                       |
+  |-v,  --verbose              | add in addition to code                       | sets verbosity level,-v outputs INFO level, -vv outputs DEBUG level messgaes 	  |
+  |-d,  --depth^{1}            | file(csv), optional: statistic(s)             | resample input file by depth by given increment amount with statistics       	  |
+  |-y,  --year^{1}             | file(csv), optional: statistic(s)             | resample input file by year by given increment amount  with statistics           |
+  |-i,  --inc_amt^{2}          | increment to resample by for year,depth       | assigns the increment to resample input file by, assigned value is 1             |
+  |-by, --resample_by          | file(csv), file(csv) to resample by           | resample input file by lower resolution's depth intervals by mean                |
+  |-pd, --plot_depth           | file(csv), optional: interval                 | plot input file by depth column, optional input of depth interval to plot        |
+  |-py, --plot_year            | file(csv), optional: interval                 | plot input file by year column, optional input of year interval to plot          |
+  |-int,--interval^{3}         | interval to plot for year,depth               | specifies interval of year or depth to plot                                      |
+  |-rl, --raw_laser^{4}        | directory, depth_age_file(txt), folder prefix | compiles raw laser data by directory                                             |
+  |-l,  --load^{5}             | file(csv)                                     | input file contains header information for unrecognized headers                  |                                                                                                                                                                                    |                                               |                                                                              |
+  |----------------------------+-----------------------------------------------+----------------------------------------------------------------------------------|
   1. Potential statistics to input: mean ,std, min, max, 25%, 50%, 75%
      - input statistics inside brackets, example: ['mean']
      - if none specified, will output all statistics
@@ -119,8 +121,8 @@ make html
 	     -Folder within named Input , ex. within 'KCC81' will be folder named 'Input'
                     - Text files of each run, ex. '1.txt','2.txt'
                     - 2 Input text files, names starting with 'Input' corresponding to resolution
-	 - ending with 'MR' or 1 for medium resolution files, ex. 'Input_MR.txt'
-	 - ending with 'LR' or 2 for medium resolution files, ex. 'Input_LR.txt'
+	 					- ending with 'MR' or 1 for medium resolution files, ex. 'Input_MR.txt'
+	 					- ending with 'LR' or 2 for medium resolution files, ex. 'Input_LR.txt'
   
   5. Header file: load the headers of the CSV and store them in the header dictionary. 
          - This file should contain rows of (name, type, class, unit, label)
