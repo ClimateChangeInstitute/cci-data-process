@@ -58,6 +58,7 @@ class FrameClass():
         self.sample_headers = process_header_data(self.df, HeaderType.SAMPLE)
         self.sample_headers_name = [i.name for i in self.sample_headers]
         self.sample_headers_label = [i.label for i in self.sample_headers] 
+        self.sample_headers_class = [i.hclass for i in self.sample_headers] 
         self.depth_headers = process_header_data(self.df, HeaderType.DEPTH) 
         self.depth_headers_name = [i.name for i in self.depth_headers] 
         self.depth_headers_label = [i.label for i in self.depth_headers] 

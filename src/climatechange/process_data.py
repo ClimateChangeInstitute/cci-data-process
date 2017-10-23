@@ -118,7 +118,7 @@ def setup_argument_parser(program_version_message, program_license):
                         action="store",
                         help="%(dest)s by year [default: %(default)s]")\
                         
-    parser.add_argument("-l_raw",
+    parser.add_argument("-rl",
                         "--raw_laser_data",
                         dest="raw_laser_data",
                         action="store",
@@ -200,6 +200,7 @@ USAGE
 
         
         inc_amt = float(args.inc_amt)
+        
         
         
         if args.interval:

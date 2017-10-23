@@ -188,6 +188,8 @@ def by_depths(dc:DataClass,depth_header:Header,inc_amt:float,stat:List[str] = No
 
     range_list=create_range_for_depths(dc.df.loc[:,depth_header.name].values.tolist(), inc_amt)
 
+    print("reached.")
+
     dc_df = dc.sample_df.set_index(dc.df[depth_header.name])
 
     stat_list = []
