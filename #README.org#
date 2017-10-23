@@ -1,0 +1,139 @@
+[[https://travis-ci.org/ClimateChangeInstitute/cci-data-process][file:https://travis-ci.org/ClimateChangeInstitute/cci-data-process.svg?branch=master]]
+
+* CCI Data Process
+
+  This project is meant to be a library/WEB API for facilitating
+  common data processing tasks at the University of Maine.
+
+* Requirements
+
+  The project is built using Python 3.6, so a version of Python >= 3.6
+  is required.  Furthermore, the system requires the following python
+  libraries.
+
+  |------------------+--------------------+--------------------------+----------------------------------------------------------------------------------------------------------------------|
+  | Library          | Apt                | Pip                      | Description                                                                                                          |
+  |------------------+--------------------+--------------------------+----------------------------------------------------------------------------------------------------------------------|
+  | Bottle           | python3-bottle     | bottle                   | Python library for creating web interfaces                                                                           |
+  | Matplotlib       | python3-matplotlib | matplotlib               | Python based plotting system in a style similar to Matlab                                                            |
+  | Pandas           | python3-pandas     | pandas                   | Data structures for "relational" or "labeled" data                                                                   |
+  | Sphinx           | python3-sphinx     | sphinx                   | Documentation generator for Python projects                                                                          |
+  | Sphinx Typehints |                    | sphinx-autodoc-typehints | Allows you to use Python 3 annotations for documenting acceptable argument types and return value types of functions |
+  | SciKit           | python3-sklearn    | scikit-learn             | Simple and efficient tools for data mining and data analysis                                                         |
+  | SciPy            | python3-scipy      | scipy                    | Ecosystem of open-source software for mathematics, science, and engineering                                          |
+  |------------------+--------------------+--------------------------+----------------------------------------------------------------------------------------------------------------------|
+
+  As of writing this document, the default version of Python for
+  [[https://www.continuum.io][Anaconda]] is 3.6.  However, on most Linux distribution the default
+  version of Python is 2.7, and package managed versions of Python 3
+  are likely to be pre 3.6 (this may change soon) on many Linux
+  distributions.  If you do not want to use Anaconda on a Debian
+  system, you can install Python 3.6 by amending the [[file:/etc/apt/sources.list][sources.list]]
+  file.
+
+  The build instructions in this document assume that =python3.6=
+  points to a valid Python 3.6 installation.
+
+  Using =pip= to install the required modules is an acceptable
+  installation method and does not require root access.  For example,
+  to install the required libraries using pip, type the following.
+
+#+BEGIN_SRC sh
+python3.6 -m pip install bottle matplotlib pandas scikit-learn scipy 
+#+END_SRC
+
+  *Optional:* If you want to build the code documentation, install
+  the following packages using =pip=.
+
+#+BEGIN_SRC sh
+python3.6 -m pip install sphinx sphinx-autodoc-typehints
+#+END_SRC
+  
+
+* Building and Testing
+
+  The source code for the project is located in the [[file:src]]
+  directory.  Test files are unsurprisingly found in the [[file:test]]
+  directory.
+
+  To run all of the unit tests for the project execute the following.
+
+#+BEGIN_SRC sh
+(cd test; PYTHONPATH=../src python3.6 -m unittest discover climatechange)
+#+END_SRC
+
+   To run code from the project execute the following.
+   (name of python can vary, could run as python or python3.6
+   
+   For Windows:
+	- cd src
+	- python3.6 climatechange/process_data.py 
+   For Mac:
+    -cd src 
+   	- PYTHONPATH=. python3.6 climatechange/process_data.py
+* Generating Documentation
+
+  The project is documented using [[http:www.sphinx-doc.org]] style
+  comments.  In order to build the documentation the sphinx must be
+  installed.  On Debian-like systems the required package is
+  =python3-sphinx=.
+
+  In order to generate the project documentation html =cd= to the
+  [[file:doc]] directory and execute the following.
+
+#+BEGIN_SRC sh
+make html
+#+END_SRC
+
+  This will generate the HTML documentation for the project and place
+  it in [[file:doc/_build/html]].
+* Usage
+
+  |-------------------------+-----------------------------------------------+------------------------------------------------------------------------------|
+  | Arguments               | Inputs                                        | Use                                                                          |
+  |-------------------------+-----------------------------------------------+------------------------------------------------------------------------------ |
+  |-h,  --help              |                                               | show help message and exit                                                   |
+  |-v,  --verbose           | add in addition to code                       | sets verbosity level,-v outputs INFO level, -vv outputs DEBUG level messgaes |
+  |-d,  --depth^{1}          | file(csv), optional: statistic(s)             | resample input file by depth by given increment amount with statistics       |
+  |-y,  --year^{1}           | file(csv), optional: statistic(s)             | resample input file by year by given increment amount  with statistics       |
+  |-i,  --inc_amt^{2}        | increment to resample by for year,depth       | assigns the increment to resample input file by, assigned value is 1         |
+  |-by, --resample_by      | file(csv), file(csv) to resample by           | resample input file by lower resolution's depth intervals by mean            |
+  |-pd, --plot_depth       | file(csv), optional: interval                 | plot input file by depth column, optional input of depth interval to plot    |
+  |-py, --plot_year        | file(csv), optional: interval                 | plot input file by year column, optional input of year interval to plot      |
+  |-int,--interval^{3}       | interval to plot for year,depth               | specifies interval of year or depth to plot                                  |
+  |-rl, --raw_laser^{4}    | directory, depth_age_file(txt), folder prefix | compiles raw laser data by directory                                         |
+  |-l,  --load^{5}           | file(csv)                                     | input file contains header information for unrecognized headers              |                                                                                                                                                                                    |                                               |                                                                              |
+  |-------------------------+-----------------------------------------------+------------------------------------------------------------------------------|
+  1. Potential statistics to input: mean ,std, min, max, 25%, 50%, 75%
+     - input statistics inside brackets, example: ['mean']
+     - if none specified, will output all statistics
+     - can specify more that one statistic ['mean','std']
+		  
+  2. Increment amount for resampling by depth or year, ex. -d file.csv -i 0.1 or -y file.csv -i 1
+  
+  3. Interval specified for depth within its range ,ex.-pd file.csv -int [64 67], for year within range, ex.-py file.csv -int [1999 2001]
+		
+  4. Laser directory composition:
+     -Directory, ex. 'LaserDirectory' 
+       - Folders starting with given prefix, ex. prefix: 'KCC', folder name: 'KCC81'
+	     -Folder within named Input , ex. within 'KCC81' will be folder named 'Input'
+                    - Text files of each run, ex. '1.txt','2.txt'
+                    - 2 Input text files, names starting with 'Input' corresponding to resolution
+	 - ending with 'MR' or 1 for medium resolution files, ex. 'Input_MR.txt'
+	 - ending with 'LR' or 2 for medium resolution files, ex. 'Input_LR.txt'
+  
+  5. Header file: load the headers of the CSV and store them in the header dictionary. 
+         - This file should contain rows of (name, type, class, unit, label)
+
+
+* Contact
+
+  For more information, contact one of the following developers.
+
+  |------------------+----------------------------+---------------------------------|
+  | Developer        | Email                      | Role                            |
+  |------------------+----------------------------+---------------------------------|
+  | Andrei Kurbatov  | andrei.kurbotov@maine.edu  | Project lead                    |
+  | Heather Clifford | heather.clifford@maine.edu | Climate details and coding      |
+  | Mark Royer       | mark.royer@maine.edu       | Programming technical questions |
+  |------------------+----------------------------+---------------------------------|
