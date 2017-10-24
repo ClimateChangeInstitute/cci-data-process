@@ -65,13 +65,13 @@ python3.6 -m pip install sphinx sphinx-autodoc-typehints
    To run code from the project execute the following.
    	- name of python can vary, could run as python or python3.6
    	
-   For Windows:
-	- cd src
-	- python3.6 climatechange/process_data.py -process
+	For Windows:
+		- cd src
+		- python3.6 climatechange/process_data.py -h (or preferred input)
 	
-   For Mac:
-    -cd src 
-   	- PYTHONPATH=. python3.6 climatechange/process_data.py -process
+	For Mac:
+    	-cd src 
+   		- PYTHONPATH=. python3.6 climatechange/process_data.py -h 
    	
 * Generating Documentation
 
@@ -103,13 +103,12 @@ make html
   |-pd, --plot_depth           | file(csv), optional: interval                 | plot input file by depth column, optional input of depth interval to plot        |
   |-py, --plot_year            | file(csv), optional: interval                 | plot input file by year column, optional input of year interval to plot          |
   |-int,--interval^{3}         | interval to plot for year,depth               | specifies interval of year or depth to plot                                      |
-  |-rl, --raw_laser^{4}        | directory, depth_age_file(txt), folder prefix | compiles raw laser data by directory                                             |
-  |-l,  --load^{5}             | file(csv)                                     | input file contains header information for unrecognized headers                  |                                                                                                                                                                                    |                                               |                                                                              |
+  |-l, --raw_laser^{4}        | directory, depth_age_file(txt), folder prefix | compiles raw laser data by directory                                             |
+  |-hf,  --header^{5}          | file(csv)                                     | input file contains header information for unrecognized headers                  |                                                                                                                                                                                    |                                               |                                                                              |
   |----------------------------+-----------------------------------------------+----------------------------------------------------------------------------------|
-  1. Potential statistics to input: mean ,std, min, max, 25%, 50%, 75%
-     - input statistics inside brackets, example: ['mean']
-     - if none specified, will output all statistics
-     - can specify more that one statistic ['mean','std']
+  1. Potential statistics to input: mean ,std, min, max, 25%, 50%, 75%, all
+     - input statistics, example: mean
+     - can specify more that one statistic by adding coma: mean,std
 		  
   2. Increment amount for resampling by depth or year, ex. -d file.csv -i 0.1 or -y file.csv -i 1
   
@@ -124,8 +123,22 @@ make html
 	 					- ending with 'MR' or 1 for medium resolution files, ex. 'Input_MR.txt'
 	 					- ending with 'LR' or 2 for medium resolution files, ex. 'Input_LR.txt'
   
-  5. Header file: load the headers of the CSV and store them in the header dictionary. 
-         - This file should contain rows of (name, type, class, unit, label)
+  5. Header file: load the headers of the CSV to be processed and store them in the header dictionary. 
+         - This file should be in csv format and contain rows of (name, type, class, unit, label)
+
+
+  
+  |----------------------------+--------------------------------------------------------------------------------------|
+  | Arguments                  | Example                                   								              |                   
+  |----------------------------+--------------------------------------------------------------------------------------| 	  
+  |-d,  --depth           	   | -d ../examples/example_input_file.csv mean -i 0.01  								  |        	
+  |-y,  --year            	   | -y ../examples/example_input_file.csv mean -i 1      							      |         
+  |-by, --resample_by          | -by ../examples/example_resample_file.csv ../examples/example_by_file.csv mean       |      
+  |-pd, --plot_depth           | -pd ../examples/example_input_file.csv             								  | 
+  |-py, --plot_year            | -py ../examples/example_input_file.csv               								  | 
+  |-l,  --raw_laser       	   | -rl ../examples/test_directory ../examples/depth_age_file.txt KCC   				  | 
+  |-hf, --header               | -hf ../examples/header_test.csv                   									  |     
+  |----------------------------+--------------------------------------------------------------------------------------|
 
 
 * Contact

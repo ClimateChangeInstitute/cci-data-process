@@ -35,12 +35,12 @@ class Test(unittest.TestCase):
 #         self.assertEqual('KCC', folder_prefix)
 
         # -d or --depth
-        args = parser.parse_args(['-d','/tmp/depth_file.csv',['mean']])
+        args = parser.parse_args(['-d','/tmp/depth_file.csv','mean'])
         
         depth_file,stat = args.depth_file
         
         self.assertEqual('/tmp/depth_file.csv', depth_file)
-        self.assertEqual(['mean'], stat)
+        self.assertEqual('mean', stat)
 
         # -dd or --depth-depth
 #         args = parser.parse_args(['-dd','/tmp/depth_file1.csv','/tmp/depth_file2.csv'])
@@ -51,12 +51,13 @@ class Test(unittest.TestCase):
 #         self.assertEqual('/tmp/depth_file2.csv', depth_file2)
 
         # -di or --double-interval
-        args = parser.parse_args(['-by','/tmp/interval_file1.csv','/tmp/interval_file2.csv'])
+        args = parser.parse_args(['-by','/tmp/interval_file1.csv','/tmp/interval_file2.csv','mean'])
         
-        interval_file1, interval_file2 = args.interval_files
+        interval_file1, interval_file2,stat = args.interval_files
         
         self.assertEqual('/tmp/interval_file1.csv', interval_file1)
         self.assertEqual('/tmp/interval_file2.csv', interval_file2)
+        self.assertEqual('mean', stat)
 
         # -f or --filter 
 #         args = parser.parse_args(['-f', 'replace_outliers'])
@@ -93,7 +94,7 @@ class Test(unittest.TestCase):
         self.assertEqual('1.1', inc_amt)
         
         # -l or --load
-        args = parser.parse_args(['-l','/tmp/headers_file.csv'])
+        args = parser.parse_args(['-hf','/tmp/headers_file.csv'])
         
         headers_file = args.headers_file
         
@@ -106,7 +107,7 @@ class Test(unittest.TestCase):
         self.assertEqual(2, args.verbose)
 
         # -y or --year
-        args = parser.parse_args(['-y','/tmp/year_file.csv','Mean'])
+        args = parser.parse_args(['-y','/tmp/year_file.csv','mean'])
         
         year_file,stat_header = args.year_file
         year_inc_amt = int(args.inc_amt) # should have a default value of 1

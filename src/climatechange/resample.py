@@ -19,6 +19,7 @@ import pandas
 
 from typing import List
 from pandas.core.series import Series
+import sys
 
 #######################################################################################3
 '''
@@ -27,7 +28,7 @@ RESAMPLE BY YEARS
 
 '''
 
-def resample(by:str,f:str,stat:str='Mean', inc_amt:int=1, by_name:str =None,output = True):
+def resample(by:str,f:str,stat:str=['mean'], inc_amt:int=1, by_name:str =None,output = True):
     '''
     Resampler by Years or Depths
     a. Input: dataset with years, depths, samples
@@ -63,7 +64,10 @@ def resample(by:str,f:str,stat:str='Mean', inc_amt:int=1, by_name:str =None,outp
         dfs.append(df)
             
         if stat:
-            file ='{}_resample_by_{}_{}_{}.csv'.format(dc.base,inc_amt,h.label,'_'.join(stat))
+            if type(stat)==str:
+                file ='{}_resample_by_{}_{}_{}.csv'.format(dc.base,inc_amt,h.label,stat)
+            else:
+                file ='{}_resample_by_{}_{}_{}.csv'.format(dc.base,inc_amt,h.label,'_'.join(stat))
         else:
             file = '{}_resample_by_{}_{}_stats.csv'.format(dc.base,inc_amt,h.label)
             
@@ -123,6 +127,9 @@ def create_range_by_year(list_to_inc:List[float], inc_amt: int=1) -> List[float]
 def by_years(dc:DataClass,depth_header:Header,inc_amt:int=1,stat:List[str] = None, year = None):
     
     range_list=create_range_by_year(dc.df.loc[:,depth_header.name].values.tolist(), inc_amt)
+    if len(range_list) <=1:
+        logging.error('Increment amount is too high {}'.format(inc_amt))
+        sys.exit()
 
     dc_df = dc.sample_df.set_index(dc.df[depth_header.name])
 
@@ -135,8 +142,11 @@ def by_years(dc:DataClass,depth_header:Header,inc_amt:int=1,stat:List[str] = Non
             df = df.append(idx[s.name].describe(),ignore_index = True)
             
         if stat:
-            df = df[stat]   
-            df.columns = [s.label+'_'+col for col in df]
+            df = df[stat] 
+            try:
+                df.columns = [s.label+'_'+col for col in df]
+            except TypeError:
+                df.name = s.label+'_'+df.name
             stat_list.append(df)
 
         else:
@@ -185,28 +195,33 @@ def depth_columns(dc:DataClass,year_header:Header, inc_amt:int):
 ###############################################################################################
 
 def by_depths(dc:DataClass,depth_header:Header,inc_amt:float,stat:List[str] = None):
-
+    
     range_list=create_range_for_depths(dc.df.loc[:,depth_header.name].values.tolist(), inc_amt)
-
-    print("reached.")
-
+    if len(range_list) <=1:
+        logging.error('Increment amount is too high {}'.format(inc_amt))
+        sys.exit()
+        
     dc_df = dc.sample_df.set_index(dc.df[depth_header.name])
-
     stat_list = []
     for s in dc.sample_headers:
         df = DataFrame()
         for i in range_list:
             idx = dc_df[(dc_df.index >=i) & (dc_df.index < i+1)]
-            df = df.append(idx[s.name].describe(),ignore_index = True)
             
+            df = df.append(idx[s.name].describe(),ignore_index = True)
+
         if stat:
-            df = df[stat]   
-            df.columns = [s.label+'_'+col for col in df]
+            df = df[stat]
+            try:
+                df.columns = [s.label+'_'+col for col in df]
+            except TypeError:
+                df.name = s.label+'_'+df.name
             stat_list.append(df)
 
         else:
             df.columns = [s.label+'_'+col for col in df]
             stat_list.append(df)
+
 
     
     stat_df =pandas.concat(stat_list,axis=1)
@@ -236,8 +251,6 @@ def create_range_for_depths(list_to_inc:List[float], inc_amt: float=0.01) -> Lis
 
 
 
-
-
 def find_match(dc:DataClass,dclr:DataClass)-> List[Header]:
     '''
     Find matching depth columns within each dataclass 
@@ -247,10 +260,12 @@ def find_match(dc:DataClass,dclr:DataClass)-> List[Header]:
         for lr in dclr.depth_headers:
             if hr.name == lr.name:
                 match.append(hr)
+    if match ==[]:
+        logging.error('No depth matches in data')
     return match
 
 # 
-def resample_by(filename:str,resample_by:str,stat:List[str] = None,depth:str = None,output = False):
+def resample_by(filename:str,resample_by:str,stat:List[str] = None,depth:str = None,output = True):
     '''
     From the given data frame compile statistics (mean, median, min, max, etc)
     based on the parameters.
@@ -291,19 +306,26 @@ def resample_by(filename:str,resample_by:str,stat:List[str] = None,depth:str = N
                 df = df.append(idx[s.name].describe(),ignore_index = True)
                 
             if stat:
-                df = df[stat]   
-                df.columns = [s.label+'_'+col for col in df]
+                df = df[stat]
+                try:
+                    df.columns = [s.label+'_'+col for col in df]
+                except TypeError:
+                    df.name = s.label+'_'+df.name  
                 stat_dict.append(df)
-                file ='{}_resample_by_{}_{}_{}.csv'.format(dc.base,dc_by.base,h.label,'_'.join(stat))
+                if type(stat)==str:
+                    file ='{}_resampled_by_{}_{}_{}.csv'.format(dc.base,dc_by.base,h.label,stat)
+                else:
+                    file ='{}_resampled_by_{}_{}_{}.csv'.format(dc.base,dc_by.base,h.label,'_'.join(stat))
             else:
                 df.columns = [s.label+'_'+col for col in df]
                 stat_dict.append(df)
                 file = '{}_resample_by_{}_{}.csv'.format(dc.base,dc_by.base,h.label)
         all_files.append(file)
+        
            
         stat_df =pandas.concat(stat_dict,axis=1)
         stat_df = stat_df.set_index([lr.index[:-1]])
-
+        
         stat_df.index.name=h.label
         if output:
             to_csv(dc.dirname,stat_df,file)

@@ -136,41 +136,4 @@ def to_csv(directory:str,df:DataFrame,filename:str='output_file.csv',idx = True)
     df.to_csv(os.path.join(csv_folder,filename),index = idx)
     os.startfile(os.path.join(csv_folder,filename))
     
-    
-def index_by_increment(list_to_inc:List[float], range_list:List[float]) -> Tuple[List[List[int]],List[float]]:
-    '''
-
-    :param list_to_inc:
-    :param inc_amt:
-    '''
-    logging.debug("find_index_by_increment: range_list=%s", range_list)
-    result = []
-
-    gaps=[]
-    range_list_size = len(range_list)
-    prev = 0
-    for i in range(range_list_size - 1):
-        tmp = []
-        for j in range(prev, len(list_to_inc)):
-            e = list_to_inc[j]
-            if e >= range_list[i] and e < range_list[i + 1]:
-                tmp.append(j)
-                prev = j + 1
-        if not tmp:
-            logging.warning('no values between [%f,%f)', range_list[i], range_list[i + 1])
-            gaps.append([range_list[i], range_list[i + 1]])
-        else: 
-            result.append(tmp)
-        
-    tmp = []
-    for j in range(prev, len(list_to_inc)):
-        e = list_to_inc[j]
-        if e >= range_list[range_list_size-1]:
-            tmp.append(j)
-    if not tmp:
-        logging.warning('no values > %f',range_list[range_list_size-1])
-    else:
-        result.append(tmp)
-       
-    return result
 

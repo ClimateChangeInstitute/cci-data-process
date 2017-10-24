@@ -9,7 +9,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 
 
-from climatechange.headers import Header
+from climatechange.headers import Header, process_header_str
 import matplotlib.pyplot as plt
 import os
 from climatechange.common_functions import DataClass
@@ -19,34 +19,43 @@ from typing import List
 def plot_samples_by_year(f:str, interval:List=[]):
     
     dc = DataClass(f)
-    if not interval == []:
-        pdf_file = os.path.join(dc.dirname,('plot_%s_year_%.0f-%.0f.pdf'%(dc.base,interval[0],interval[1])))
-    else:
-        pdf_file = os.path.join(dc.dirname,('plot_%s_year.pdf'%(dc.base)))
-    with PdfPages(pdf_file) as pdf:
-        for year in dc.year_headers:
-            for sample in dc.sample_headers:
-                plot_samples(dc,sample,year,pdf, interval)
-    os.startfile(pdf_file)
+    folder = os.path.join(dc.dirname, 'Output_Files')
+    if not os.path.exists(folder):
+        os.makedirs(folder)  
+
+    
+    for y in dc.year_headers:
+        if not interval == []:
+            pdf_file = os.path.join(folder,('plot_%s_%.0f-%.0f.pdf'%(y.label,interval[0],interval[1])))
+        else:
+            pdf_file = os.path.join(folder,('plot_%s.pdf'%(y.label)))
+        with PdfPages(pdf_file) as pdf:
+            for i,sample in enumerate(dc.sample_headers):
+                plot_samples(i,dc,sample,y,pdf, interval)
+        os.startfile(pdf_file)
         
         
 def plot_samples_by_depth(f:str, interval:List=[]):
     
     dc = DataClass(f)
-    if not interval == []:
-        pdf_file = os.path.join(dc.dirname,('plot_%s_depth_%.3f-%.3f.pdf'%(dc.base,interval[0],interval[1])))
-    else:
-        pdf_file = os.path.join(dc.dirname,('plot_%s_depth.pdf'%(dc.base)))
+    folder = os.path.join(dc.dirname, 'Output_Files')
+    if not os.path.exists(folder):
+        os.makedirs(folder)  
+
+    for d in dc.depth_headers:
+        if not interval == []:
+            pdf_file = os.path.join(folder,('plot_%s_%.3f-%.3f.pdf'%(d.label,interval[0],interval[1])))
+        else:
+            pdf_file = os.path.join(folder,('plot_%s.pdf'%(d.name)))
         
-    with PdfPages(pdf_file) as pdf:
-        for depth in dc.depth_headers:
-            for sample in dc.sample_headers:
-                plot_samples(dc, sample, depth, pdf, interval)
-    os.startfile(pdf_file)
+            with PdfPages(pdf_file) as pdf:
+                for i,sample in enumerate(dc.sample_headers):
+                    plot_samples(i,dc, sample, d, pdf, interval)
+        os.startfile(pdf_file)
         
     
      
-def plot_samples(dc:DataClass, sample_header:Header, x_header:Header, pdf, interval:List=[]):
+def plot_samples(i:int,dc:DataClass, sample_header:Header, x_header:Header, pdf, interval:List=[]):
     '''
     
     :param dc: DataClass Object
@@ -59,24 +68,20 @@ def plot_samples(dc:DataClass, sample_header:Header, x_header:Header, pdf, inter
    
     if not interval == []:
         df = dc.df[(dc.df[x_header.name] >= interval[0]) & (dc.df[x_header.name] <= interval[1])]
+        df = df.set_index(x_header.name)
     else:
         df = dc.df
-        
-        
-    plt.figure(figsize=(11, 8.5))
-    fig, tg = plt.subplots(1)
-    ax = df[[x_header.name, sample_header.name]].plot(x=x_header.name, kind='line',
-                                           linestyle='-',
-                                           color='b',
-                                           ax=tg,zorder=-1)
-    vals = ax.get_xticks()
-    ax.set_xticklabels(['{:.0f}'.format(x) for x in vals])
-    plt.xlabel(x_header.label)
-    plt.title('%s Data' % (sample_header.hclass))
-    plt.ylabel(sample_header.label)
-    plt.legend()    
+        df = df.set_index(x_header.name)
+    cmap = plt.get_cmap('ocean')
+    ax = df[sample_header.name].plot(figsize=(12,6),color=cmap(i / float(len(dc.sample_headers_name)+3)))    
+    ax.set_ylabel(sample_header.label)
+    ax.set_xlabel(x_header.label)
+    plt.tight_layout()
+    fig = plt.gcf()
     pdf.savefig(fig)
     plt.close()
+
+
 
                   
 #         # Meta data for the PdfPages

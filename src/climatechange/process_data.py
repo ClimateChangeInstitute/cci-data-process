@@ -70,8 +70,8 @@ def setup_argument_parser(program_version_message, program_license):
                         "--resample_by",
                         dest="interval_files",
                         action="store",
-                        nargs=2,
-                        metavar=('file_1', 'file_2'),
+                        nargs=3,
+                        metavar=('to_resample_file', 'resample_by_file','statistics'),
                         help="resample %(dest)s to the lower resolution of the two files")
 
 #     parser.add_argument("-f",
@@ -98,8 +98,8 @@ def setup_argument_parser(program_version_message, program_license):
                         metavar=('top_interval','bottom_interval'),
                         help="the interval to be plotted [default: %(default)s]")
     
-    parser.add_argument("-l",
-                        "--load",
+    parser.add_argument("-hf",
+                        "--header",
                         dest="headers_file",
                         action="store",
                         help="load the headers of the CSV and store them in the header dictionary.  "
@@ -118,7 +118,7 @@ def setup_argument_parser(program_version_message, program_license):
                         action="store",
                         help="%(dest)s by year [default: %(default)s]")\
                         
-    parser.add_argument("-rl",
+    parser.add_argument("-l",
                         "--raw_laser_data",
                         dest="raw_laser_data",
                         action="store",
@@ -200,7 +200,7 @@ USAGE
 
         
         inc_amt = float(args.inc_amt)
-        
+        stats = ['mean','std', 'min', 'max', '25%', '50%', '75%', 'all']
         
         
         if args.interval:
@@ -228,13 +228,16 @@ USAGE
 #                                       inc_amt)
         if args.plot_depth_files:
             file = args.plot_depth_files
+
             if args.interval:
                 plot_samples_by_depth(file,interval)
             else:
                 plot_samples_by_depth(file)
+                
         
         if args.plot_year_files:
             file = args.plot_year_files
+
             if args.interval:
                 plot_samples_by_year(file,interval)
             else:
@@ -249,24 +252,57 @@ USAGE
             if args.inc_amt:
                 logging.warning("Specified increment amount %d is not used "
                              "when resampling by depth intervals.", inc_amt)
-            resample_by(args.interval_files)  
+            
+            resample_file,by_file,stat = args.interval_files
+            stat =str(stat).split(',')
+            for i in stat: 
+                if not i in stats:
+                    logging.error('Statistic specified is not option, options include {}'.format(', '.join(stats)))
+                    sys.exit()
+            if len(stat)==1:
+                stat=stat[0]
+                if stat == 'all':
+                    stat=None
+            
+            
+            resample_by(resample_file,by_file,stat) 
+            
+             
         
         if args.year_file:
             
-            year_file,stat_header = args.year_file
+            year_file,stat = args.year_file
+            stat =str(stat).split(',')
+            for i in stat: 
+                if not i in stats:
+                    logging.error('Statistic specified is not option, options include {}'.format(', '.join(stats)))
+                    sys.exit()
+            if len(stat)==1:
+                stat=stat[0]
+                if stat == 'all':
+                    stat=None        
             
             if year_file.endswith('.csv'): 
           
-                resample('year',year_file,stat_header, int(inc_amt))
+                resample('year',year_file,stat, int(inc_amt))
             else:
                 raise Exception("The specified year_file must be a CSV file.")
         
         if args.depth_file:
             
-            depth_file,stat_header = args.depth_file
+            depth_file,stat = args.depth_file
+            stat =str(stat).split(',')
+            for i in stat: 
+                if not i in stats:
+                    logging.error('Statistic specified is not option, options include {}'.format(', '.join(stats)))
+                    sys.exit()
+            if len(stat)==1:
+                stat=stat[0]
+                if stat == 'all':
+                    stat=None
             
             if depth_file.endswith('.csv'):
-                resample('depth',depth_file, stat_header,inc_amt)
+                resample('depth',depth_file, stat,inc_amt)
             else:
                 raise Exception("The specified depth_file must be a CSV file.")
                 
@@ -279,5 +315,6 @@ USAGE
         return 2
 
 if __name__ == "__main__":
+    #!/usr/bin/python
     sys.exit(main())
     
