@@ -28,7 +28,7 @@ from climatechange.plot import plot_samples_by_depth, plot_samples_by_year
 from climatechange.laser import raw_data
 from climatechange.resample import resample, resample_by
 from climatechange.headers import load_and_store_header_file
-from laser import resample_data
+from climatechange.laser import resample_data
 
 
 
