@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3.6
+#!/usr/local/bin/python
 # encoding: utf-8
 '''
 The Climate Change Institute Data Processor
@@ -314,7 +314,12 @@ USAGE
         sys.stderr.write(indent + "  for help use --help\n")
         return 2
 
+
+
+
 if __name__ == "__main__":
     #!/usr/bin/python
+    PYTHONPATH="${PYTHONPATH}/usr/bin/python"
+    sys.path.append(os.path.join(os.path.dirname(__file__), 'climatechange'))
     sys.exit(main())
     
