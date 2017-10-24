@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import os
 from climatechange.common_functions import DataClass
 from typing import List
+import subprocess
 
 
 def plot_samples_by_year(f:str, interval:List=[]):
@@ -32,7 +33,10 @@ def plot_samples_by_year(f:str, interval:List=[]):
         with PdfPages(pdf_file) as pdf:
             for i,sample in enumerate(dc.sample_headers):
                 plot_samples(i,dc,sample,y,pdf, interval)
-        os.startfile(pdf_file)
+        try:
+            os.startfile(pdf_file)
+        except:
+            subprocess.call(['open',pdf_file])
         
         
 def plot_samples_by_depth(f:str, interval:List=[]):
@@ -51,7 +55,11 @@ def plot_samples_by_depth(f:str, interval:List=[]):
             with PdfPages(pdf_file) as pdf:
                 for i,sample in enumerate(dc.sample_headers):
                     plot_samples(i,dc, sample, d, pdf, interval)
-        os.startfile(pdf_file)
+        try:
+            os.startfile(pdf_file)
+        except:
+            subprocess.call(['open',pdf_file])
+        
         
     
      

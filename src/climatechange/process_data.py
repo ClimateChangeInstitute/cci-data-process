@@ -28,6 +28,7 @@ from climatechange.plot import plot_samples_by_depth, plot_samples_by_year
 from climatechange.laser import raw_data
 from climatechange.resample import resample, resample_by
 from climatechange.headers import load_and_store_header_file
+from laser import resample_data
 
 
 
@@ -126,6 +127,14 @@ def setup_argument_parser(program_version_message, program_license):
                         metavar=('DIRECTORY', 'DEPTH_AGE_FILE', 'FOLDER_PREFIX'),
                         help="compiles %(dest) [default: %(default)s]")
     
+    parser.add_argument("-rl",
+                        "--resample_laser",
+                        dest="resample_laser_data",
+                        action="store",
+                        nargs=4,
+                        metavar=('DIRECTORY', 'DEPTH_AGE_FILE', 'FOLDER_PREFIX','RESAMPLE_BY'),
+                        help="compiles %(dest) [default: %(default)s]")
+
 #     parser.add_argument("-f",
 #                         "--filter_LAICPMS_directory",
 #                         dest="filter_directory",
@@ -246,6 +255,10 @@ USAGE
         if args.raw_laser_data:
             directory, depth_age_file, prefix = args.raw_laser_data
             raw_data(directory, depth_age_file, prefix)
+        
+        if args.resample_laser_data:
+            directory, depth_age_file, prefix,by = args.resample_laser_data
+            resample_data(directory, by,depth_age_file, prefix)
             
 #             
         if args.interval_files:
@@ -319,7 +332,6 @@ USAGE
 
 if __name__ == "__main__":
     #!/usr/bin/python
-    PYTHONPATH="${PYTHONPATH}/usr/bin/python"
-    sys.path.append(os.path.join(os.path.dirname(__file__), 'climatechange'))
+
     sys.exit(main())
     

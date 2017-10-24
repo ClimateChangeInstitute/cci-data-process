@@ -10,7 +10,6 @@ import unittest
 import numpy
 from pandas import DataFrame
 from pandas.util.testing import assert_frame_equal
-
 from climatechange.data_filters import normalize_min_max_scaler, \
     replace_outliers, savgol_smooth_filter, filter_function, filters_to_string,\
     normalize_data, medfilt_filter,\

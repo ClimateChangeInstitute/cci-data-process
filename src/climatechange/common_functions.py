@@ -15,6 +15,7 @@ from typing import List, Tuple
 import numpy
 from pandas.core.series import Series
 import datetime
+import subprocess
 
 class DataClass():
 
@@ -134,6 +135,9 @@ def to_csv(directory:str,df:DataFrame,filename:str='output_file.csv',idx = True)
         
 
     df.to_csv(os.path.join(csv_folder,filename),index = idx)
-    os.startfile(os.path.join(csv_folder,filename))
+    try:
+        os.startfile(os.path.join(csv_folder,filename))
+    except:
+        subprocess.call(['open',filename])
     
 
